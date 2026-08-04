@@ -409,6 +409,7 @@ function fmtTime(ts) {
                 allPlayers = [];
                 snap.forEach(doc => {
                     const d = doc.data();
+                    if (d.addedByAdmin) return;
                     d.id = doc.id;
                     allPlayers.push(d);
                 });
