@@ -543,6 +543,26 @@
         .save-btn:active { transform: scale(0.98); }
         .save-btn svg { width: 18px; height: 18px; }
 
+        .add-player-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 16px;
+            border: none;
+            border-radius: var(--ios-radius-sm);
+            background: linear-gradient(135deg, #0A84FF 0%, #007AFF 100%);
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(10,132,255,0.3);
+            transition: all 0.2s ease;
+            margin-left: auto;
+        }
+        .add-player-btn:active { transform: scale(0.96); }
+        .add-player-btn svg { width: 16px; height: 16px; }
+
         /* ===== RULES ADMIN ===== */
         .rule-edit {
             background: white;
@@ -730,6 +750,10 @@
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                         <input type="text" placeholder="Search player..." id="adminSearch" oninput="renderPlayers()">
                     </div>
+                    <button class="add-player-btn" onclick="openAddPlayer()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Add Player
+                    </button>
                 </div>
                 <div id="adminPlayerList"></div>
                 <div class="empty-state" id="adminEmpty">
@@ -821,6 +845,57 @@
                 <button class="mini-btn mb-green" id="mApprove" onclick="approvePlayer(currentPlayerId)">Approve</button>
                 <button class="mini-btn mb-red" id="mReject" onclick="rejectPlayer(currentPlayerId)">Reject</button>
                 <button class="mini-btn mb-gray" id="mDelete" onclick="deletePlayer(currentPlayerId)">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ADD PLAYER MODAL ===== -->
+    <div class="modal" id="addPlayerModal">
+        <div class="modal-card">
+            <button class="close-x" onclick="closeAddPlayer()">&times;</button>
+            <h3>Add Player</h3>
+            <div class="sub">Manually register a player — auto-approved, join page pe turant dikhega</div>
+            <div class="form-grid">
+                <div class="form-row">
+                    <label>User Name *</label>
+                    <input type="text" id="apName" placeholder="Player name">
+                </div>
+                <div class="form-row">
+                    <label>Game ID Name</label>
+                    <input type="text" id="apGameName" placeholder="Nickname">
+                </div>
+                <div class="form-row">
+                    <label>Game ID Number</label>
+                    <input type="text" id="apGameNum" placeholder="e.g. 883421">
+                </div>
+                <div class="form-row">
+                    <label>Game ID Level</label>
+                    <input type="text" id="apLevel" placeholder="e.g. Diamond IV">
+                </div>
+                <div class="form-row">
+                    <label>Mobile Number</label>
+                    <input type="tel" id="apMobile" placeholder="+91 98765 43210">
+                </div>
+                <div class="form-row">
+                    <label>Email ID</label>
+                    <input type="email" id="apEmail" placeholder="you@email.com">
+                </div>
+                <div class="form-row">
+                    <label>Payment Name</label>
+                    <input type="text" id="apPayName" placeholder="Name on UPI">
+                </div>
+                <div class="form-row">
+                    <label>UTR Number</label>
+                    <input type="text" id="apUtr" placeholder="12-digit UTR">
+                </div>
+            </div>
+            <div class="form-row">
+                <label>Payment Screenshot (optional)</label>
+                <input type="file" id="apShot" accept="image/*" style="border:none;padding:0;background:transparent">
+            </div>
+            <div class="modal-actions">
+                <button class="mini-btn mb-gray" onclick="closeAddPlayer()">Cancel</button>
+                <button class="mini-btn mb-green" onclick="addPlayer()">Add Player</button>
             </div>
         </div>
     </div>
@@ -1101,6 +1176,73 @@ function fmtTime(ts) {
                 console.error(e);
                 showToast('Error deleting player');
             }
+        }
+
+        /* ===== ADD PLAYER (MANUAL) ===== */
+        function openAddPlayer() {
+            $('addPlayerModal').classList.add('active');
+        }
+
+        function closeAddPlayer() {
+            $('addPlayerModal').classList.remove('active');
+            ['apName','apGameName','apGameNum','apLevel','apMobile','apEmail','apPayName','apUtr'].forEach(id => $(id).value = '');
+            $('apShot').value = '';
+        }
+
+        async function addPlayer() {
+            const name = $('apName').value.trim();
+            if (!name) { showToast('Enter user name'); return; }
+            let screenshot = '';
+            const file = $('apShot').files[0];
+            if (file) {
+                try { screenshot = await compressImage(file); } catch (e) { screenshot = ''; }
+            }
+            try {
+                await db.collection('players').add({
+                    userName: name,
+                    gameIdName: $('apGameName').value.trim(),
+                    gameIdNumber: $('apGameNum').value.trim(),
+                    gameIdLevel: $('apLevel').value.trim(),
+                    mobileNumber: $('apMobile').value.trim(),
+                    emailId: $('apEmail').value.trim(),
+                    paymentName: $('apPayName').value.trim(),
+                    utrNumber: $('apUtr').value.trim(),
+                    screenshot: screenshot,
+                    status: 'approved',
+                    addedByAdmin: true,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                closeAddPlayer();
+                showToast('Player added');
+            } catch (e) {
+                console.error(e);
+                showToast('Error adding player');
+            }
+        }
+
+        function compressImage(file, maxSize, quality) {
+            maxSize = maxSize || 700;
+            quality = quality || 0.6;
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const img = new Image();
+                    img.onload = function () {
+                        const canvas = document.createElement('canvas');
+                        let w = img.width;
+                        let h = img.height;
+                        const scale = Math.min(1, maxSize / Math.max(w, h));
+                        canvas.width = Math.round(w * scale);
+                        canvas.height = Math.round(h * scale);
+                        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                        resolve(canvas.toDataURL('image/jpeg', quality));
+                    };
+                    img.onerror = reject;
+                    img.src = e.target.result;
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
         }
 
         /* ===== SETTINGS ===== */
