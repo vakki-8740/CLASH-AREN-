@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tournament Registration</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --ios-bg: #F2F2F7;
+            --ios-card: #FFFFFF;
+            --ios-sky: #0A84FF;
+            --ios-sky-glow: rgba(10, 132, 255, 0.10);
+            --ios-sky-light: rgba(10, 132, 255, 0.06);
+            --ios-text: #1C1C1E;
+            --ios-text-secondary: #8E8E93;
+            --ios-border: #E5E5EA;
+            --ios-radius: 14px;
+            --ios-radius-sm: 10px;
+            --shadow-ios: 0 2px 12px rgba(0,0,0,0.08);
+            --glow-sky: 0 0 20px rgba(10, 132, 255, 0.10), 0 0 60px rgba(10, 132, 255, 0.04);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(180deg, #E3F2FD 0%, #F2F2F7 40%, #F2F2F7 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: var(--ios-text);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Ambient sky glow orbs */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -80px;
+            right: -60px;
+            width: 240px;
+            height: 240px;
+            background: radial-gradient(circle, rgba(10,132,255,0.12) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: 60px;
+            left: -40px;
+            width: 180px;
+            height: 180px;
+            background: radial-gradient(circle, rgba(10,132,255,0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .page {
+            position: relative;
+            z-index: 1;
+            padding: 24px 20px 40px;
+            max-width: 420px;
+            margin: 0 auto;
+            min-height: 100vh;
+            display: none;
+        }
+        .page.active {
+            display: block;
+        }
+
+        /* iOS Slide Animations */
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOutLeft {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(-40%); opacity: 0; }
+        }
+        @keyframes slideInLeft {
+            from { transform: translateX(-40%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOutRight {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+        @keyframes fadeScaleUp {
+            from { transform: scale(0.92); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 4px 20px rgba(10,132,255,0.25), 0 0 40px rgba(10,132,255,0.08); }
+            50% { box-shadow: 0 4px 30px rgba(10,132,255,0.35), 0 0 60px rgba(10,132,255,0.12); }
+        }
+
+        .anim-enter {
+            animation: slideInRight 0.45s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+        }
+        .anim-exit {
+            animation: slideOutLeft 0.4s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+        }
+        .anim-enter-back {
+            animation: slideInLeft 0.45s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+        }
+        .anim-exit-back {
+            animation: slideOutRight 0.4s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+        }
+
+        /* Header */
+        .ios-header {
+            text-align: center;
+            margin-bottom: 28px;
+            padding-top: 8px;
+        }
+        .ios-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--ios-text);
+            margin: 0 0 6px;
+            letter-spacing: -0.5px;
+        }
+        .ios-header p {
+            font-size: 15px;
+            color: var(--ios-text-secondary);
+            margin: 0;
+            font-weight: 400;
+        }
+        .ios-header .trophy {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 16px;
+            background: linear-gradient(135deg, #0A84FF 0%, #5AC8FA 100%);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(10,132,255,0.25), 0 0 40px rgba(10,132,255,0.08);
+            animation: fadeScaleUp 0.6s cubic-bezier(0.32, 0.72, 0, 1) 0.1s both, pulseGlow 3s ease-in-out infinite 0.7s;
+        }
+        .ios-header .trophy svg {
+            width: 32px;
+            height: 32px;
+            color: white;
+        }
+
+        /* Form Card */
+        .ios-card {
+            background: var(--ios-card);
+            border-radius: var(--ios-radius);
+            box-shadow: var(--shadow-ios), var(--glow-sky);
+            overflow: hidden;
+            margin-bottom: 20px;
+            animation: fadeScaleUp 0.5s cubic-bezier(0.32, 0.72, 0, 1) 0.15s both;
+        }
+
+        .ios-input-group {
+            padding: 0 16px;
+        }
+        .ios-input-row {
+            display: flex;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--ios-border);
+            gap: 12px;
+        }
+        .ios-input-row:last-child {
+            border-bottom: none;
+        }
+        .ios-input-row .icon {
+            width: 20px;
+            height: 20px;
+            color: var(--ios-sky);
+            flex-shrink: 0;
+            opacity: 0.8;
+        }
+        .ios-input-row label {
+            font-size: 13px;
+            color: var(--ios-text-secondary);
+            min-width: 100px;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+        .ios-input-row input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            color: var(--ios-text);
+            background: transparent;
+            font-family: inherit;
+            padding: 0;
+            min-width: 0;
+        }
+        .ios-input-row input::placeholder {
+            color: #C7C7CC;
+        }
+        .ios-input-row:focus-within .icon {
+            color: var(--ios-sky);
+            opacity: 1;
+        }
+
+        /* iOS Button */
+        .ios-btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: var(--ios-radius-sm);
+            background: linear-gradient(135deg, #0A84FF 0%, #007AFF 100%);
+            color: white;
+            font-size: 17px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(10,132,255,0.3), 0 0 30px rgba(10,132,255,0.08);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 8px;
+            animation: fadeScaleUp 0.5s cubic-bezier(0.32, 0.72, 0, 1) 0.3s both;
+        }
+        .ios-btn:active {
+            transform: scale(0.97);
+            box-shadow: 0 2px 8px rgba(10,132,255,0.2);
+        }
+        .ios-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Back Button */
+        .ios-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--ios-sky);
+            font-size: 17px;
+            font-weight: 500;
+            background: none;
+            border: none;
+            padding: 8px 0;
+            margin-bottom: 12px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .ios-back svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* QR Section */
+        .qr-container {
+            background: white;
+            border-radius: var(--ios-radius);
+            padding: 24px;
+            text-align: center;
+            box-shadow: var(--shadow-ios), var(--glow-sky);
+            margin-bottom: 20px;
+            animation: fadeScaleUp 0.5s cubic-bezier(0.32, 0.72, 0, 1) 0.1s both;
+        }
+        .qr-label {
+            font-size: 13px;
+            color: var(--ios-text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+        }
+        .qr-box {
+            width: 180px;
+            height: 180px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 12px;
+            box-shadow: inset 0 0 0 1px var(--ios-border);
+            position: relative;
+        }
+        .qr-box svg {
+            width: 100%;
+            height: 100%;
+        }
+        .qr-amount {
+            margin-top: 16px;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--ios-text);
+        }
+        .qr-amount span {
+            font-size: 15px;
+            color: var(--ios-text-secondary);
+            font-weight: 500;
+        }
+
+        /* Upload Area */
+        .upload-area {
+            border: 2px dashed #C7C7CC;
+            border-radius: var(--ios-radius-sm);
+            padding: 28px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            background: var(--ios-sky-light);
+            margin-top: 8px;
+        }
+        .upload-area:hover {
+            border-color: var(--ios-sky);
+            background: rgba(10,132,255,0.08);
+        }
+        .upload-area.has-file {
+            border-color: #34C759;
+            background: rgba(52,199,89,0.06);
+        }
+        .upload-area svg {
+            width: 36px;
+            height: 36px;
+            color: var(--ios-sky);
+            margin-bottom: 8px;
+        }
+        .upload-area.has-file svg {
+            color: #34C759;
+        }
+        .upload-area .upload-text {
+            font-size: 14px;
+            color: var(--ios-text-secondary);
+            font-weight: 500;
+        }
+        .upload-area .upload-filename {
+            font-size: 13px;
+            color: var(--ios-text);
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        /* Payment header */
+        .payment-header {
+            text-align: center;
+            margin-bottom: 20px;
+            animation: fadeScaleUp 0.5s cubic-bezier(0.32, 0.72, 0, 1) 0.05s both;
+        }
+        .payment-header h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--ios-text);
+            margin: 0 0 4px;
+        }
+        .payment-header p {
+            font-size: 14px;
+            color: var(--ios-text-secondary);
+            margin: 0;
+        }
+
+        /* Section title */
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--ios-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin: 20px 0 10px 4px;
+        }
+
+        /* Success overlay */
+        .success-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 20px;
+        }
+        .success-overlay.active {
+            display: flex;
+            animation: fadeScaleUp 0.3s ease;
+        }
+        .success-card {
+            background: white;
+            border-radius: var(--ios-radius);
+            padding: 36px 28px;
+            text-align: center;
+            max-width: 300px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+        .success-card .check-circle {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #34C759, #30D158);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 4px 20px rgba(52,199,89,0.3);
+        }
+        .success-card .check-circle svg {
+            width: 32px;
+            height: 32px;
+            color: white;
+        }
+        .success-card h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--ios-text);
+            margin: 0 0 8px;
+        }
+        .success-card p {
+            font-size: 14px;
+            color: var(--ios-text-secondary);
+            margin: 0 0 20px;
+        }
+        .success-card .done-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: var(--ios-radius-sm);
+            background: var(--ios-sky);
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        /* Announcement bar */
+        .announcement-bar {
+            background: rgba(255, 149, 0, 0.08);
+            border: 1px solid rgba(255, 149, 0, 0.25);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            text-align: left;
+            animation: fadeScaleUp 0.5s cubic-bezier(0.32, 0.72, 0, 1) 0.1s both;
+        }
+        .announcement-bar svg {
+            width: 18px;
+            height: 18px;
+            color: #FF9500;
+            flex-shrink: 0;
+        }
+        .announcement-bar p {
+            font-size: 13px;
+            color: #8A5A00;
+            font-weight: 500;
+            line-height: 1.4;
+            margin: 0;
+        }
+        .setup-warning {
+            background: rgba(255, 59, 48, 0.07);
+            border: 1px solid rgba(255, 59, 48, 0.25);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #C0392B;
+            font-weight: 500;
+            display: none;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- PAGE 1: Tournament Registration -->
+    <div class="page active" id="page1">
+        <div class="ios-header">
+            <div class="trophy">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
+                    <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
+                    <path d="M4 22h16"/>
+                    <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+                    <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+                    <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
+                </svg>
+            </div>
+            <h1 id="tournamentTitle">Join Tournament</h1>
+            <p>Fill your details to register</p>
+        </div>
+
+        <div class="setup-warning" id="setupWarning">Firebase not configured. Add your config in firebase-config.js</div>
+        <div class="announcement-bar" id="announcementBar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            <p id="announcementText"></p>
+        </div>
+
+        <div class="ios-card">
+            <div class="ios-input-group">
+                <div class="ios-input-row">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <label>User Name</label>
+                    <input type="text" placeholder="Enter your name" id="userName">
+                </div>
+                <div class="ios-input-row">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                    <label>Game ID Name</label>
+                    <input type="text" placeholder="Your game nickname" id="gameIdName">
+                </div>
+                <div class="ios-input-row">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+                    <label>Game ID Number</label>
+                    <input type="text" placeholder="e.g. 883421" id="gameIdNumber">
+                </div>
+                <div class="ios-input-row">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    <label>Game ID Level</label>
+                    <input type="text" placeholder="e.g. Diamond IV" id="gameIdLevel">
+                </div>
+                <div class="ios-input-row">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    <label>Mobile Number</label>
+                    <input type="tel" placeholder="+91 98765 43210" id="mobileNumber">
+                </div>
+                <div class="ios-input-row">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                    <label>Email ID</label>
+                    <input type="email" placeholder="you@email.com" id="emailId">
+                </div>
+            </div>
+        </div>
+
+        <button class="ios-btn" onclick="goToPayment()">
+            Next
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+    </div>
+
+    <!-- PAGE 2: Payment -->
+    <div class="page" id="page2">
+        <button class="ios-back" onclick="goBack()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            Back
+        </button>
+
+        <div class="payment-header">
+            <h2>Payment</h2>
+            <p>Scan QR & complete payment</p>
+        </div>
+
+        <div class="qr-container">
+            <div class="qr-label">Scan to Pay</div>
+            <div class="qr-box" id="qrBox">
+                <svg viewBox="0 0 100 100">
+                    <rect fill="white" width="100" height="100"/>
+                    <g fill="#1C1C1E">
+                        <rect x="5" y="5" width="25" height="25"/>
+                        <rect fill="white" x="9" y="9" width="17" height="17"/>
+                        <rect x="13" y="13" width="9" height="9"/>
+                        <rect x="70" y="5" width="25" height="25"/>
+                        <rect fill="white" x="74" y="9" width="17" height="17"/>
+                        <rect x="78" y="13" width="9" height="9"/>
+                        <rect x="5" y="70" width="25" height="25"/>
+                        <rect fill="white" x="9" y="74" width="17" height="17"/>
+                        <rect x="13" y="78" width="9" height="9"/>
+                        <rect x="35" y="5" width="5" height="5"/><rect x="45" y="5" width="5" height="5"/><rect x="55" y="10" width="5" height="5"/>
+                        <rect x="35" y="15" width="5" height="5"/><rect x="50" y="15" width="5" height="5"/><rect x="60" y="15" width="5" height="5"/>
+                        <rect x="40" y="25" width="5" height="5"/><rect x="55" y="25" width="5" height="5"/>
+                        <rect x="5" y="35" width="5" height="5"/><rect x="15" y="35" width="5" height="5"/><rect x="30" y="35" width="5" height="5"/><rect x="45" y="35" width="5" height="5"/><rect x="60" y="35" width="5" height="5"/><rect x="75" y="35" width="5" height="5"/><rect x="85" y="35" width="5" height="5"/>
+                        <rect x="10" y="45" width="5" height="5"/><rect x="25" y="45" width="5" height="5"/><rect x="40" y="45" width="5" height="5"/><rect x="55" y="45" width="5" height="5"/><rect x="70" y="45" width="5" height="5"/><rect x="80" y="45" width="5" height="5"/>
+                        <rect x="5" y="55" width="5" height="5"/><rect x="20" y="55" width="5" height="5"/><rect x="35" y="55" width="5" height="5"/><rect x="50" y="55" width="5" height="5"/><rect x="65" y="55" width="5" height="5"/><rect x="80" y="55" width="5" height="5"/>
+                        <rect x="15" y="65" width="5" height="5"/><rect x="30" y="65" width="5" height="5"/><rect x="45" y="65" width="5" height="5"/><rect x="60" y="65" width="5" height="5"/><rect x="75" y="65" width="5" height="5"/>
+                        <rect x="35" y="75" width="5" height="5"/><rect x="50" y="75" width="5" height="5"/><rect x="65" y="75" width="5" height="5"/><rect x="80" y="75" width="5" height="5"/>
+                        <rect x="40" y="85" width="5" height="5"/><rect x="55" y="85" width="5" height="5"/><rect x="70" y="85" width="5" height="5"/>
+                        <rect x="35" y="40" width="5" height="5"/><rect x="40" y="50" width="5" height="5"/><rect x="50" y="60" width="5" height="5"/>
+                    </g>
+                </svg>
+            </div>
+            <div class="qr-amount">₹<span id="entryFeeAmt">199</span> <span>Entry Fee</span></div>
+        </div>
+
+        <div class="section-title">Payment Details</div>
+        <div class="ios-card">
+            <div class="ios-input-group">
+                <div class="ios-input-row">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <label>Payment Name</label>
+                    <input type="text" placeholder="Name on UPI" id="paymentName">
+                </div>
+                <div class="ios-input-row">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                    <label>UTR Number</label>
+                    <input type="text" placeholder="12-digit UTR" id="utrNumber">
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title">Screenshot</div>
+        <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+            <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleFile(this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <div class="upload-text" id="uploadText">Tap to upload payment screenshot</div>
+            <div class="upload-filename" id="uploadFilename"></div>
+        </div>
+
+        <button class="ios-btn" style="margin-top: 24px;" onclick="submitPayment(this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Confirm Payment
+        </button>
+    </div>
+
+    <!-- Success Overlay -->
+    <div class="success-overlay" id="successOverlay">
+        <div class="success-card">
+            <div class="check-circle">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <h3>Registered!</h3>
+            <p>Your tournament slot is confirmed. Good luck!</p>
+            <button class="done-btn" onclick="closeSuccess()">Awesome</button>
+        </div>
+    </div>
+
+    <script>
+        function goToPayment() {
+            const name = document.getElementById('userName').value.trim();
+            const gid = document.getElementById('gameIdNumber').value.trim();
+            const mobile = document.getElementById('mobileNumber').value.trim();
+            if (!name || !gid || !mobile) {
+                alert('Please fill User Name, Game ID Number and Mobile Number');
+                return;
+            }
+            if (!FIREBASE_CONFIGURED) {
+                alert('Firebase not configured. Add your config in firebase-config.js');
+                return;
+            }
+            document.getElementById('paymentName').value = name;
+            const p1 = document.getElementById('page1');
+            const p2 = document.getElementById('page2');
+            p1.classList.add('anim-exit');
+            setTimeout(() => {
+                p1.classList.remove('active', 'anim-exit');
+                p2.classList.add('active', 'anim-enter');
+                setTimeout(() => p2.classList.remove('anim-enter'), 450);
+            }, 350);
+        }
+
+        function goBack() {
+            const p1 = document.getElementById('page1');
+            const p2 = document.getElementById('page2');
+            p2.classList.add('anim-exit-back');
+            setTimeout(() => {
+                p2.classList.remove('active', 'anim-exit-back');
+                p1.classList.add('active', 'anim-enter-back');
+                setTimeout(() => p1.classList.remove('anim-enter-back'), 450);
+            }, 350);
+        }
+
+        function handleFile(input) {
+            const area = document.getElementById('uploadArea');
+            const text = document.getElementById('uploadText');
+            const filename = document.getElementById('uploadFilename');
+            if (input.files && input.files[0]) {
+                area.classList.add('has-file');
+                text.textContent = 'Screenshot uploaded';
+                filename.textContent = input.files[0].name;
+            }
+        }
+
+        async function submitPayment(btn) {
+            const paymentName = document.getElementById('paymentName').value.trim();
+            const utr = document.getElementById('utrNumber').value.trim();
+            const file = document.getElementById('fileInput').files[0];
+            if (!paymentName || !utr || !file) {
+                alert('Please fill Payment Name, UTR Number and upload the screenshot');
+                return;
+            }
+            if (!FIREBASE_CONFIGURED) {
+                alert('Firebase not configured. Add your config in firebase-config.js');
+                return;
+            }
+            btn.disabled = true;
+            btn.style.opacity = '0.6';
+            try {
+                const screenshot = await compressImage(file);
+                await db.collection('players').add({
+                    userName: document.getElementById('userName').value.trim(),
+                    gameIdName: document.getElementById('gameIdName').value.trim(),
+                    gameIdNumber: document.getElementById('gameIdNumber').value.trim(),
+                    gameIdLevel: document.getElementById('gameIdLevel').value.trim(),
+                    mobileNumber: document.getElementById('mobileNumber').value.trim(),
+                    emailId: document.getElementById('emailId').value.trim(),
+                    paymentName: paymentName,
+                    utrNumber: utr,
+                    screenshot: screenshot,
+                    status: 'pending',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                document.getElementById('successOverlay').classList.add('active');
+            } catch (e) {
+                alert('Something went wrong. Please try again.');
+            } finally {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+            }
+        }
+
+        function compressImage(file, maxSize, quality) {
+            maxSize = maxSize || 700;
+            quality = quality || 0.6;
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const img = new Image();
+                    img.onload = function () {
+                        const canvas = document.createElement('canvas');
+                        let w = img.width;
+                        let h = img.height;
+                        const scale = Math.min(1, maxSize / Math.max(w, h));
+                        canvas.width = Math.round(w * scale);
+                        canvas.height = Math.round(h * scale);
+                        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                        resolve(canvas.toDataURL('image/jpeg', quality));
+                    };
+                    img.onerror = reject;
+                    img.src = e.target.result;
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function closeSuccess() {
+            document.getElementById('successOverlay').classList.remove('active');
+            document.getElementById('page2').classList.remove('active');
+            document.getElementById('page1').classList.add('active');
+            document.querySelectorAll('input[type=\"text\"], input[type=\"tel\"], input[type=\"email\"]').forEach(i => i.value = '');
+            document.getElementById('uploadArea').classList.remove('has-file');
+            document.getElementById('uploadText').textContent = 'Tap to upload payment screenshot';
+            document.getElementById('uploadFilename').textContent = '';
+            document.getElementById('fileInput').value = '';
+        }
+    </script>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script>
+const FIREBASE_CONFIG = {
+    apiKey: "AIzaSyCXSv7eNl7KcttNvKF46BCAkhYv6t6S0bI",
+    authDomain: "user-manage-bot.firebaseapp.com",
+    databaseURL: "https://user-manage-bot-default-rtdb.firebaseio.com",
+    projectId: "user-manage-bot",
+    storageBucket: "user-manage-bot.firebasestorage.app",
+    messagingSenderId: "17364199534",
+    appId: "1:17364199534:web:dce4f0df3efe163930de7f"
+};
+
+const FIREBASE_CONFIGURED = FIREBASE_CONFIG.apiKey !== "YOUR_API_KEY";
+
+let firebaseApp = null;
+let db = null;
+
+if (FIREBASE_CONFIGURED && typeof firebase !== 'undefined') {
+    firebaseApp = firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.firestore();
+}
+
+const DEFAULT_SETTINGS = {
+    tournamentName: 'Clash Arena',
+    entryFee: 199,
+    upiId: '',
+    upiName: 'Clash Arena',
+    prizePool: '₹5,000',
+    matchTime: '9:00 PM',
+    maxPlayers: 100,
+    announcement: '',
+    adminPass: 'admin123',
+    rules: [
+        { title: 'Fair Play Only', description: 'Any use of hacks, mods, or third-party tools will result in immediate disqualification.' },
+        { title: 'Entry Fee Non-Refundable', description: 'Once paid, the entry fee is non-refundable under any circumstances.' },
+        { title: 'On-Time Check-In', description: 'Players must check in 15 minutes before match start. Late entries will not be allowed.' },
+        { title: 'Valid ID Required', description: 'All players must use the same Game ID submitted during registration throughout the tournament.' },
+        { title: 'No Team Switching', description: 'Once teams are finalized, no player substitutions or team changes are permitted.' },
+        { title: 'Recording Mandatory', description: 'Every player must screen-record their gameplay. Failure to provide proof may void results.' },
+        { title: 'Dispute Resolution', description: 'All disputes will be resolved by tournament admins. Their decision is final and binding.' },
+        { title: 'Prize Distribution', description: 'Prizes will be credited within 48 hours after tournament completion to the registered UPI.' },
+        { title: 'Communication Rules', description: 'Toxic behaviour, abuse, or harassment in chat or voice will lead to a permanent ban.' },
+        { title: 'Device Responsibility', description: 'Players are responsible for their own internet and device issues. No rematches will be given.' }
+    ]
+};
+
+let cachedSettings = null;
+
+function withTimeout(promise, ms) {
+    return new Promise((resolve, reject) => {
+        const t = setTimeout(() => reject(new Error('timeout')), ms);
+        promise.then(
+            v => { clearTimeout(t); resolve(v); },
+            e => { clearTimeout(t); reject(e); }
+        );
+    });
+}
+
+async function fetchSettings() {
+    if (!FIREBASE_CONFIGURED || !db) {
+        cachedSettings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+        return cachedSettings;
+    }
+    try {
+        const snap = await withTimeout(db.collection('settings').doc('main').get(), 6000);
+        if (snap.exists) {
+            cachedSettings = Object.assign({}, DEFAULT_SETTINGS, snap.data());
+        } else {
+            cachedSettings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+            try {
+                await withTimeout(db.collection('settings').doc('main').set(cachedSettings), 6000);
+            } catch (e) { }
+        }
+    } catch (e) {
+        cachedSettings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+    }
+    return cachedSettings;
+}
+
+function getSettings() {
+    if (!cachedSettings) return JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+    return cachedSettings;
+}
+
+function fmtTime(ts) {
+    if (!ts) return '';
+    const d = (ts && ts.toDate) ? ts.toDate() : new Date(ts);
+    return d.toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+}
+</script>
+
+    <script>
+        let appSettings = null;
+
+        (async function init() {
+            appSettings = await fetchSettings();
+            document.getElementById('tournamentTitle').textContent = appSettings.tournamentName;
+            document.getElementById('entryFeeAmt').textContent = appSettings.entryFee;
+            if (appSettings.announcement) {
+                document.getElementById('announcementText').textContent = appSettings.announcement;
+                document.getElementById('announcementBar').style.display = 'flex';
+            }
+            if (!FIREBASE_CONFIGURED) {
+                document.getElementById('setupWarning').style.display = 'block';
+            }
+            buildQR();
+        })();
+
+        function buildQR() {
+            const box = document.getElementById('qrBox');
+            if (!FIREBASE_CONFIGURED || !db) {
+                box.innerHTML = '<svg viewBox="0 0 100 100"><rect fill="white" width="100" height="100"/><g fill="#C7C7CC"><rect x="35" y="35" width="30" height="30"/></g></svg>';
+                return;
+            }
+            if (!appSettings.upiId) return;
+            box.innerHTML = '';
+            const uri = 'upi://pay?pa=' + encodeURIComponent(appSettings.upiId) +
+                '&pn=' + encodeURIComponent(appSettings.upiName || 'Tournament') +
+                '&am=' + encodeURIComponent(appSettings.entryFee) +
+                '&cu=INR&tn=' + encodeURIComponent(appSettings.tournamentName + ' Entry Fee');
+            new QRCode(box, {
+                text: uri,
+                width: 156,
+                height: 156,
+                colorDark: '#1C1C1E',
+                colorLight: '#FFFFFF',
+                correctLevel: QRCode.CorrectLevel.M
+            });
+        }
+    </script>
+</body>
+</html>
