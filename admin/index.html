@@ -854,44 +854,16 @@
         <div class="modal-card">
             <button class="close-x" onclick="closeAddPlayer()">&times;</button>
             <h3>Add Player</h3>
-            <div class="sub">Manually register a player — auto-approved, join page pe turant dikhega</div>
+            <div class="sub">User ko tournament me add karein — join page pe turant dikhega</div>
             <div class="form-grid">
                 <div class="form-row">
                     <label>User Name *</label>
                     <input type="text" id="apName" placeholder="Player name">
                 </div>
                 <div class="form-row">
-                    <label>Game ID Name</label>
-                    <input type="text" id="apGameName" placeholder="Nickname">
-                </div>
-                <div class="form-row">
-                    <label>Game ID Number</label>
+                    <label>UID Number</label>
                     <input type="text" id="apGameNum" placeholder="e.g. 883421">
                 </div>
-                <div class="form-row">
-                    <label>Game ID Level</label>
-                    <input type="text" id="apLevel" placeholder="e.g. Diamond IV">
-                </div>
-                <div class="form-row">
-                    <label>Mobile Number</label>
-                    <input type="tel" id="apMobile" placeholder="+91 98765 43210">
-                </div>
-                <div class="form-row">
-                    <label>Email ID</label>
-                    <input type="email" id="apEmail" placeholder="you@email.com">
-                </div>
-                <div class="form-row">
-                    <label>Payment Name</label>
-                    <input type="text" id="apPayName" placeholder="Name on UPI">
-                </div>
-                <div class="form-row">
-                    <label>UTR Number</label>
-                    <input type="text" id="apUtr" placeholder="12-digit UTR">
-                </div>
-            </div>
-            <div class="form-row">
-                <label>Payment Screenshot (optional)</label>
-                <input type="file" id="apShot" accept="image/*" style="border:none;padding:0;background:transparent">
             </div>
             <div class="modal-actions">
                 <button class="mini-btn mb-gray" onclick="closeAddPlayer()">Cancel</button>
@@ -1185,29 +1157,17 @@ function fmtTime(ts) {
 
         function closeAddPlayer() {
             $('addPlayerModal').classList.remove('active');
-            ['apName','apGameName','apGameNum','apLevel','apMobile','apEmail','apPayName','apUtr'].forEach(id => $(id).value = '');
-            $('apShot').value = '';
+            $('apName').value = '';
+            $('apGameNum').value = '';
         }
 
         async function addPlayer() {
             const name = $('apName').value.trim();
             if (!name) { showToast('Enter user name'); return; }
-            let screenshot = '';
-            const file = $('apShot').files[0];
-            if (file) {
-                try { screenshot = await compressImage(file); } catch (e) { screenshot = ''; }
-            }
             try {
                 await db.collection('players').add({
                     userName: name,
-                    gameIdName: $('apGameName').value.trim(),
                     gameIdNumber: $('apGameNum').value.trim(),
-                    gameIdLevel: $('apLevel').value.trim(),
-                    mobileNumber: $('apMobile').value.trim(),
-                    emailId: $('apEmail').value.trim(),
-                    paymentName: $('apPayName').value.trim(),
-                    utrNumber: $('apUtr').value.trim(),
-                    screenshot: screenshot,
                     status: 'approved',
                     addedByAdmin: true,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -1218,31 +1178,6 @@ function fmtTime(ts) {
                 console.error(e);
                 showToast('Error adding player');
             }
-        }
-
-        function compressImage(file, maxSize, quality) {
-            maxSize = maxSize || 700;
-            quality = quality || 0.6;
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    const img = new Image();
-                    img.onload = function () {
-                        const canvas = document.createElement('canvas');
-                        let w = img.width;
-                        let h = img.height;
-                        const scale = Math.min(1, maxSize / Math.max(w, h));
-                        canvas.width = Math.round(w * scale);
-                        canvas.height = Math.round(h * scale);
-                        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-                        resolve(canvas.toDataURL('image/jpeg', quality));
-                    };
-                    img.onerror = reject;
-                    img.src = e.target.result;
-                };
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
-            });
         }
 
         /* ===== SETTINGS ===== */
