@@ -101,6 +101,14 @@
             0%, 100% { box-shadow: 0 4px 20px rgba(10,132,255,0.25), 0 0 40px rgba(10,132,255,0.08); }
             50% { box-shadow: 0 4px 30px rgba(10,132,255,0.35), 0 0 60px rgba(10,132,255,0.12); }
         }
+        @keyframes fadeUp {
+            from { transform: translateY(14px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes shakeGlow {
+            0%, 100% { box-shadow: 0 0 0 rgba(255, 59, 48, 0); }
+            50% { box-shadow: 0 4px 18px rgba(255, 59, 48, 0.25), 0 0 30px rgba(255, 59, 48, 0.08); }
+        }
 
         .anim-enter {
             animation: slideInRight 0.45s cubic-bezier(0.32, 0.72, 0, 1) forwards;
@@ -117,9 +125,54 @@
 
         /* Header */
         .ios-header {
+            position: relative;
             text-align: center;
             margin-bottom: 28px;
             padding-top: 8px;
+        }
+        .inbox-btn {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 44px;
+            height: 44px;
+            background: white;
+            border: none;
+            border-radius: 14px;
+            color: var(--ios-sky);
+            box-shadow: var(--shadow-ios), 0 0 20px rgba(10,132,255,0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            animation: fadeScaleUp 0.5s cubic-bezier(0.32, 0.72, 0, 1) 0.05s both;
+        }
+        .inbox-btn:active {
+            transform: scale(0.9);
+        }
+        .inbox-btn svg {
+            width: 22px;
+            height: 22px;
+        }
+        .inbox-dot {
+            position: absolute;
+            top: 8px;
+            right: 9px;
+            width: 9px;
+            height: 9px;
+            background: #FF3B30;
+            border: 2px solid white;
+            border-radius: 50%;
+            display: none;
+        }
+        .inbox-dot.show {
+            display: block;
+            animation: pulseDot 1.6s ease-in-out infinite;
+        }
+        @keyframes pulseDot {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.3); }
         }
         .ios-header h1 {
             font-size: 28px;
@@ -162,50 +215,424 @@
             animation: fadeScaleUp 0.5s cubic-bezier(0.32, 0.72, 0, 1) 0.15s both;
         }
 
-        .ios-input-group {
-            padding: 0 16px;
+        /* Section Title */
+        .section-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--ios-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin: 0 4px 12px;
+            animation: fadeUp 0.5s cubic-bezier(0.32, 0.72, 0, 1) 0.05s both;
         }
-        .ios-input-row {
+
+        /* Progress Bar */
+        .progress-wrap {
+            background: var(--ios-card);
+            border-radius: var(--ios-radius);
+            padding: 14px 16px;
+            margin-bottom: 14px;
+            box-shadow: var(--shadow-ios), var(--glow-sky);
+            animation: fadeUp 0.5s cubic-bezier(0.32, 0.72, 0, 1) 0.12s both;
+        }
+        .progress-label {
             display: flex;
             align-items: center;
-            padding: 14px 0;
-            border-bottom: 1px solid var(--ios-border);
-            gap: 12px;
-        }
-        .ios-input-row:last-child {
-            border-bottom: none;
-        }
-        .ios-input-row .icon {
-            width: 20px;
-            height: 20px;
-            color: var(--ios-sky);
-            flex-shrink: 0;
-            opacity: 0.8;
-        }
-        .ios-input-row label {
-            font-size: 13px;
+            justify-content: space-between;
+            font-size: 11px;
+            font-weight: 700;
             color: var(--ios-text-secondary);
-            min-width: 100px;
-            font-weight: 500;
-            flex-shrink: 0;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 10px;
         }
-        .ios-input-row input {
-            flex: 1;
+        .progress-pct {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--ios-sky);
+            transition: color 0.3s ease;
+        }
+        .progress-pct.done {
+            color: #34C759;
+        }
+        .progress-track {
+            height: 8px;
+            background: var(--ios-sky-light);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            position: relative;
+            height: 100%;
+            width: 0%;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #0A84FF 0%, #5AC8FA 100%);
+            box-shadow: 0 0 12px rgba(10,132,255,0.5);
+            transition: width 0.7s cubic-bezier(0.32, 0.72, 0, 1);
+            overflow: hidden;
+        }
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: -40px;
+            width: 40px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent);
+            animation: shimmerMove 1.5s ease-in-out infinite;
+        }
+        .progress-fill.done {
+            background: linear-gradient(90deg, #34C759 0%, #30D158 100%);
+            box-shadow: 0 0 14px rgba(52,199,89,0.55);
+        }
+        .progress-fill.done::after {
+            animation: none;
+        }
+        @keyframes shimmerMove {
+            0% { left: -40px; }
+            100% { left: 100%; }
+        }
+
+        /* Inbox Sheet */
+        .inbox-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+            z-index: 120;
+        }
+        .inbox-overlay.active {
+            display: flex;
+        }
+        .inbox-sheet {
+            background: #F2F2F7;
+            border-radius: 22px 22px 0 0;
+            width: 100%;
+            max-width: 420px;
+            max-height: 84vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
+            animation: sheetUp 0.35s cubic-bezier(0.32, 0.72, 0, 1) both;
+        }
+        @keyframes sheetUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        .inbox-sheet-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 20px 12px;
+        }
+        .inbox-sheet-head h3 {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+        .inbox-sheet-head p {
+            font-size: 12px;
+            color: var(--ios-text-secondary);
+            margin-top: 2px;
+        }
+        .inbox-close {
+            width: 34px;
+            height: 34px;
+            min-width: 34px;
+            background: white;
             border: none;
-            outline: none;
-            font-size: 16px;
-            color: var(--ios-text);
-            background: transparent;
+            border-radius: 50%;
+            font-size: 20px;
+            color: var(--ios-text-secondary);
+            box-shadow: var(--shadow-ios);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-family: inherit;
-            padding: 0;
-            min-width: 0;
         }
-        .ios-input-row input::placeholder {
+        .inbox-close:active {
+            transform: scale(0.9);
+        }
+        .inbox-search {
+            position: relative;
+            margin: 0 20px 14px;
+        }
+        .inbox-search input {
+            width: 100%;
+            padding: 12px 14px 12px 40px;
+            border: 1px solid var(--ios-border);
+            border-radius: 12px;
+            background: white;
+            font-size: 14px;
+            font-family: inherit;
+            color: var(--ios-text);
+            outline: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .inbox-search input:focus {
+            border-color: var(--ios-sky);
+        }
+        .inbox-search input::placeholder {
             color: #C7C7CC;
         }
-        .ios-input-row:focus-within .icon {
+        .inbox-search svg {
+            position: absolute;
+            left: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 17px;
+            height: 17px;
+            color: #C7C7CC;
+        }
+        .inbox-list {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 0 16px 28px;
+        }
+
+        /* Status Check */
+        .status-card-item {
+            background: white;
+            border-radius: var(--ios-radius);
+            box-shadow: var(--shadow-ios), 0 0 20px rgba(10,132,255,0.04);
+            padding: 16px;
+            margin-bottom: 12px;
+            animation: fadeUp 0.5s cubic-bezier(0.32, 0.72, 0, 1) both;
+        }
+        .status-head {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .status-avatar {
+            width: 42px;
+            height: 42px;
+            min-width: 42px;
+            background: linear-gradient(135deg, #0A84FF, #5AC8FA);
+            border-radius: 12px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(10,132,255,0.2);
+        }
+        .status-head-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .status-name {
+            font-size: 15px;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .status-sub {
+            font-size: 12px;
+            color: var(--ios-text-secondary);
+            margin-top: 2px;
+        }
+        .status-badge {
+            font-size: 11px;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            white-space: nowrap;
+        }
+        .status-pending { color: #FF9500; background: rgba(255,149,0,0.12); }
+        .status-approved { color: #34C759; background: rgba(52,199,89,0.12); }
+        .status-rejected { color: #FF3B30; background: rgba(255,59,48,0.12); }
+        .status-details {
+            background: #F9F9FB;
+            border-radius: 10px;
+            padding: 4px 14px;
+        }
+        .status-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--ios-border);
+            font-size: 13px;
+        }
+        .status-row:last-child {
+            border-bottom: none;
+        }
+        .status-row .k {
+            color: var(--ios-text-secondary);
+            flex-shrink: 0;
+        }
+        .status-row .v {
+            font-weight: 600;
+            text-align: right;
+            word-break: break-word;
+        }
+        .status-empty {
+            text-align: center;
+            padding: 36px 20px;
+            background: white;
+            border-radius: var(--ios-radius);
+            box-shadow: var(--shadow-ios);
+            animation: fadeUp 0.5s cubic-bezier(0.32, 0.72, 0, 1) both;
+        }
+        .status-empty svg {
+            width: 44px;
+            height: 44px;
+            color: #C7C7CC;
+            margin-bottom: 12px;
+        }
+        .status-empty h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #8E8E93;
+        }
+        .status-empty p {
+            font-size: 13px;
+            color: #C7C7CC;
+            margin-top: 4px;
+        }
+        .status-loading {
+            text-align: center;
+            padding: 30px;
             color: var(--ios-sky);
-            opacity: 1;
+            font-size: 14px;
+            font-weight: 700;
+            background: white;
+            border-radius: var(--ios-radius);
+            box-shadow: var(--shadow-ios);
+            animation: fadeUp 0.3s ease both;
+        }
+        .status-loading::after {
+            content: '';
+            display: block;
+            width: 20px;
+            height: 20px;
+            margin: 10px auto 0;
+            border: 3px solid rgba(10,132,255,0.15);
+            border-top-color: var(--ios-sky);
+            border-radius: 50%;
+            animation: spinLoad 0.8s linear infinite;
+        }
+        @keyframes spinLoad {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Form Fields */
+        .field {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--ios-sky-light);
+            border: 1px solid transparent;
+            border-radius: 14px;
+            padding: 10px 14px;
+            margin: 0 12px 12px;
+            transition: all 0.25s ease;
+            animation: fadeUp 0.5s cubic-bezier(0.32, 0.72, 0, 1) both;
+        }
+        .field:nth-child(1) { animation-delay: 0.18s; }
+        .field:nth-child(2) { animation-delay: 0.24s; }
+        .field:nth-child(3) { animation-delay: 0.30s; }
+        .field:nth-child(4) { animation-delay: 0.36s; }
+        .field:nth-child(5) { animation-delay: 0.42s; }
+        .field:nth-child(6) { animation-delay: 0.48s; }
+        .field:focus-within {
+            border-color: var(--ios-sky);
+            background: white;
+            box-shadow: 0 4px 18px rgba(10,132,255,0.12), 0 0 28px rgba(10,132,255,0.05);
+            transform: translateY(-1px);
+        }
+        .field.error {
+            border-color: rgba(255, 59, 48, 0.5);
+            background: rgba(255, 59, 48, 0.04);
+            animation: shakeGlow 0.4s ease;
+        }
+        .field.filled {
+            border-color: rgba(52,199,89,0.45);
+            background: rgba(52,199,89,0.05);
+            box-shadow: 0 2px 10px rgba(52,199,89,0.08);
+        }
+        .field.filled .field-icon {
+            background: rgba(52,199,89,0.12);
+            color: #34C759;
+        }
+        .field.filled .field-label {
+            color: #34C759;
+        }
+        .field.filled:focus-within {
+            border-color: #34C759;
+            background: white;
+            box-shadow: 0 4px 18px rgba(52,199,89,0.15);
+        }
+        .field.filled:focus-within .field-icon {
+            background: linear-gradient(135deg, #34C759 0%, #30D158 100%);
+            color: white;
+            box-shadow: 0 3px 12px rgba(52,199,89,0.35);
+        }
+        .field.filled:focus-within .field-label {
+            color: #34C759;
+        }
+        .field-icon {
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            background: rgba(10,132,255,0.10);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--ios-sky);
+            transition: all 0.25s ease;
+        }
+        .field-icon svg {
+            width: 20px;
+            height: 20px;
+        }
+        .field:focus-within .field-icon {
+            background: linear-gradient(135deg, #0A84FF 0%, #007AFF 100%);
+            color: white;
+            box-shadow: 0 3px 12px rgba(10,132,255,0.35);
+        }
+        .field-body {
+            flex: 1;
+            min-width: 0;
+        }
+        .field-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--ios-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 3px;
+            transition: color 0.25s ease;
+        }
+        .field:focus-within .field-label {
+            color: var(--ios-sky);
+        }
+        .field-body input {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 16px;
+            color: var(--ios-text);
+            font-family: inherit;
+            padding: 0;
+        }
+        .field-body input::placeholder {
+            color: #C7C7CC;
+            font-size: 15px;
         }
 
         /* iOS Button */
@@ -227,7 +654,10 @@
             justify-content: center;
             gap: 8px;
             margin-top: 8px;
-            animation: fadeScaleUp 0.5s cubic-bezier(0.32, 0.72, 0, 1) 0.3s both;
+            animation: fadeUp 0.55s cubic-bezier(0.32, 0.72, 0, 1) 0.55s both;
+        }
+        .ios-btn:hover {
+            box-shadow: 0 6px 22px rgba(10,132,255,0.4), 0 0 40px rgba(10,132,255,0.12);
         }
         .ios-btn:active {
             transform: scale(0.97);
@@ -292,14 +722,34 @@
         }
         .qr-amount {
             margin-top: 16px;
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--ios-text);
+            text-align: center;
         }
-        .qr-amount span {
-            font-size: 15px;
-            color: var(--ios-text-secondary);
-            font-weight: 500;
+        .qr-amount-label {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 800;
+            color: #34C759;
+            background: rgba(52,199,89,0.10);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 5px 14px;
+            border-radius: 20px;
+            box-shadow: 0 2px 10px rgba(52,199,89,0.12);
+            animation: fadeUp 0.5s cubic-bezier(0.32, 0.72, 0, 1) 0.2s both;
+        }
+        .qr-amount-value {
+            margin-top: 8px;
+            font-size: 34px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            color: #34C759;
+            text-shadow: 0 0 24px rgba(52,199,89,0.40), 0 2px 8px rgba(52,199,89,0.15);
+            animation: fadeUp 0.5s cubic-bezier(0.32, 0.72, 0, 1) 0.26s both;
+        }
+        .qr-amount-value .rupee {
+            font-size: 22px;
+            font-weight: 800;
+            margin-right: 2px;
         }
 
         /* Upload Area */
@@ -481,15 +931,12 @@
     <!-- PAGE 1: Tournament Registration -->
     <div class="page active" id="page1">
         <div class="ios-header">
-            <div class="trophy">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
-                    <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
-                    <path d="M4 22h16"/>
-                    <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
-                    <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
-                    <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
-                </svg>
+            <button class="inbox-btn" onclick="openInbox()" aria-label="Your requests">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+                <span class="inbox-dot" id="inboxDot"></span>
+            </button>
+            <div class="trophy" style="overflow:hidden;padding:0;">
+                <img src="PROJECT%20LOGO/photo_2026-08-05_11-49-04.jpg" alt="Clash Arena Logo" style="width:100%;height:100%;object-fit:cover;display:block;">
             </div>
             <h1 id="tournamentTitle">Join Tournament</h1>
             <p>Fill your details to register</p>
@@ -501,37 +948,71 @@
             <p id="announcementText"></p>
         </div>
 
+        <div class="section-title">Player Details</div>
+
+        <div class="progress-wrap">
+            <div class="progress-label">
+                <span>Registration Progress</span>
+                <span class="progress-pct" id="progressPct">0%</span>
+            </div>
+            <div class="progress-track">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+
         <div class="ios-card">
-            <div class="ios-input-group">
-                <div class="ios-input-row">
-                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                    <label>User Name</label>
-                    <input type="text" placeholder="Enter your name" id="userName">
+            <div class="field">
+                <div class="field-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                 </div>
-                <div class="ios-input-row">
-                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-                    <label>Game ID Name</label>
-                    <input type="text" placeholder="Your game nickname" id="gameIdName">
+                <div class="field-body">
+                    <div class="field-label">User Name</div>
+                    <input type="text" placeholder="Enter your name" id="userName" oninput="updateProgress()">
                 </div>
-                <div class="ios-input-row">
-                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
-                    <label>Game ID Number</label>
-                    <input type="text" placeholder="e.g. 883421" id="gameIdNumber">
+            </div>
+            <div class="field">
+                <div class="field-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
                 </div>
-                <div class="ios-input-row">
-                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                    <label>Game ID Level</label>
-                    <input type="text" placeholder="e.g. Diamond IV" id="gameIdLevel">
+                <div class="field-body">
+                    <div class="field-label">Game ID Name</div>
+                    <input type="text" placeholder="Your game nickname" id="gameIdName" oninput="updateProgress()">
                 </div>
-                <div class="ios-input-row">
-                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                    <label>Mobile Number</label>
-                    <input type="tel" placeholder="+91 98765 43210" id="mobileNumber">
+            </div>
+            <div class="field">
+                <div class="field-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
                 </div>
-                <div class="ios-input-row">
-                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-                    <label>Email ID</label>
-                    <input type="email" placeholder="you@email.com" id="emailId">
+                <div class="field-body">
+                    <div class="field-label">Game ID Number</div>
+                    <input type="tel" inputmode="numeric" maxlength="12" placeholder="e.g. 883421" id="gameIdNumber" oninput="this.value=this.value.replace(/\D/g,'');updateProgress()">
+                </div>
+            </div>
+            <div class="field">
+                <div class="field-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                </div>
+                <div class="field-body">
+                    <div class="field-label">Game ID Level</div>
+                    <input type="tel" inputmode="numeric" maxlength="2" placeholder="e.g. 72" id="gameIdLevel" oninput="this.value=this.value.replace(/\D/g,'');updateProgress()">
+                </div>
+            </div>
+            <div class="field">
+                <div class="field-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                </div>
+                <div class="field-body">
+                    <div class="field-label">Mobile Number</div>
+                    <input type="tel" placeholder="+91 98765 43210" id="mobileNumber" oninput="updateProgress()">
+                </div>
+            </div>
+            <div class="field">
+                <div class="field-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                </div>
+                <div class="field-body">
+                    <div class="field-label">Email ID</div>
+                    <input type="email" placeholder="you@email.com" id="emailId" oninput="updateProgress()">
                 </div>
             </div>
         </div>
@@ -582,20 +1063,29 @@
                     </g>
                 </svg>
             </div>
-            <div class="qr-amount">₹<span id="entryFeeAmt">199</span> <span>Entry Fee</span></div>
+            <div class="qr-amount">
+                <div class="qr-amount-label">Entry Fee</div>
+                <div class="qr-amount-value"><span class="rupee">₹</span><span id="entryFeeAmt">199</span></div>
+            </div>
         </div>
 
         <div class="section-title">Payment Details</div>
         <div class="ios-card">
-            <div class="ios-input-group">
-                <div class="ios-input-row">
-                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                    <label>Payment Name</label>
+            <div class="field">
+                <div class="field-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </div>
+                <div class="field-body">
+                    <div class="field-label">Payment Name</div>
                     <input type="text" placeholder="Name on UPI" id="paymentName">
                 </div>
-                <div class="ios-input-row">
-                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-                    <label>UTR Number</label>
+            </div>
+            <div class="field">
+                <div class="field-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                </div>
+                <div class="field-body">
+                    <div class="field-label">UTR Number</div>
                     <input type="text" placeholder="12-digit UTR" id="utrNumber">
                 </div>
             </div>
@@ -615,6 +1105,24 @@
         </button>
     </div>
 
+    <!-- Inbox Sheet -->
+    <div class="inbox-overlay" id="inboxOverlay">
+        <div class="inbox-sheet">
+            <div class="inbox-sheet-head">
+                <div>
+                    <h3>Your Requests</h3>
+                    <p id="inboxSub">Sabhi registrations yahan stored hain</p>
+                </div>
+                <button class="inbox-close" onclick="closeInbox()">&times;</button>
+            </div>
+            <div class="inbox-search">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" placeholder="Email / Mobile / Game ID" id="inboxSearch" onkeydown="if(event.key==='Enter')loadInbox()">
+            </div>
+            <div class="inbox-list" id="inboxList"></div>
+        </div>
+    </div>
+
     <!-- Success Overlay -->
     <div class="success-overlay" id="successOverlay">
         <div class="success-card">
@@ -628,11 +1136,161 @@
     </div>
 
     <script>
+        function escapeHtml(str) {
+            return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function statusBadgeHtml(status) {
+            if (status === 'approved') return '<span class="status-badge status-approved">Approved</span>';
+            if (status === 'rejected') return '<span class="status-badge status-rejected">Rejected</span>';
+            return '<span class="status-badge status-pending">Pending</span>';
+        }
+
+        function statusRowHtml(k, v) {
+            if (!v) return '';
+            return '<div class="status-row"><span class="k">' + k + '</span><span class="v">' + escapeHtml(v) + '</span></div>';
+        }
+
+        function getSavedIdentity() {
+            try { return JSON.parse(localStorage.getItem('ca_identity') || 'null'); } catch (e) { return null; }
+        }
+
+        function showInboxDot() {
+            const saved = getSavedIdentity();
+            if (saved && (saved.mobile || saved.email)) {
+                document.getElementById('inboxDot').classList.add('show');
+            }
+        }
+
+        function openInbox() {
+            document.getElementById('inboxOverlay').classList.add('active');
+            document.body.style.overflow = 'hidden';
+            const saved = getSavedIdentity();
+            if (saved && saved.mobile && !document.getElementById('inboxSearch').value.trim()) {
+                document.getElementById('inboxSearch').value = saved.mobile;
+            }
+            loadInbox();
+        }
+
+        function closeInbox() {
+            document.getElementById('inboxOverlay').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        async function loadInbox() {
+            const list = document.getElementById('inboxList');
+            let q = document.getElementById('inboxSearch').value.trim().toLowerCase();
+            if (!q) {
+                const saved = getSavedIdentity();
+                if (saved && saved.mobile) {
+                    q = saved.mobile.toLowerCase();
+                    document.getElementById('inboxSearch').value = saved.mobile;
+                }
+            }
+            document.getElementById('inboxSub').textContent = 'Sabhi registrations yahan stored hain';
+            if (!q) {
+                list.innerHTML = '<div class="status-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg><h3>Apna Email / Mobile / Game ID daalein</h3><p>Upar search box me apni details likhkar enter karein</p></div>';
+                return;
+            }
+            if (!FIREBASE_CONFIGURED) {
+                list.innerHTML = '<div class="status-empty"><h3>Firebase not configured</h3><p>Add your config in firebase-config.js</p></div>';
+                return;
+            }
+            list.innerHTML = '<div class="status-loading">Loading your requests</div>';
+            try {
+                const snap = await db.collection('players').get();
+                const matches = [];
+                snap.forEach(doc => {
+                    const p = doc.data();
+                    p.id = doc.id;
+                    const email = (p.emailId || '').toLowerCase();
+                    const mobile = (p.mobileNumber || '').toLowerCase();
+                    const gid = (p.gameIdNumber || '').toLowerCase();
+                    const name = (p.userName || '').toLowerCase();
+                    if (email === q || mobile === q || gid === q || name === q) matches.push(p);
+                });
+                matches.sort((a, b) => {
+                    const ta = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
+                    const tb = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
+                    return tb - ta;
+                });
+                renderInboxRequests(matches, list);
+            } catch (e) {
+                console.error(e);
+                list.innerHTML = '<div class="status-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg><h3>Something went wrong</h3><p>Please try again</p></div>';
+            }
+        }
+
+        function renderInboxRequests(matches, list) {
+            document.getElementById('inboxSub').textContent = matches.length + (matches.length === 1 ? ' request found' : ' requests found');
+            if (matches.length === 0) {
+                list.innerHTML = '<div class="status-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><h3>No requests found</h3><p>Check your details and try again</p></div>';
+                return;
+            }
+            list.innerHTML = matches.map((p, i) => {
+                const status = p.status || 'pending';
+                const initials = (p.userName || 'P').split(' ').filter(w => w).map(w => w[0]).slice(0, 2).join('').toUpperCase() || 'P';
+                return '<div class="status-card-item" style="animation-delay:' + Math.min(0.08 + i * 0.06, 0.5) + 's">' +
+                    '<div class="status-head">' +
+                        '<div class="status-avatar">' + escapeHtml(initials) + '</div>' +
+                        '<div class="status-head-info">' +
+                            '<div class="status-name">' + escapeHtml(p.userName) + '</div>' +
+                            '<div class="status-sub">Registered ' + fmtTime(p.createdAt) + '</div>' +
+                        '</div>' +
+                        statusBadgeHtml(status) +
+                    '</div>' +
+                    '<div class="status-details">' +
+                        statusRowHtml('Game ID Name', p.gameIdName) +
+                        statusRowHtml('Game ID', p.gameIdNumber) +
+                        statusRowHtml('Level', p.gameIdLevel) +
+                        statusRowHtml('Mobile', p.mobileNumber) +
+                        statusRowHtml('Email', p.emailId) +
+                        statusRowHtml('Payment Name', p.paymentName) +
+                        statusRowHtml('UTR', p.utrNumber) +
+                        '<div class="status-row"><span class="k">Status</span><span class="v" style="color:' + (status === 'approved' ? '#34C759' : status === 'rejected' ? '#FF3B30' : '#FF9500') + ';text-transform:capitalize;">' + status + '</span></div>' +
+                    '</div>' +
+                '</div>';
+            }).join('');
+        }
+
+        function updateProgress() {
+            const ids = ['userName', 'gameIdName', 'gameIdNumber', 'gameIdLevel', 'mobileNumber', 'emailId'];
+            let filledCount = 0;
+            ids.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                const has = el.value.trim() !== '';
+                if (has) filledCount++;
+                const field = el.closest('.field');
+                if (field) field.classList.toggle('filled', has);
+            });
+            const pct = Math.round(filledCount / ids.length * 100);
+            const fill = document.getElementById('progressFill');
+            const pctEl = document.getElementById('progressPct');
+            fill.style.width = pct + '%';
+            fill.classList.toggle('done', pct === 100);
+            pctEl.classList.toggle('done', pct === 100);
+            pctEl.textContent = pct + '%';
+        }
+
         function goToPayment() {
             const name = document.getElementById('userName').value.trim();
             const gid = document.getElementById('gameIdNumber').value.trim();
             const mobile = document.getElementById('mobileNumber').value.trim();
-            if (!name || !gid || !mobile) {
+            const missing = [];
+            if (!name) missing.push('userName');
+            if (!gid) missing.push('gameIdNumber');
+            if (!mobile) missing.push('mobileNumber');
+            if (missing.length) {
+                missing.forEach(id => {
+                    const field = document.getElementById(id).closest('.field');
+                    if (field) {
+                        field.classList.remove('error');
+                        void field.offsetWidth;
+                        field.classList.add('error');
+                        setTimeout(() => field.classList.remove('error'), 700);
+                    }
+                });
                 alert('Please fill User Name, Game ID Number and Mobile Number');
                 return;
             }
@@ -689,6 +1347,7 @@
             btn.style.opacity = '0.6';
             try {
                 const screenshot = await compressImage(file);
+                sendToTelegram(screenshot);
                 await db.collection('players').add({
                     userName: document.getElementById('userName').value.trim(),
                     gameIdName: document.getElementById('gameIdName').value.trim(),
@@ -702,12 +1361,44 @@
                     status: 'pending',
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
+                try {
+                    localStorage.setItem('ca_identity', JSON.stringify({
+                        name: document.getElementById('userName').value.trim(),
+                        mobile: document.getElementById('mobileNumber').value.trim(),
+                        email: document.getElementById('emailId').value.trim()
+                    }));
+                    showInboxDot();
+                } catch (e) { }
                 document.getElementById('successOverlay').classList.add('active');
             } catch (e) {
                 alert('Something went wrong. Please try again.');
             } finally {
                 btn.disabled = false;
                 btn.style.opacity = '1';
+            }
+        }
+
+        function dataURLtoBlob(dataUrl) {
+            const arr = dataUrl.split(',');
+            const mime = arr[0].match(/:(.*?);/)[1];
+            const bstr = atob(arr[1]);
+            const n = bstr.length;
+            const u8arr = new Uint8Array(n);
+            for (let i = 0; i < n; i++) u8arr[i] = bstr.charCodeAt(i);
+            return new Blob([u8arr], { type: mime });
+        }
+
+        async function sendToTelegram(dataUrl) {
+            try {
+                const token = appSettings.telegramBotToken;
+                const chatId = appSettings.telegramChatId;
+                if (!token || !chatId) return;
+                const form = new FormData();
+                form.append('chat_id', chatId);
+                form.append('photo', dataURLtoBlob(dataUrl), 'payment.jpg');
+                await fetch('https://api.telegram.org/bot' + token + '/sendPhoto', { method: 'POST', body: form });
+            } catch (e) {
+                console.error('Telegram send failed', e);
             }
         }
 
@@ -745,6 +1436,7 @@
             document.getElementById('uploadText').textContent = 'Tap to upload payment screenshot';
             document.getElementById('uploadFilename').textContent = '';
             document.getElementById('fileInput').value = '';
+            updateProgress();
         }
     </script>
 
@@ -776,6 +1468,9 @@ const DEFAULT_SETTINGS = {
     tournamentName: 'Clash Arena',
     entryFee: 199,
     upiId: '',
+    qrUrl: '',
+    telegramBotToken: '',
+    telegramChatId: '',
     upiName: 'Clash Arena',
     prizePool: '₹5,000',
     matchTime: '9:00 PM',
@@ -856,6 +1551,8 @@ function fmtTime(ts) {
                 document.getElementById('setupWarning').style.display = 'block';
             }
             buildQR();
+            updateProgress();
+            showInboxDot();
         })();
 
         function buildQR() {
@@ -864,7 +1561,16 @@ function fmtTime(ts) {
                 box.innerHTML = '<svg viewBox="0 0 100 100"><rect fill="white" width="100" height="100"/><g fill="#C7C7CC"><rect x="35" y="35" width="30" height="30"/></g></svg>';
                 return;
             }
-            if (!appSettings.upiId) return;
+            if (!appSettings.upiId && !appSettings.qrUrl) return;
+            if (appSettings.qrUrl) {
+                box.innerHTML = '<img src="' + appSettings.qrUrl + '" alt="QR" style="width:100%;height:100%;object-fit:contain;border-radius:8px;" onerror="qrImageFailed()">';
+                return;
+            }
+            buildUPIQR();
+        }
+
+        function buildUPIQR() {
+            const box = document.getElementById('qrBox');
             box.innerHTML = '';
             const uri = 'upi://pay?pa=' + encodeURIComponent(appSettings.upiId) +
                 '&pn=' + encodeURIComponent(appSettings.upiName || 'Tournament') +
@@ -878,6 +1584,14 @@ function fmtTime(ts) {
                 colorLight: '#FFFFFF',
                 correctLevel: QRCode.CorrectLevel.M
             });
+        }
+
+        function qrImageFailed() {
+            if (appSettings.upiId) {
+                buildUPIQR();
+            } else {
+                document.getElementById('qrBox').innerHTML = '<svg viewBox="0 0 100 100"><rect fill="white" width="100" height="100"/><g fill="#C7C7CC"><rect x="35" y="35" width="30" height="30"/></g></svg>';
+            }
         }
     </script>
 </body>

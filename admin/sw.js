@@ -1,12 +1,11 @@
-const CACHE = 'clash-admin-v1';
+const CACHE = 'clash-admin-v2';
 
 self.addEventListener('install', e => {
     e.waitUntil(
         caches.open(CACHE).then(c => c.addAll([
             './',
             './manifest.json',
-            './icons/icon-192.png',
-            './icons/icon-512.png'
+            './icons/LOGO-09.jpg'
         ]))
     );
     self.skipWaiting();

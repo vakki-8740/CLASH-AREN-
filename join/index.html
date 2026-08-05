@@ -62,6 +62,21 @@
             margin-bottom: 24px;
             padding-top: 12px;
         }
+        .header-logo {
+            width: 68px;
+            height: 68px;
+            margin: 0 auto 14px;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(10,132,255,0.25), 0 0 40px rgba(10,132,255,0.10);
+            animation: popIn 0.5s cubic-bezier(0.32, 0.72, 0, 1) both;
+        }
+        .header-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
         .header-badge {
             display: inline-flex;
             align-items: center;
@@ -272,6 +287,9 @@
 
     <div class="container">
         <div class="header">
+            <div class="header-logo">
+                <img src="PROJECT%20LOGO/photo_2026-08-05_11-49-04.jpg" alt="Clash Arena Logo">
+            </div>
             <div class="header-badge">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                 LIVE
@@ -321,6 +339,9 @@ const DEFAULT_SETTINGS = {
     tournamentName: 'Clash Arena',
     entryFee: 199,
     upiId: '',
+    qrUrl: '',
+    telegramBotToken: '',
+    telegramChatId: '',
     upiName: 'Clash Arena',
     prizePool: '₹5,000',
     matchTime: '9:00 PM',
