@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Admin Panel</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0A84FF">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Clash Admin">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --ios-bg: #F2F2F7;
+            --ios-card: #FFFFFF;
+            --ios-sky: #0A84FF;
+            --ios-text: #1C1C1E;
+            --ios-text-secondary: #8E8E93;
+            --ios-border: #E5E5EA;
+            --ios-radius: 14px;
+            --ios-radius-sm: 10px;
+            --shadow-ios: 0 2px 12px rgba(0,0,0,0.08);
+            --glow-sky: 0 0 20px rgba(10, 132, 255, 0.10), 0 0 60px rgba(10, 132, 255, 0.04);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(180deg, #E3F2FD 0%, #F2F2F7 30%, #F2F2F7 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: var(--ios-text);
+            -webkit-font-smoothing: antialiased;
+            padding-bottom: 40px;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -80px;
+            right: -60px;
+            width: 240px;
+            height: 240px;
+            background: radial-gradient(circle, rgba(10,132,255,0.12) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: 60px;
+            left: -40px;
+            width: 180px;
+            height: 180px;
+            background: radial-gradient(circle, rgba(10,132,255,0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        @keyframes fadeUp {
+            from { transform: translateY(14px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 4px 20px rgba(10,132,255,0.25), 0 0 40px rgba(10,132,255,0.08); }
+            50% { box-shadow: 0 4px 30px rgba(10,132,255,0.35), 0 0 60px rgba(10,132,255,0.12); }
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 24px 20px;
+        }
+
+        /* ===== LOGIN ===== */
+        .login-wrap {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .login-card {
+            background: white;
+            border-radius: 18px;
+            padding: 36px 28px;
+            width: 100%;
+            max-width: 360px;
+            text-align: center;
+            box-shadow: var(--shadow-ios), var(--glow-sky);
+            animation: popIn 0.5s cubic-bezier(0.32, 0.72, 0, 1) both;
+        }
+        .login-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 18px;
+            background: linear-gradient(135deg, #0A84FF 0%, #5AC8FA 100%);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(10,132,255,0.25), 0 0 40px rgba(10,132,255,0.08);
+            animation: pulseGlow 3s ease-in-out infinite;
+        }
+        .login-icon svg {
+            width: 30px;
+            height: 30px;
+            color: white;
+        }
+        .login-card h1 {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.4px;
+        }
+        .login-card p {
+            font-size: 14px;
+            color: var(--ios-text-secondary);
+            margin: 4px 0 24px;
+        }
+        .login-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid var(--ios-border);
+            border-radius: var(--ios-radius-sm);
+            font-size: 16px;
+            font-family: inherit;
+            color: var(--ios-text);
+            outline: none;
+            background: #F9F9FB;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+        .login-input:focus {
+            border-color: var(--ios-sky);
+            background: white;
+        }
+        .login-btn {
+            width: 100%;
+            margin-top: 14px;
+            padding: 15px;
+            border: none;
+            border-radius: var(--ios-radius-sm);
+            background: linear-gradient(135deg, #0A84FF 0%, #007AFF 100%);
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(10,132,255,0.3), 0 0 30px rgba(10,132,255,0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+        .login-btn:active {
+            transform: scale(0.97);
+        }
+        .login-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+        .login-hint {
+            font-size: 12px;
+            color: var(--ios-text-secondary);
+            margin-top: 16px;
+        }
+
+        /* ===== HEADER ===== */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 22px;
+            animation: fadeUp 0.5s both;
+        }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .brand-icon {
+            width: 46px;
+            height: 46px;
+            background: linear-gradient(135deg, #0A84FF 0%, #5AC8FA 100%);
+            border-radius: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 16px rgba(10,132,255,0.25);
+        }
+        .brand-icon svg {
+            width: 22px;
+            height: 22px;
+            color: white;
+        }
+        .brand h1 {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+        .brand p {
+            font-size: 13px;
+            color: var(--ios-text-secondary);
+            margin-top: 2px;
+        }
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 16px;
+            border: none;
+            border-radius: var(--ios-radius-sm);
+            background: white;
+            color: #FF3B30;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        }
+        .logout-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+        .logout-btn:active {
+            transform: scale(0.96);
+        }
+
+        /* ===== STATS ===== */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: white;
+            border-radius: var(--ios-radius);
+            padding: 16px 14px;
+            text-align: center;
+            box-shadow: var(--shadow-ios), var(--glow-sky);
+            animation: fadeUp 0.5s both;
+        }
+        .stat-card .num {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        .stat-card .lbl {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--ios-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+        }
+        .stat-total { color: #1C1C1E; }
+        .stat-pending { color: #FF9500; }
+        .stat-approved { color: #34C759; }
+        .stat-rejected { color: #FF3B30; }
+
+        /* ===== TABS ===== */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 18px;
+            background: white;
+            padding: 5px;
+            border-radius: var(--ios-radius);
+            box-shadow: var(--shadow-ios);
+            animation: fadeUp 0.5s 0.1s both;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 11px;
+            border: none;
+            border-radius: var(--ios-radius-sm);
+            background: transparent;
+            color: var(--ios-text-secondary);
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .tab-btn.active {
+            background: linear-gradient(135deg, #0A84FF 0%, #007AFF 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(10,132,255,0.3);
+        }
+
+        .tab-section { display: none; }
+        .tab-section.active { display: block; animation: fadeUp 0.4s both; }
+
+        /* ===== TOOLBAR ===== */
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .chips {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .chip {
+            padding: 8px 14px;
+            border: 1px solid var(--ios-border);
+            border-radius: 20px;
+            background: white;
+            color: var(--ios-text-secondary);
+            font-size: 13px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .chip.active {
+            background: var(--ios-sky);
+            border-color: var(--ios-sky);
+            color: white;
+            box-shadow: 0 3px 10px rgba(10,132,255,0.25);
+        }
+        .toolbar .search {
+            flex: 1;
+            min-width: 180px;
+            position: relative;
+        }
+        .toolbar .search input {
+            width: 100%;
+            padding: 10px 14px 10px 38px;
+            border: 1px solid var(--ios-border);
+            border-radius: var(--ios-radius-sm);
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .toolbar .search svg {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            color: #C7C7CC;
+        }
+
+        /* ===== PLAYER ITEM ===== */
+        .player-item {
+            background: white;
+            border-radius: var(--ios-radius);
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: var(--shadow-ios);
+            animation: fadeUp 0.4s both;
+        }
+        .p-avatar {
+            width: 42px;
+            height: 42px;
+            min-width: 42px;
+            background: linear-gradient(135deg, #0A84FF, #5AC8FA);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 15px;
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(10,132,255,0.2);
+        }
+        .p-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .p-name {
+            font-size: 15px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .p-uid {
+            font-size: 12.5px;
+            color: var(--ios-text-secondary);
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .p-time {
+            font-size: 11.5px;
+            color: #C7C7CC;
+            margin-top: 2px;
+        }
+        .status-badge {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 8px;
+            white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+        .status-pending { color: #FF9500; background: rgba(255,149,0,0.10); }
+        .status-approved { color: #34C759; background: rgba(52,199,89,0.10); }
+        .status-rejected { color: #FF3B30; background: rgba(255,59,48,0.10); }
+        .p-actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+        .mini-btn {
+            border: none;
+            border-radius: 8px;
+            padding: 7px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            color: white;
+            transition: all 0.15s ease;
+        }
+        .mini-btn:active { transform: scale(0.94); }
+        .mb-blue { background: var(--ios-sky); }
+        .mb-green { background: #34C759; }
+        .mb-red { background: #FF3B30; }
+        .mb-gray { background: #8E8E93; }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--ios-text-secondary);
+            display: none;
+        }
+        .empty-state svg {
+            width: 48px;
+            height: 48px;
+            color: #C7C7CC;
+            margin-bottom: 12px;
+        }
+        .empty-state h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #8E8E93;
+        }
+
+        /* ===== CARDS / FORMS ===== */
+        .card {
+            background: white;
+            border-radius: var(--ios-radius);
+            box-shadow: var(--shadow-ios), var(--glow-sky);
+            padding: 22px;
+            margin-bottom: 16px;
+        }
+        .card h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+        .form-row {
+            margin-bottom: 14px;
+        }
+        .form-row label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--ios-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+        .form-row input,
+        .form-row textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--ios-border);
+            border-radius: var(--ios-radius-sm);
+            font-size: 15px;
+            font-family: inherit;
+            color: var(--ios-text);
+            outline: none;
+            background: #F9F9FB;
+        }
+        .form-row input:focus,
+        .form-row textarea:focus {
+            border-color: var(--ios-sky);
+            background: white;
+        }
+        .form-row textarea {
+            resize: vertical;
+            min-height: 70px;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0 14px;
+        }
+        .save-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: var(--ios-radius-sm);
+            background: linear-gradient(135deg, #0A84FF 0%, #007AFF 100%);
+            color: white;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(10,132,255,0.3);
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .save-btn:active { transform: scale(0.98); }
+        .save-btn svg { width: 18px; height: 18px; }
+
+        .add-player-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 16px;
+            border: none;
+            border-radius: var(--ios-radius-sm);
+            background: linear-gradient(135deg, #0A84FF 0%, #007AFF 100%);
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(10,132,255,0.3);
+            transition: all 0.2s ease;
+            margin-left: auto;
+        }
+        .add-player-btn:active { transform: scale(0.96); }
+        .add-player-btn svg { width: 16px; height: 16px; }
+
+        /* ===== RULES ADMIN ===== */
+        .rule-edit {
+            background: white;
+            border-radius: var(--ios-radius);
+            box-shadow: var(--shadow-ios);
+            padding: 16px;
+            margin-bottom: 10px;
+            animation: fadeUp 0.4s both;
+        }
+        .rule-edit-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .rule-edit-num {
+            width: 26px;
+            height: 26px;
+            background: linear-gradient(135deg, #0A84FF, #5AC8FA);
+            color: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .rule-edit-actions { display: flex; gap: 6px; }
+
+        /* ===== MODAL ===== */
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: none;
+            align-items: flex-start;
+            justify-content: center;
+            z-index: 100;
+            padding: 24px 16px;
+            overflow-y: auto;
+        }
+        .modal.active { display: flex; }
+        .modal-card {
+            background: white;
+            border-radius: 18px;
+            max-width: 420px;
+            width: 100%;
+            margin: auto 0;
+            padding: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+            animation: popIn 0.3s cubic-bezier(0.32, 0.72, 0, 1) both;
+        }
+        .modal-card h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .modal-card .sub {
+            font-size: 13px;
+            color: var(--ios-text-secondary);
+            margin-bottom: 16px;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 9px 0;
+            border-bottom: 1px solid var(--ios-border);
+            font-size: 14px;
+            gap: 12px;
+        }
+        .detail-row:last-child { border-bottom: none; }
+        .detail-row .k { color: var(--ios-text-secondary); flex-shrink: 0; }
+        .detail-row .v { font-weight: 600; text-align: right; word-break: break-word; }
+        .screenshot-wrap {
+            margin: 14px 0;
+            border-radius: var(--ios-radius-sm);
+            overflow: hidden;
+            border: 1px solid var(--ios-border);
+            background: #F9F9FB;
+        }
+        .screenshot-wrap img {
+            width: 100%;
+            max-height: 300px;
+            object-fit: contain;
+            display: block;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+        .modal-actions .mini-btn { flex: 1; padding: 12px; font-size: 14px; }
+        .close-x {
+            float: right;
+            background: none;
+            border: none;
+            color: var(--ios-text-secondary);
+            font-size: 20px;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        /* ===== TOAST ===== */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: #1C1C1E;
+            color: white;
+            font-size: 13.5px;
+            font-weight: 600;
+            padding: 12px 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            z-index: 200;
+            max-width: 90%;
+            text-align: center;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        @media (max-width: 560px) {
+            .stats { grid-template-columns: repeat(2, 1fr); }
+            .form-grid { grid-template-columns: 1fr; }
+            .player-item { flex-wrap: wrap; }
+            .p-actions { width: 100%; justify-content: flex-end; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== PANEL VIEW ===== -->
+    <div id="panelView">
+        <div class="container">
+
+            <div class="topbar">
+                <div class="brand">
+                    <div class="brand-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    </div>
+                    <div>
+                        <h1 id="panelTitle">Admin Panel</h1>
+                        <p id="panelSub">Manage your tournament</p>
+                    </div>
+                </div>
+                <button class="logout-btn" onclick="location.reload()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                    Refresh
+                </button>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats" id="statsRow">
+                <div class="stat-card"><div class="num stat-total" id="statTotal">0</div><div class="lbl">Total</div></div>
+                <div class="stat-card"><div class="num stat-pending" id="statPending">0</div><div class="lbl">Pending</div></div>
+                <div class="stat-card"><div class="num stat-approved" id="statApproved">0</div><div class="lbl">Approved</div></div>
+                <div class="stat-card"><div class="num stat-rejected" id="statRejected">0</div><div class="lbl">Rejected</div></div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab-btn active" id="tabBtnPlayers" onclick="switchTab('players')">Players</button>
+                <button class="tab-btn" id="tabBtnSettings" onclick="switchTab('settings')">Settings</button>
+                <button class="tab-btn" id="tabBtnRules" onclick="switchTab('rules')">Rules</button>
+            </div>
+
+            <!-- ===== PLAYERS TAB ===== -->
+            <div class="tab-section active" id="tabPlayers">
+                <div class="toolbar">
+                    <div class="chips">
+                        <button class="chip active" data-status="all" onclick="setFilter('all', this)">All</button>
+                        <button class="chip" data-status="pending" onclick="setFilter('pending', this)">Pending</button>
+                        <button class="chip" data-status="approved" onclick="setFilter('approved', this)">Approved</button>
+                        <button class="chip" data-status="rejected" onclick="setFilter('rejected', this)">Rejected</button>
+                    </div>
+                    <div class="search">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input type="text" placeholder="Search player..." id="adminSearch" oninput="renderPlayers()">
+                    </div>
+                    <button class="add-player-btn" onclick="openAddPlayer()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Add Player
+                    </button>
+                </div>
+                <div id="adminPlayerList"></div>
+                <div class="empty-state" id="adminEmpty">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    <h3>No players found</h3>
+                </div>
+            </div>
+
+            <!-- ===== SETTINGS TAB ===== -->
+            <div class="tab-section" id="tabSettings">
+                <div class="card">
+                    <h3>Tournament Settings</h3>
+                    <div class="form-grid">
+                        <div class="form-row">
+                            <label>Tournament Name</label>
+                            <input type="text" id="setTournamentName">
+                        </div>
+                        <div class="form-row">
+                            <label>Entry Fee (₹)</label>
+                            <input type="number" id="setEntryFee" min="0">
+                        </div>
+                        <div class="form-row">
+                            <label>Prize Pool</label>
+                            <input type="text" id="setPrizePool">
+                        </div>
+                        <div class="form-row">
+                            <label>Match Time</label>
+                            <input type="text" id="setMatchTime">
+                        </div>
+                        <div class="form-row">
+                            <label>Max Players</label>
+                            <input type="number" id="setMaxPlayers" min="1">
+                        </div>
+                        <div class="form-row">
+                            <label>UPI ID</label>
+                            <input type="text" id="setUpiId" placeholder="yourupi@bank">
+                        </div>
+                        <div class="form-row">
+                            <label>UPI Name</label>
+                            <input type="text" id="setUpiName">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <label>Announcement (shown on registration page)</label>
+                        <textarea id="setAnnouncement" placeholder="e.g. Matches start at 9 PM sharp"></textarea>
+                    </div>
+                    <button class="save-btn" onclick="saveSettings()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        Save Settings
+                    </button>
+                    <p style="font-size:12px;color:#8E8E93;margin-top:12px;">Players ka QR payment code, fee aur announcement yahan change karne par sab pages par turant update ho jayega.</p>
+                </div>
+            </div>
+
+            <!-- ===== RULES TAB ===== -->
+            <div class="tab-section" id="tabRules">
+                <div id="rulesAdminList"></div>
+                <div class="card">
+                    <h3>Add New Rule</h3>
+                    <div class="form-row">
+                        <label>Rule Title</label>
+                        <input type="text" id="newRuleTitle" placeholder="e.g. Fair Play Only">
+                    </div>
+                    <div class="form-row">
+                        <label>Rule Description</label>
+                        <textarea id="newRuleDesc" placeholder="Rule details..."></textarea>
+                    </div>
+                    <button class="save-btn" onclick="addRule()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Add Rule
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== PLAYER DETAIL MODAL ===== -->
+    <div class="modal" id="playerModal">
+        <div class="modal-card">
+            <button class="close-x" onclick="closePlayer()">&times;</button>
+            <h3 id="mName">Player</h3>
+            <div class="sub" id="mSub">Details</div>
+            <div id="mDetails"></div>
+            <div class="screenshot-wrap" id="mShotWrap" style="display:none">
+                <img id="mShot" alt="Payment screenshot">
+            </div>
+            <div class="modal-actions">
+                <button class="mini-btn mb-green" id="mApprove" onclick="approvePlayer(currentPlayerId)">Approve</button>
+                <button class="mini-btn mb-red" id="mReject" onclick="rejectPlayer(currentPlayerId)">Reject</button>
+                <button class="mini-btn mb-gray" id="mDelete" onclick="deletePlayer(currentPlayerId)">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ADD PLAYER MODAL ===== -->
+    <div class="modal" id="addPlayerModal">
+        <div class="modal-card">
+            <button class="close-x" onclick="closeAddPlayer()">&times;</button>
+            <h3>Add Player</h3>
+            <div class="sub">User ko tournament me add karein — join page pe turant dikhega</div>
+            <div class="form-grid">
+                <div class="form-row">
+                    <label>User Name *</label>
+                    <input type="text" id="apName" placeholder="Player name">
+                </div>
+                <div class="form-row">
+                    <label>UID Number</label>
+                    <input type="text" id="apGameNum" placeholder="e.g. 883421">
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="mini-btn mb-gray" onclick="closeAddPlayer()">Cancel</button>
+                <button class="mini-btn mb-green" onclick="addPlayer()">Add Player</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== TOAST ===== -->
+    <div class="toast" id="toast"></div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+    <script>
+const FIREBASE_CONFIG = {
+    apiKey: "AIzaSyCXSv7eNl7KcttNvKF46BCAkhYv6t6S0bI",
+    authDomain: "user-manage-bot.firebaseapp.com",
+    databaseURL: "https://user-manage-bot-default-rtdb.firebaseio.com",
+    projectId: "user-manage-bot",
+    storageBucket: "user-manage-bot.firebasestorage.app",
+    messagingSenderId: "17364199534",
+    appId: "1:17364199534:web:dce4f0df3efe163930de7f"
+};
+
+const FIREBASE_CONFIGURED = FIREBASE_CONFIG.apiKey !== "YOUR_API_KEY";
+
+let firebaseApp = null;
+let db = null;
+
+if (FIREBASE_CONFIGURED && typeof firebase !== 'undefined') {
+    firebaseApp = firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.firestore();
+}
+
+const DEFAULT_SETTINGS = {
+    tournamentName: 'Clash Arena',
+    entryFee: 199,
+    upiId: '',
+    upiName: 'Clash Arena',
+    prizePool: '₹5,000',
+    matchTime: '9:00 PM',
+    maxPlayers: 100,
+    announcement: '',
+    adminPass: 'admin123',
+    rules: [
+        { title: 'Fair Play Only', description: 'Any use of hacks, mods, or third-party tools will result in immediate disqualification.' },
+        { title: 'Entry Fee Non-Refundable', description: 'Once paid, the entry fee is non-refundable under any circumstances.' },
+        { title: 'On-Time Check-In', description: 'Players must check in 15 minutes before match start. Late entries will not be allowed.' },
+        { title: 'Valid ID Required', description: 'All players must use the same Game ID submitted during registration throughout the tournament.' },
+        { title: 'No Team Switching', description: 'Once teams are finalized, no player substitutions or team changes are permitted.' },
+        { title: 'Recording Mandatory', description: 'Every player must screen-record their gameplay. Failure to provide proof may void results.' },
+        { title: 'Dispute Resolution', description: 'All disputes will be resolved by tournament admins. Their decision is final and binding.' },
+        { title: 'Prize Distribution', description: 'Prizes will be credited within 48 hours after tournament completion to the registered UPI.' },
+        { title: 'Communication Rules', description: 'Toxic behaviour, abuse, or harassment in chat or voice will lead to a permanent ban.' },
+        { title: 'Device Responsibility', description: 'Players are responsible for their own internet and device issues. No rematches will be given.' }
+    ]
+};
+
+let cachedSettings = null;
+
+function withTimeout(promise, ms) {
+    return new Promise((resolve, reject) => {
+        const t = setTimeout(() => reject(new Error('timeout')), ms);
+        promise.then(
+            v => { clearTimeout(t); resolve(v); },
+            e => { clearTimeout(t); reject(e); }
+        );
+    });
+}
+
+async function fetchSettings() {
+    if (!FIREBASE_CONFIGURED || !db) {
+        cachedSettings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+        return cachedSettings;
+    }
+    try {
+        const snap = await withTimeout(db.collection('settings').doc('main').get(), 6000);
+        if (snap.exists) {
+            cachedSettings = Object.assign({}, DEFAULT_SETTINGS, snap.data());
+        } else {
+            cachedSettings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+            try {
+                await withTimeout(db.collection('settings').doc('main').set(cachedSettings), 6000);
+            } catch (e) { }
+        }
+    } catch (e) {
+        cachedSettings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+    }
+    return cachedSettings;
+}
+
+function getSettings() {
+    if (!cachedSettings) return JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+    return cachedSettings;
+}
+
+function fmtTime(ts) {
+    if (!ts) return '';
+    const d = (ts && ts.toDate) ? ts.toDate() : new Date(ts);
+    return d.toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+}
+</script>
+
+    <script>
+        let settings = null;
+        let allPlayers = [];
+        let currentFilter = 'all';
+        let currentPlayerId = null;
+        let currentModalPlayer = null;
+
+        function $(id) { return document.getElementById(id); }
+
+        function escapeHtml(str) {
+            return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function showToast(msg) {
+            const t = $('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            clearTimeout(t._timer);
+            t._timer = setTimeout(() => t.classList.remove('show'), 2600);
+        }
+
+        function initials(name) {
+            return String(name || 'P').split(' ').filter(w => w).map(w => w[0]).slice(0, 2).join('').toUpperCase() || 'P';
+        }
+
+        /* ===== INIT (No login - panel opens directly) ===== */
+        (async function init() {
+            settings = await fetchSettings();
+            $('panelTitle').textContent = settings.tournamentName + ' — Admin';
+            fillSettingsForm();
+            renderRules();
+            startListening();
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js').catch(function () { });
+            }
+        })();
+
+        /* ===== REALTIME PLAYERS ===== */
+        function startListening() {
+            if (!db) return;
+            db.collection('players').onSnapshot(snap => {
+                allPlayers = [];
+                snap.forEach(d => {
+                    const p = d.data();
+                    p.id = d.id;
+                    allPlayers.push(p);
+                });
+                allPlayers.sort((a, b) => {
+                    const ta = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
+                    const tb = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
+                    return tb - ta;
+                });
+                renderStats();
+                renderPlayers();
+            }, err => {
+                console.error(err);
+                showToast('Error loading players');
+            });
+        }
+
+        function renderStats() {
+            let pending = 0, approved = 0, rejected = 0;
+            allPlayers.forEach(p => {
+                if (p.status === 'pending') pending++;
+                else if (p.status === 'approved') approved++;
+                else if (p.status === 'rejected') rejected++;
+            });
+            $('statTotal').textContent = allPlayers.length;
+            $('statPending').textContent = pending;
+            $('statApproved').textContent = approved;
+            $('statRejected').textContent = rejected;
+        }
+
+        function setFilter(status, el) {
+            currentFilter = status;
+            document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            renderPlayers();
+        }
+
+        function renderPlayers() {
+            const list = $('adminPlayerList');
+            const empty = $('adminEmpty');
+            list.innerHTML = '';
+            const term = $('adminSearch').value.toLowerCase();
+            const filtered = allPlayers.filter(p => {
+                if (currentFilter !== 'all' && p.status !== currentFilter) return false;
+                if (!term) return true;
+                return (p.userName || '').toLowerCase().includes(term) ||
+                       (p.gameIdNumber || '').toLowerCase().includes(term) ||
+                       (p.mobileNumber || '').toLowerCase().includes(term);
+            });
+
+            filtered.forEach((p, i) => {
+                const item = document.createElement('div');
+                item.className = 'player-item';
+                item.style.animationDelay = Math.min(i * 0.05, 0.4) + 's';
+                item.innerHTML =
+                    '<div class="p-avatar">' + escapeHtml(initials(p.userName)) + '</div>' +
+                    '<div class="p-info">' +
+                        '<div class="p-name">' + escapeHtml(p.userName) + '</div>' +
+                        '<div class="p-uid">Game ID: ' + escapeHtml(p.gameIdNumber) + (p.gameIdLevel ? ' &bull; ' + escapeHtml(p.gameIdLevel) : '') + '</div>' +
+                        '<div class="p-time">' + escapeHtml(fmtTime(p.createdAt)) + '</div>' +
+                    '</div>' +
+                    '<span class="status-badge status-' + escapeHtml(p.status || 'pending') + '">' + escapeHtml(p.status || 'pending') + '</span>' +
+                    '<div class="p-actions">' +
+                        '<button class="mini-btn mb-blue" onclick="openPlayer(\'' + p.id + '\')">View</button>' +
+                        (p.status !== 'approved' ? '<button class="mini-btn mb-green" onclick="approvePlayer(\'' + p.id + '\')">Approve</button>' : '') +
+                        (p.status !== 'rejected' ? '<button class="mini-btn mb-red" onclick="rejectPlayer(\'' + p.id + '\')">Reject</button>' : '') +
+                        '<button class="mini-btn mb-gray" onclick="deletePlayer(\'' + p.id + '\')">Delete</button>' +
+                    '</div>';
+                list.appendChild(item);
+            });
+
+            empty.style.display = filtered.length === 0 ? 'block' : 'none';
+        }
+
+        /* ===== PLAYER ACTIONS ===== */
+        function findPlayer(id) {
+            return allPlayers.find(p => p.id === id);
+        }
+
+        function openPlayer(id) {
+            const p = findPlayer(id);
+            if (!p) return;
+            currentPlayerId = id;
+            currentModalPlayer = p;
+            $('mName').textContent = p.userName || 'Player';
+            $('mSub').textContent = 'Joined ' + fmtTime(p.createdAt);
+            $('mDetails').innerHTML =
+                '<div class="detail-row"><span class="k">Game ID Name</span><span class="v">' + escapeHtml(p.gameIdName) + '</span></div>' +
+                '<div class="detail-row"><span class="k">Game ID</span><span class="v">' + escapeHtml(p.gameIdNumber) + '</span></div>' +
+                '<div class="detail-row"><span class="k">Level</span><span class="v">' + escapeHtml(p.gameIdLevel) + '</span></div>' +
+                '<div class="detail-row"><span class="k">Mobile</span><span class="v">' + escapeHtml(p.mobileNumber) + '</span></div>' +
+                '<div class="detail-row"><span class="k">Email</span><span class="v">' + escapeHtml(p.emailId) + '</span></div>' +
+                '<div class="detail-row"><span class="k">Payment Name</span><span class="v">' + escapeHtml(p.paymentName) + '</span></div>' +
+                '<div class="detail-row"><span class="k">UTR Number</span><span class="v">' + escapeHtml(p.utrNumber) + '</span></div>' +
+                '<div class="detail-row"><span class="k">Status</span><span class="v">' + escapeHtml(p.status || 'pending') + '</span></div>';
+            if (p.screenshot) {
+                $('mShot').src = p.screenshot;
+                $('mShotWrap').style.display = 'block';
+            } else {
+                $('mShotWrap').style.display = 'none';
+            }
+            $('mApprove').style.display = p.status === 'approved' ? 'none' : 'block';
+            $('mReject').style.display = p.status === 'rejected' ? 'none' : 'block';
+            $('playerModal').classList.add('active');
+        }
+
+        function closePlayer() {
+            $('playerModal').classList.remove('active');
+            currentPlayerId = null;
+        }
+
+        async function setStatus(id, status) {
+            try {
+                await db.collection('players').doc(id).update({ status: status });
+                showToast('Player ' + status);
+            } catch (e) {
+                console.error(e);
+                showToast('Error updating player');
+            }
+        }
+
+        function approvePlayer(id) {
+            setStatus(id, 'approved');
+        }
+
+        function rejectPlayer(id) {
+            setStatus(id, 'rejected');
+        }
+
+        async function deletePlayer(id) {
+            if (!confirm('Delete this player? This cannot be undone.')) return;
+            try {
+                await db.collection('players').doc(id).delete();
+                showToast('Player deleted');
+            } catch (e) {
+                console.error(e);
+                showToast('Error deleting player');
+            }
+        }
+
+        /* ===== ADD PLAYER (MANUAL) ===== */
+        function openAddPlayer() {
+            $('addPlayerModal').classList.add('active');
+        }
+
+        function closeAddPlayer() {
+            $('addPlayerModal').classList.remove('active');
+            $('apName').value = '';
+            $('apGameNum').value = '';
+        }
+
+        async function addPlayer() {
+            const name = $('apName').value.trim();
+            if (!name) { showToast('Enter user name'); return; }
+            try {
+                await db.collection('players').add({
+                    userName: name,
+                    gameIdNumber: $('apGameNum').value.trim(),
+                    status: 'approved',
+                    addedByAdmin: true,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                closeAddPlayer();
+                showToast('Player added');
+            } catch (e) {
+                console.error(e);
+                showToast('Error adding player');
+            }
+        }
+
+        /* ===== SETTINGS ===== */
+        function fillSettingsForm() {
+            if (!settings) return;
+            $('setTournamentName').value = settings.tournamentName || '';
+            $('setEntryFee').value = settings.entryFee || 0;
+            $('setPrizePool').value = settings.prizePool || '';
+            $('setMatchTime').value = settings.matchTime || '';
+            $('setMaxPlayers').value = settings.maxPlayers || 0;
+            $('setUpiId').value = settings.upiId || '';
+            $('setUpiName').value = settings.upiName || '';
+            $('setAnnouncement').value = settings.announcement || '';
+        }
+
+        async function saveSettings() {
+            const updated = {
+                tournamentName: $('setTournamentName').value.trim(),
+                entryFee: Number($('setEntryFee').value) || 0,
+                prizePool: $('setPrizePool').value.trim(),
+                matchTime: $('setMatchTime').value.trim(),
+                maxPlayers: Number($('setMaxPlayers').value) || 0,
+                upiId: $('setUpiId').value.trim(),
+                upiName: $('setUpiName').value.trim(),
+                announcement: $('setAnnouncement').value.trim(),
+                rules: (settings && settings.rules) || []
+            };
+            try {
+                await db.collection('settings').doc('main').set(Object.assign({}, DEFAULT_SETTINGS, updated));
+                settings = Object.assign({}, settings, updated);
+                $('panelTitle').textContent = settings.tournamentName + ' — Admin';
+                showToast('Settings saved');
+            } catch (e) {
+                console.error(e);
+                showToast('Error saving settings');
+            }
+        }
+
+        /* ===== RULES ===== */
+        function renderRules() {
+            const list = $('rulesAdminList');
+            list.innerHTML = '';
+            const rules = (settings && settings.rules) || [];
+            if (rules.length === 0) {
+                list.innerHTML = '<div class="empty-state" style="display:block"><h3>No rules yet</h3></div>';
+                return;
+            }
+            rules.forEach((rule, i) => {
+                const item = document.createElement('div');
+                item.className = 'rule-edit';
+                item.innerHTML =
+                    '<div class="rule-edit-head">' +
+                        '<div class="rule-edit-num">' + (i + 1) + '</div>' +
+                        '<div class="rule-edit-actions">' +
+                            '<button class="mini-btn mb-blue" onclick="saveRule(' + i + ')">Save</button>' +
+                            '<button class="mini-btn mb-gray" onclick="deleteRule(' + i + ')">Delete</button>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="form-row" style="margin-bottom:10px">' +
+                        '<input type="text" id="ruleTitle_' + i + '" value="' + escapeHtml(rule.title) + '">' +
+                    '</div>' +
+                    '<div class="form-row" style="margin-bottom:0">' +
+                        '<textarea id="ruleDesc_' + i + '">' + escapeHtml(rule.description) + '</textarea>' +
+                    '</div>';
+                list.appendChild(item);
+            });
+        }
+
+        async function persistRules(rules) {
+            try {
+                await db.collection('settings').doc('main').set({ rules: rules }, { merge: true });
+                settings = Object.assign({}, settings, { rules: rules });
+                showToast('Rules updated');
+            } catch (e) {
+                console.error(e);
+                showToast('Error saving rules');
+            }
+        }
+
+        function saveRule(index) {
+            const rules = (settings && settings.rules || []).slice();
+            rules[index] = {
+                title: $('ruleTitle_' + index).value.trim(),
+                description: $('ruleDesc_' + index).value.trim()
+            };
+            persistRules(rules).then(renderRules);
+        }
+
+        function deleteRule(index) {
+            if (!confirm('Delete this rule?')) return;
+            const rules = (settings && settings.rules || []).slice();
+            rules.splice(index, 1);
+            persistRules(rules).then(renderRules);
+        }
+
+        function addRule() {
+            const title = $('newRuleTitle').value.trim();
+            const desc = $('newRuleDesc').value.trim();
+            if (!title || !desc) { showToast('Fill title and description'); return; }
+            const rules = (settings && settings.rules || []).slice();
+            rules.push({ title: title, description: desc });
+            persistRules(rules).then(() => {
+                $('newRuleTitle').value = '';
+                $('newRuleDesc').value = '';
+                renderRules();
+            });
+        }
+
+        /* ===== TABS ===== */
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            $('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+            $('tabBtn' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+        }
+    </script>
+</body>
+</html>
