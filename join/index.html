@@ -107,11 +107,22 @@
             animation: fadeUp 0.5s 0.12s both;
         }
         .header .count {
-            font-size: 13px;
-            color: #0A84FF;
-            font-weight: 600;
-            margin-top: 6px;
+            font-size: 42px;
+            font-weight: 800;
+            color: #C19A6B;
+            margin-top: 12px;
+            letter-spacing: -1px;
+            line-height: 1;
             animation: fadeUp 0.5s 0.16s both;
+        }
+        .header .count-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #B8956A;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 4px;
+            animation: fadeUp 0.5s 0.2s both;
         }
 
         /* Search Bar */
@@ -296,7 +307,8 @@
             </div>
             <h1>Tournament Players</h1>
             <p>Players who joined the battle</p>
-            <div class="count" id="playerCount">0 Players Registered</div>
+            <div class="count" id="playerCount">0</div>
+            <div class="count-label">Players Registered</div>
         </div>
 
         <div class="search-box">
@@ -474,7 +486,7 @@ function fmtTime(ts) {
                 playersList.appendChild(card);
             });
 
-            countEl.textContent = allPlayers.length + ' Players Registered';
+            countEl.textContent = allPlayers.length;
             if (filtered.length === 0 && allPlayers.length > 0) {
                 playersList.style.display = 'none';
                 emptyState.style.display = 'block';
