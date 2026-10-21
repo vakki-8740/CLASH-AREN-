@@ -1,0 +1,117 @@
+/* ==========================================================
+   Clash Arena UI — shared helpers (OWN Library design system)
+   ========================================================== */
+(function () {
+    "use strict";
+
+    var root = document.documentElement;
+
+    function setTheme(theme) {
+        root.setAttribute("data-theme", theme);
+        try { localStorage.setItem("theme", theme); } catch (e) { }
+    }
+
+    function currentTheme() {
+        return root.getAttribute("data-theme") || "light";
+    }
+
+    function toggleTheme() {
+        setTheme(currentTheme() === "dark" ? "light" : "dark");
+    }
+
+    function esc(value) {
+        return String(value == null ? "" : value)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+    }
+
+    function fmtTime(ts) {
+        if (!ts) return "";
+        var d = (ts && typeof ts.toDate === "function") ? ts.toDate() : new Date(ts);
+        if (isNaN(d.getTime())) return "";
+        return d.toLocaleString("en-IN", {
+            day: "2-digit",
+            month: "short",
+            hour: "2-digit",
+            minute: "2-digit"
+        });
+    }
+
+    function toast(message, type) {
+        var el = document.getElementById("toast");
+        if (!el) {
+            el = document.createElement("div");
+            el.id = "toast";
+            el.className = "toast";
+            el.setAttribute("role", "status");
+            el.setAttribute("aria-live", "polite");
+            document.body.appendChild(el);
+        }
+        el.textContent = message;
+        el.className = "toast" + (type ? " " + type : "");
+        el.classList.add("show");
+        clearTimeout(el._timer);
+        el._timer = setTimeout(function () {
+            el.classList.remove("show");
+        }, 2600);
+    }
+
+    function openOverlay(id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        el.classList.add("active");
+        document.body.style.overflow = "hidden";
+    }
+
+    function closeOverlay(id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        el.classList.remove("active");
+        document.body.style.overflow = "";
+    }
+
+    function bindThemeButtons() {
+        document.querySelectorAll("[data-theme-toggle]").forEach(function (btn) {
+            btn.addEventListener("click", toggleTheme);
+        });
+    }
+
+    function bindOverlayDismiss() {
+        document.querySelectorAll("[data-close-overlay]").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                closeOverlay(btn.getAttribute("data-close-overlay"));
+            });
+        });
+        document.querySelectorAll(".overlay, .sheet-overlay").forEach(function (overlay) {
+            if (overlay.hasAttribute("data-static")) return;
+            overlay.addEventListener("click", function (e) {
+                if (e.target === overlay) closeOverlay(overlay.id);
+            });
+        });
+    }
+
+    function init() {
+        bindThemeButtons();
+        bindOverlayDismiss();
+    }
+
+    window.CA = {
+        setTheme: setTheme,
+        toggleTheme: toggleTheme,
+        currentTheme: currentTheme,
+        esc: esc,
+        fmtTime: fmtTime,
+        toast: toast,
+        openOverlay: openOverlay,
+        closeOverlay: closeOverlay
+    };
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", init);
+    } else {
+        init();
+    }
+})();

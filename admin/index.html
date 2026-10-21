@@ -1,1402 +1,710 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Admin Panel</title>
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0A84FF">
-    <link rel="icon" type="image/jpeg" href="icons/LOGO-09.jpg">
-    <link rel="apple-touch-icon" href="icons/LOGO-09.jpg">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="Clash Admin">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        :root {
-            --ios-bg: #F2F2F7;
-            --ios-card: #FFFFFF;
-            --ios-sky: #0A84FF;
-            --ios-text: #1C1C1E;
-            --ios-text-secondary: #8E8E93;
-            --ios-border: #E5E5EA;
-            --ios-radius: 14px;
-            --ios-radius-sm: 10px;
-            --shadow-ios: 0 2px 12px rgba(0,0,0,0.08);
-            --glow-sky: 0 0 20px rgba(10, 132, 255, 0.10), 0 0 60px rgba(10, 132, 255, 0.04);
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(180deg, #E3F2FD 0%, #F2F2F7 30%, #F2F2F7 100%);
-            min-height: 100vh;
-            overflow-x: hidden;
-            color: var(--ios-text);
-            -webkit-font-smoothing: antialiased;
-            padding-bottom: 40px;
-        }
-
-        body::before {
-            content: '';
-            position: fixed;
-            top: -80px;
-            right: -60px;
-            width: 240px;
-            height: 240px;
-            background: radial-gradient(circle, rgba(10,132,255,0.12) 0%, transparent 70%);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 0;
-        }
-        body::after {
-            content: '';
-            position: fixed;
-            bottom: 60px;
-            left: -40px;
-            width: 180px;
-            height: 180px;
-            background: radial-gradient(circle, rgba(10,132,255,0.08) 0%, transparent 70%);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        @keyframes popIn {
-            from { transform: scale(0.9); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-        @keyframes fadeUp {
-            from { transform: translateY(14px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        @keyframes pulseGlow {
-            0%, 100% { box-shadow: 0 4px 20px rgba(10,132,255,0.25), 0 0 40px rgba(10,132,255,0.08); }
-            50% { box-shadow: 0 4px 30px rgba(10,132,255,0.35), 0 0 60px rgba(10,132,255,0.12); }
-        }
-
-        .container {
-            position: relative;
-            z-index: 1;
-            max-width: 760px;
-            margin: 0 auto;
-            padding: 24px 20px;
-        }
-
-        /* ===== LOGIN ===== */
-        .login-wrap {
-            position: relative;
-            z-index: 1;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        .login-card {
-            background: white;
-            border-radius: 18px;
-            padding: 36px 28px;
-            width: 100%;
-            max-width: 360px;
-            text-align: center;
-            box-shadow: var(--shadow-ios), var(--glow-sky);
-            animation: popIn 0.5s cubic-bezier(0.32, 0.72, 0, 1) both;
-        }
-        .login-icon {
-            width: 64px;
-            height: 64px;
-            margin: 0 auto 18px;
-            background: linear-gradient(135deg, #0A84FF 0%, #5AC8FA 100%);
-            border-radius: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 20px rgba(10,132,255,0.25), 0 0 40px rgba(10,132,255,0.08);
-            animation: pulseGlow 3s ease-in-out infinite;
-        }
-        .login-icon svg {
-            width: 30px;
-            height: 30px;
-            color: white;
-        }
-        .login-card h1 {
-            font-size: 24px;
-            font-weight: 700;
-            letter-spacing: -0.4px;
-        }
-        .login-card p {
-            font-size: 14px;
-            color: var(--ios-text-secondary);
-            margin: 4px 0 24px;
-        }
-        .login-input {
-            width: 100%;
-            padding: 14px 16px;
-            border: 1px solid var(--ios-border);
-            border-radius: var(--ios-radius-sm);
-            font-size: 16px;
-            font-family: inherit;
-            color: var(--ios-text);
-            outline: none;
-            background: #F9F9FB;
-            text-align: center;
-            letter-spacing: 2px;
-        }
-        .login-input:focus {
-            border-color: var(--ios-sky);
-            background: white;
-        }
-        .login-btn {
-            width: 100%;
-            margin-top: 14px;
-            padding: 15px;
-            border: none;
-            border-radius: var(--ios-radius-sm);
-            background: linear-gradient(135deg, #0A84FF 0%, #007AFF 100%);
-            color: white;
-            font-size: 16px;
-            font-weight: 600;
-            font-family: inherit;
-            cursor: pointer;
-            box-shadow: 0 4px 16px rgba(10,132,255,0.3), 0 0 30px rgba(10,132,255,0.08);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: all 0.2s ease;
-        }
-        .login-btn:active {
-            transform: scale(0.97);
-        }
-        .login-btn svg {
-            width: 18px;
-            height: 18px;
-        }
-        .login-hint {
-            font-size: 12px;
-            color: var(--ios-text-secondary);
-            margin-top: 16px;
-        }
-
-        /* ===== HEADER ===== */
-        .topbar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 22px;
-            animation: fadeUp 0.5s both;
-        }
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .brand-icon {
-            width: 46px;
-            height: 46px;
-            background: linear-gradient(135deg, #0A84FF 0%, #5AC8FA 100%);
-            border-radius: 13px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 16px rgba(10,132,255,0.25);
-            overflow: hidden;
-        }
-        .brand-icon img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }
-        .brand-icon svg {
-            width: 22px;
-            height: 22px;
-            color: white;
-        }
-        .brand h1 {
-            font-size: 20px;
-            font-weight: 700;
-            letter-spacing: -0.3px;
-        }
-        .brand p {
-            font-size: 13px;
-            color: var(--ios-text-secondary);
-            margin-top: 2px;
-        }
-        .logout-btn {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 10px 16px;
-            border: none;
-            border-radius: var(--ios-radius-sm);
-            background: white;
-            color: #FF3B30;
-            font-size: 14px;
-            font-weight: 600;
-            font-family: inherit;
-            cursor: pointer;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
-        }
-        .logout-btn svg {
-            width: 16px;
-            height: 16px;
-        }
-        .logout-btn:active {
-            transform: scale(0.96);
-        }
-
-        /* ===== STATS ===== */
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .stat-card {
-            background: white;
-            border-radius: var(--ios-radius);
-            padding: 16px 14px;
-            text-align: center;
-            box-shadow: var(--shadow-ios), var(--glow-sky);
-            animation: fadeUp 0.5s both;
-        }
-        .stat-card .num {
-            font-size: 24px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-        }
-        .stat-card .lbl {
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--ios-text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-top: 4px;
-        }
-        .stat-total { color: #1C1C1E; }
-        .stat-pending { color: #FF9500; }
-        .stat-approved { color: #34C759; }
-        .stat-rejected { color: #FF3B30; }
-
-        /* ===== TABS ===== */
-        .tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 18px;
-            background: white;
-            padding: 5px;
-            border-radius: var(--ios-radius);
-            box-shadow: var(--shadow-ios);
-            animation: fadeUp 0.5s 0.1s both;
-        }
-        .tab-btn {
-            flex: 1;
-            padding: 11px;
-            border: none;
-            border-radius: var(--ios-radius-sm);
-            background: transparent;
-            color: var(--ios-text-secondary);
-            font-size: 14px;
-            font-weight: 600;
-            font-family: inherit;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .tab-btn.active {
-            background: linear-gradient(135deg, #0A84FF 0%, #007AFF 100%);
-            color: white;
-            box-shadow: 0 4px 12px rgba(10,132,255,0.3);
-        }
-
-        .tab-section { display: none; }
-        .tab-section.active { display: block; animation: fadeUp 0.4s both; }
-
-        /* ===== TOOLBAR ===== */
-        .toolbar {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 16px;
-        }
-        .chips {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        .chip {
-            padding: 8px 14px;
-            border: 1px solid var(--ios-border);
-            border-radius: 20px;
-            background: white;
-            color: var(--ios-text-secondary);
-            font-size: 13px;
-            font-weight: 600;
-            font-family: inherit;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .chip.active {
-            background: var(--ios-sky);
-            border-color: var(--ios-sky);
-            color: white;
-            box-shadow: 0 3px 10px rgba(10,132,255,0.25);
-        }
-        .toolbar .search {
-            flex: 1;
-            min-width: 180px;
-            position: relative;
-        }
-        .toolbar .search input {
-            width: 100%;
-            padding: 10px 14px 10px 38px;
-            border: 1px solid var(--ios-border);
-            border-radius: var(--ios-radius-sm);
-            font-size: 14px;
-            font-family: inherit;
-            outline: none;
-            background: white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-        }
-        .toolbar .search svg {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 16px;
-            height: 16px;
-            color: #C7C7CC;
-        }
-
-        /* ===== PLAYER ITEM ===== */
-        .player-item {
-            background: white;
-            border-radius: var(--ios-radius);
-            padding: 14px 16px;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            box-shadow: var(--shadow-ios);
-            animation: fadeUp 0.4s both;
-        }
-        .p-avatar {
-            width: 42px;
-            height: 42px;
-            min-width: 42px;
-            background: linear-gradient(135deg, #0A84FF, #5AC8FA);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 15px;
-            font-weight: 700;
-            box-shadow: 0 2px 8px rgba(10,132,255,0.2);
-        }
-        .p-info {
-            flex: 1;
-            min-width: 0;
-        }
-        .p-name {
-            font-size: 15px;
-            font-weight: 600;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .p-uid {
-            font-size: 12.5px;
-            color: var(--ios-text-secondary);
-            margin-top: 2px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .p-time {
-            font-size: 11.5px;
-            color: #C7C7CC;
-            margin-top: 2px;
-        }
-        .status-badge {
-            font-size: 11px;
-            font-weight: 700;
-            padding: 4px 10px;
-            border-radius: 8px;
-            white-space: nowrap;
-            text-transform: uppercase;
-            letter-spacing: 0.4px;
-        }
-        .status-pending { color: #FF9500; background: rgba(255,149,0,0.10); }
-        .status-approved { color: #34C759; background: rgba(52,199,89,0.10); }
-        .status-rejected { color: #FF3B30; background: rgba(255,59,48,0.10); }
-        .p-actions {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-            justify-content: flex-end;
-        }
-        .mini-btn {
-            border: none;
-            border-radius: 8px;
-            padding: 7px 12px;
-            font-size: 12px;
-            font-weight: 600;
-            font-family: inherit;
-            cursor: pointer;
-            color: white;
-            transition: all 0.15s ease;
-        }
-        .mini-btn:active { transform: scale(0.94); }
-        .mb-blue { background: var(--ios-sky); }
-        .mb-green { background: #34C759; }
-        .mb-red { background: #FF3B30; box-shadow: 0 3px 12px rgba(255,59,48,0.30); }
-        .mb-gray { background: #8E8E93; }
-
-        .empty-state {
-            text-align: center;
-            padding: 50px 20px;
-            color: var(--ios-text-secondary);
-            display: none;
-        }
-        .empty-state svg {
-            width: 48px;
-            height: 48px;
-            color: #C7C7CC;
-            margin-bottom: 12px;
-        }
-        .empty-state h3 {
-            font-size: 16px;
-            font-weight: 600;
-            color: #8E8E93;
-        }
-
-        /* ===== CARDS / FORMS ===== */
-        .card {
-            background: white;
-            border-radius: var(--ios-radius);
-            box-shadow: var(--shadow-ios), var(--glow-sky);
-            padding: 22px;
-            margin-bottom: 16px;
-        }
-        .card h3 {
-            font-size: 16px;
-            font-weight: 700;
-            margin-bottom: 16px;
-        }
-        .form-row {
-            margin-bottom: 14px;
-        }
-        .form-row label {
-            display: block;
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--ios-text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 6px;
-        }
-        .form-row input,
-        .form-row textarea {
-            width: 100%;
-            padding: 12px 14px;
-            border: 1px solid var(--ios-border);
-            border-radius: var(--ios-radius-sm);
-            font-size: 15px;
-            font-family: inherit;
-            color: var(--ios-text);
-            outline: none;
-            background: #F9F9FB;
-        }
-        .form-row input:focus,
-        .form-row textarea:focus {
-            border-color: var(--ios-sky);
-            background: white;
-        }
-        .form-row textarea {
-            resize: vertical;
-            min-height: 70px;
-        }
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0 14px;
-        }
-        .save-btn {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: var(--ios-radius-sm);
-            background: linear-gradient(135deg, #0A84FF 0%, #007AFF 100%);
-            color: white;
-            font-size: 15px;
-            font-weight: 600;
-            font-family: inherit;
-            cursor: pointer;
-            box-shadow: 0 4px 16px rgba(10,132,255,0.3);
-            margin-top: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        .save-btn:active { transform: scale(0.98); }
-        .save-btn svg { width: 18px; height: 18px; }
-
-        /* ===== QR PREVIEW ===== */
-        .qr-preview {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background: white;
-            border: 1px solid var(--ios-border);
-            border-radius: var(--ios-radius);
-            padding: 16px;
-            margin-bottom: 16px;
-        }
-        .qr-preview img {
-            width: 140px;
-            height: 140px;
-            object-fit: contain;
-            border-radius: 8px;
-            display: none;
-        }
-        .qr-preview p {
-            font-size: 12px;
-            color: var(--ios-text-secondary);
-            margin-top: 8px;
-        }
-
-        /* ===== RULES ADMIN ===== */
-        .rule-edit {
-            background: white;
-            border-radius: var(--ios-radius);
-            box-shadow: var(--shadow-ios);
-            padding: 16px;
-            margin-bottom: 10px;
-            animation: fadeUp 0.4s both;
-        }
-        .rule-edit-head {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-        .rule-edit-num {
-            width: 26px;
-            height: 26px;
-            background: linear-gradient(135deg, #0A84FF, #5AC8FA);
-            color: white;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: 700;
-        }
-        .rule-edit-actions { display: flex; gap: 6px; }
-
-        /* ===== MODAL ===== */
-        .modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.45);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            display: none;
-            align-items: flex-start;
-            justify-content: center;
-            z-index: 100;
-            padding: 24px 16px;
-            overflow-y: auto;
-        }
-        .modal.active { display: flex; }
-        .modal-card {
-            background: white;
-            border-radius: 18px;
-            max-width: 420px;
-            width: 100%;
-            margin: auto 0;
-            padding: 24px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.25);
-            animation: popIn 0.3s cubic-bezier(0.32, 0.72, 0, 1) both;
-        }
-        .modal-card h3 {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
-        .modal-card .sub {
-            font-size: 13px;
-            color: var(--ios-text-secondary);
-            margin-bottom: 16px;
-        }
-        .detail-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 9px 0;
-            border-bottom: 1px solid var(--ios-border);
-            font-size: 14px;
-            gap: 12px;
-        }
-        .detail-row:last-child { border-bottom: none; }
-        .detail-row .k { color: var(--ios-text-secondary); flex-shrink: 0; }
-        .detail-row .v { font-weight: 600; text-align: right; word-break: break-word; }
-        .screenshot-wrap {
-            margin: 14px 0;
-            border-radius: var(--ios-radius-sm);
-            overflow: hidden;
-            border: 1px solid var(--ios-border);
-            background: #F9F9FB;
-        }
-        .screenshot-wrap img {
-            width: 100%;
-            max-height: 300px;
-            object-fit: contain;
-            display: block;
-        }
-        .modal-actions {
-            display: flex;
-            gap: 8px;
-            margin-top: 16px;
-        }
-        .modal-actions .mini-btn { flex: 1; padding: 12px; font-size: 14px; }
-        .close-x {
-            float: right;
-            background: none;
-            border: none;
-            color: var(--ios-text-secondary);
-            font-size: 20px;
-            cursor: pointer;
-            line-height: 1;
-        }
-
-        /* ===== TOAST ===== */
-        .toast {
-            position: fixed;
-            bottom: 24px;
-            left: 50%;
-            transform: translateX(-50%) translateY(20px);
-            background: #1C1C1E;
-            color: white;
-            font-size: 13.5px;
-            font-weight: 600;
-            padding: 12px 20px;
-            border-radius: 12px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
-            opacity: 0;
-            pointer-events: none;
-            transition: all 0.3s ease;
-            z-index: 200;
-            max-width: 90%;
-            text-align: center;
-        }
-        .toast.show {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-        }
-
-        @media (max-width: 560px) {
-            .stats { grid-template-columns: repeat(2, 1fr); }
-            .form-grid { grid-template-columns: 1fr; }
-            .player-item { flex-wrap: wrap; }
-            .p-actions { width: 100%; justify-content: flex-end; }
-        }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Admin Panel</title>
+<script>
+try {
+    var savedTheme = localStorage.getItem("theme");
+    if (savedTheme) document.documentElement.setAttribute("data-theme", savedTheme);
+    else if (window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches) document.documentElement.setAttribute("data-theme", "dark");
+} catch (e) {}
+</script>
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#4f6bed" />
+<link rel="icon" type="image/jpeg" href="icons/LOGO-09.jpg" />
+<link rel="apple-touch-icon" href="icons/LOGO-09.jpg" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="Clash Admin" />
+<link rel="stylesheet" href="../assets/ui.css" />
 </head>
 <body>
 
-    <!-- ===== PANEL VIEW ===== -->
-    <div id="panelView">
-        <div class="container">
-
-            <div class="topbar">
-                <div class="brand">
-                    <div class="brand-icon">
-                        <img src="icons/LOGO-09.jpg" alt="Logo">
-                    </div>
-                    <div>
-                        <h1 id="panelTitle">Admin Panel</h1>
-                        <p id="panelSub">Manage your tournament</p>
-                    </div>
-                </div>
-                <button class="logout-btn" onclick="location.reload()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-                    Refresh
-                </button>
-            </div>
-
-            <!-- Stats -->
-            <div class="stats" id="statsRow">
-                <div class="stat-card"><div class="num stat-total" id="statTotal">0</div><div class="lbl">Total</div></div>
-                <div class="stat-card"><div class="num stat-pending" id="statPending">0</div><div class="lbl">Pending</div></div>
-                <div class="stat-card"><div class="num stat-approved" id="statApproved">0</div><div class="lbl">Approved</div></div>
-                <div class="stat-card"><div class="num stat-rejected" id="statRejected">0</div><div class="lbl">Rejected</div></div>
-            </div>
-
-            <!-- Tabs -->
-            <div class="tabs">
-                <button class="tab-btn active" id="tabBtnPlayers" onclick="switchTab('players')">Players</button>
-                <button class="tab-btn" id="tabBtnPayments" onclick="switchTab('payments')">Payments</button>
-                <button class="tab-btn" id="tabBtnSettings" onclick="switchTab('settings')">Settings</button>
-                <button class="tab-btn" id="tabBtnRules" onclick="switchTab('rules')">Rules</button>
-            </div>
-
-            <!-- ===== PLAYERS TAB ===== -->
-            <div class="tab-section active" id="tabPlayers">
-                <div class="card">
-                    <h3>Add Joined Player</h3>
-                    <p style="font-size:13px;color:var(--ios-text-secondary);margin:-8px 0 16px;">Game me join hue players ko yahan add karo — join page pe turant dikhega</p>
-                    <div class="form-grid">
-                        <div class="form-row">
-                            <label>User Name *</label>
-                            <input type="text" id="apName" placeholder="Player name">
-                        </div>
-                        <div class="form-row">
-                            <label>UID Number</label>
-                            <input type="text" id="apGameNum" placeholder="e.g. 883421">
-                        </div>
-                    </div>
-                    <button class="save-btn" onclick="addPlayer()">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                        Add Player
-                    </button>
-                </div>
-
-                <div class="section-title" style="font-size:13px;font-weight:600;color:var(--ios-text-secondary);text-transform:uppercase;letter-spacing:0.6px;margin:20px 0 10px 4px;">Joined Players</div>
-                <div id="adminJoinedList"></div>
-                <div class="empty-state" id="adminJoinedEmpty">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                    <h3>No joined players yet</h3>
-                </div>
-            </div>
-
-            <!-- ===== PAYMENTS TAB ===== -->
-            <div class="tab-section" id="tabPayments">
-                <div class="toolbar">
-                    <div class="chips">
-                        <button class="chip active" data-status="all" onclick="setFilter('all', this)">All</button>
-                        <button class="chip" data-status="pending" onclick="setFilter('pending', this)">Pending</button>
-                        <button class="chip" data-status="approved" onclick="setFilter('approved', this)">Approved</button>
-                        <button class="chip" data-status="rejected" onclick="setFilter('rejected', this)">Rejected</button>
-                    </div>
-                    <div class="search">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                        <input type="text" placeholder="Search payment..." id="adminSearch" oninput="renderPayments()">
-                    </div>
-                </div>
-                <div id="adminPlayerList"></div>
-                <div class="empty-state" id="adminEmpty">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                    <h3>No payments found</h3>
-                </div>
-            </div>
-
-            <!-- ===== SETTINGS TAB ===== -->
-            <div class="tab-section" id="tabSettings">
-                <div class="card">
-                    <h3>QR & UPI Settings</h3>
-                    <p style="font-size:13px;color:var(--ios-text-secondary);margin:-8px 0 16px;">Entry fee, payment QR aur UPI ID yahan change karo</p>
-                    <div class="form-row">
-                        <label>Entry Fee (₹)</label>
-                        <input type="number" id="setEntryFee" min="0">
-                    </div>
-                    <div class="qr-preview" id="qrPreviewWrap">
-                        <img id="qrPreview" src="" alt="QR preview">
-                        <p>QR preview</p>
-                    </div>
-                    <div class="form-row">
-                        <label>UPI ID</label>
-                        <input type="text" id="setUpiId" placeholder="yourupi@bank">
-                    </div>
-                    <div class="form-row">
-                        <label>QR Image URL</label>
-                        <input type="text" id="setQrUrl" placeholder="https://.../qr.png" oninput="renderQrPreview()">
-                    </div>
-                    <div class="section-title" style="font-size:13px;font-weight:600;color:var(--ios-text-secondary);text-transform:uppercase;letter-spacing:0.6px;margin:20px 0 10px 4px;">Telegram Payment Alert</div>
-                    <div class="form-row">
-                        <label>Bot Token</label>
-                        <input type="password" id="setTgToken" placeholder="123456:ABC-...">
-                    </div>
-                    <div class="form-row">
-                        <label>Chat ID</label>
-                        <input type="text" id="setTgChat" placeholder="-1001234567890">
-                    </div>
-                    <button class="save-btn" onclick="saveSettings()">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                        Update QR & UPI
-                    </button>
-                    <p style="font-size:12px;color:#8E8E93;margin-top:12px;">QR image ka URL paste karo — registration page par wahi QR dikhega. UPI ID tracking ke liye use hogi.</p>
-                </div>
-            </div>
-
-            <!-- ===== RULES TAB ===== -->
-            <div class="tab-section" id="tabRules">
-                <div id="rulesAdminList"></div>
-                <div class="card">
-                    <h3>Add New Rule</h3>
-                    <div class="form-row">
-                        <label>Rule Title</label>
-                        <input type="text" id="newRuleTitle" placeholder="e.g. Fair Play Only">
-                    </div>
-                    <div class="form-row">
-                        <label>Rule Description</label>
-                        <textarea id="newRuleDesc" placeholder="Rule details..."></textarea>
-                    </div>
-                    <button class="save-btn" onclick="addRule()">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                        Add Rule
-                    </button>
-                </div>
-            </div>
-
+<header class="topbar">
+    <div class="topbar-inner">
+        <a class="brand" href="../index/index.html">
+            <span class="brand-mark">
+                <img src="icons/LOGO-09.jpg" alt="Clash Arena logo" />
+            </span>
+            <span>
+                <strong class="brand-name" data-tournament-name>Clash Arena</strong>
+                <span class="brand-sub">Admin panel</span>
+            </span>
+        </a>
+        <div class="topbar-actions">
+            <span class="badge info" style="display:none" id="adminBadge">Admin</span>
+            <button class="icon-btn" type="button" onclick="location.reload()" aria-label="Refresh data">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+            </button>
+            <button class="icon-btn theme-toggle" type="button" data-theme-toggle aria-label="Toggle theme">
+                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+            </button>
         </div>
     </div>
+</header>
 
-    <!-- ===== PLAYER DETAIL MODAL ===== -->
-    <div class="modal" id="playerModal">
-        <div class="modal-card">
-            <button class="close-x" onclick="closePlayer()">&times;</button>
-            <h3 id="mName">Player</h3>
-            <div class="sub" id="mSub">Details</div>
-            <div id="mDetails"></div>
-            <div class="screenshot-wrap" id="mShotWrap" style="display:none">
-                <img id="mShot" alt="Payment screenshot">
-            </div>
-            <div class="modal-actions">
-                <button class="mini-btn mb-green" id="mApprove" onclick="approvePlayer(currentPlayerId)">Approve</button>
-                <button class="mini-btn mb-red" id="mReject" onclick="rejectPlayer(currentPlayerId)">Reject</button>
-                <button class="mini-btn mb-gray" id="mDelete" onclick="deletePlayer(currentPlayerId)">Delete</button>
-            </div>
-        </div>
+<main class="shell">
+    <div class="page-head" style="margin-bottom:16px">
+        <h1 id="panelTitle">Admin Panel</h1>
+        <p class="muted">Manage registrations, payments, rules and tournament settings.</p>
     </div>
 
-    <!-- ===== EDIT PLAYER MODAL ===== -->
-    <div class="modal" id="editPlayerModal">
-        <div class="modal-card">
-            <button class="close-x" onclick="closeEditPlayer()">&times;</button>
-            <h3>Edit Player</h3>
-            <div class="sub">Player ki details update karo</div>
-            <div class="form-row">
-                <label>User Name *</label>
-                <input type="text" id="epName" placeholder="Player name">
-            </div>
-            <div class="form-row">
-                <label>Game ID Number</label>
-                <input type="text" id="epGameNum" placeholder="e.g. 883421">
-            </div>
-            <div class="form-row">
-                <label>Game ID Name</label>
-                <input type="text" id="epGameIdName" placeholder="Game nickname">
-            </div>
-            <div class="form-row">
-                <label>Game ID Level</label>
-                <input type="text" id="epGameIdLevel" placeholder="e.g. Diamond IV">
-            </div>
-            <div class="modal-actions">
-                <button class="mini-btn mb-gray" onclick="closeEditPlayer()">Cancel</button>
-                <button class="mini-btn mb-green" onclick="saveEditPlayer()">Save</button>
-            </div>
-        </div>
+    <!-- ================= STATS ================= -->
+    <div class="stat-grid">
+        <div class="stat"><p class="stat-lb">Total</p><p class="stat-val" id="statTotal">0</p></div>
+        <div class="stat"><p class="stat-lb">Pending</p><p class="stat-val pending" id="statPending">0</p></div>
+        <div class="stat"><p class="stat-lb">Approved</p><p class="stat-val approved" id="statApproved">0</p></div>
+        <div class="stat"><p class="stat-lb">Rejected</p><p class="stat-val rejected" id="statRejected">0</p></div>
     </div>
 
-    <!-- ===== TOAST ===== -->
-    <div class="toast" id="toast"></div>
+    <!-- ================= TABS ================= -->
+    <div class="tabs" role="tablist" aria-label="Admin sections">
+        <button class="tab is-on" type="button" role="tab" data-tab="players" aria-selected="true">Players</button>
+        <button class="tab" type="button" role="tab" data-tab="payments" aria-selected="false">Payments</button>
+        <button class="tab" type="button" role="tab" data-tab="settings" aria-selected="false">Settings</button>
+        <button class="tab" type="button" role="tab" data-tab="rules" aria-selected="false">Rules</button>
+    </div>
 
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-    <script>
-const FIREBASE_CONFIG = {
-    apiKey: "AIzaSyCXSv7eNl7KcttNvKF46BCAkhYv6t6S0bI",
-    authDomain: "user-manage-bot.firebaseapp.com",
-    databaseURL: "https://user-manage-bot-default-rtdb.firebaseio.com",
-    projectId: "user-manage-bot",
-    storageBucket: "user-manage-bot.firebasestorage.app",
-    messagingSenderId: "17364199534",
-    appId: "1:17364199534:web:dce4f0df3efe163930de7f"
-};
+    <!-- ================= PLAYERS ================= -->
+    <section class="tab-panel is-on" data-panel="players">
+        <div class="panel">
+            <div class="panel-head">
+                <div>
+                    <h2 class="panel-title">Add joined player</h2>
+                    <p class="panel-sub">Manually add a player who joined the match. They appear on the public players page instantly.</p>
+                </div>
+            </div>
+            <div class="form-grid">
+                <div class="field">
+                    <label class="field-label" for="apName">User name <span class="req">*</span></label>
+                    <input class="input" type="text" id="apName" placeholder="Player name" />
+                </div>
+                <div class="field">
+                    <label class="field-label" for="apGameNum">UID number</label>
+                    <input class="input" type="text" id="apGameNum" placeholder="e.g. 883421" />
+                </div>
+            </div>
+            <button class="btn primary" type="button" onclick="addPlayer()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                Add player
+            </button>
+        </div>
 
-const FIREBASE_CONFIGURED = FIREBASE_CONFIG.apiKey !== "YOUR_API_KEY";
+        <p class="section-label">Joined players</p>
+        <div class="list" id="adminJoinedList"></div>
+        <div class="empty" id="adminJoinedEmpty" style="display:none">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <h3>No joined players yet</h3>
+            <p>Add a player above to build the roster.</p>
+        </div>
+    </section>
 
-let firebaseApp = null;
-let db = null;
+    <!-- ================= PAYMENTS ================= -->
+    <section class="tab-panel" data-panel="payments">
+        <div class="toolbar">
+            <div class="chips">
+                <button class="chip is-on" type="button" data-filter="all" onclick="setFilter('all', this)">All</button>
+                <button class="chip" type="button" data-filter="pending" onclick="setFilter('pending', this)">Pending</button>
+                <button class="chip" type="button" data-filter="approved" onclick="setFilter('approved', this)">Approved</button>
+                <button class="chip" type="button" data-filter="rejected" onclick="setFilter('rejected', this)">Rejected</button>
+            </div>
+            <div class="search">
+                <span class="lead" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+                </span>
+                <input class="input" type="text" placeholder="Search name, game ID, mobile or UTR" id="adminSearch" oninput="renderPayments()" />
+            </div>
+        </div>
 
-if (FIREBASE_CONFIGURED && typeof firebase !== 'undefined') {
-    firebaseApp = firebase.initializeApp(FIREBASE_CONFIG);
-    db = firebase.firestore();
-}
+        <div class="list" id="adminPlayerList"></div>
+        <div class="empty" id="adminEmpty" style="display:none">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <h3>No payments found</h3>
+            <p>Registrations with payment proof will appear here.</p>
+        </div>
+    </section>
 
-const DEFAULT_SETTINGS = {
-    tournamentName: 'Clash Arena',
-    entryFee: 199,
-    upiId: '',
-    upiName: 'Clash Arena',
-    qrUrl: '',
-    telegramBotToken: '',
-    telegramChatId: '',
-    prizePool: '₹5,000',
-    matchTime: '9:00 PM',
-    maxPlayers: 100,
-    announcement: '',
-    adminPass: 'admin123',
-    rules: [
-        { title: 'Fair Play Only', description: 'Any use of hacks, mods, or third-party tools will result in immediate disqualification.' },
-        { title: 'Entry Fee Non-Refundable', description: 'Once paid, the entry fee is non-refundable under any circumstances.' },
-        { title: 'On-Time Check-In', description: 'Players must check in 15 minutes before match start. Late entries will not be allowed.' },
-        { title: 'Valid ID Required', description: 'All players must use the same Game ID submitted during registration throughout the tournament.' },
-        { title: 'No Team Switching', description: 'Once teams are finalized, no player substitutions or team changes are permitted.' },
-        { title: 'Recording Mandatory', description: 'Every player must screen-record their gameplay. Failure to provide proof may void results.' },
-        { title: 'Dispute Resolution', description: 'All disputes will be resolved by tournament admins. Their decision is final and binding.' },
-        { title: 'Prize Distribution', description: 'Prizes will be credited within 48 hours after tournament completion to the registered UPI.' },
-        { title: 'Communication Rules', description: 'Toxic behaviour, abuse, or harassment in chat or voice will lead to a permanent ban.' },
-        { title: 'Device Responsibility', description: 'Players are responsible for their own internet and device issues. No rematches will be given.' }
-    ]
-};
+    <!-- ================= SETTINGS ================= -->
+    <section class="tab-panel" data-panel="settings">
+        <div class="panel">
+            <div class="panel-head">
+                <div>
+                    <h2 class="panel-title">QR &amp; UPI settings</h2>
+                    <p class="panel-sub">Entry fee, payment QR, UPI ID and Telegram alerts.</p>
+                </div>
+            </div>
 
-let cachedSettings = null;
+            <div class="form-grid">
+                <div class="field">
+                    <label class="field-label" for="setEntryFee">Entry fee (₹)</label>
+                    <input class="input" type="number" id="setEntryFee" min="0" />
+                </div>
+                <div class="field">
+                    <label class="field-label" for="setUpiId">UPI ID</label>
+                    <input class="input" type="text" id="setUpiId" placeholder="yourupi@bank" />
+                </div>
+                <div class="field full">
+                    <label class="field-label" for="setQrUrl">QR image URL</label>
+                    <input class="input" type="text" id="setQrUrl" placeholder="https://.../qr.png" oninput="renderQrPreview()" />
+                </div>
+            </div>
 
-function withTimeout(promise, ms) {
-    return new Promise((resolve, reject) => {
-        const t = setTimeout(() => reject(new Error('timeout')), ms);
-        promise.then(
-            v => { clearTimeout(t); resolve(v); },
-            e => { clearTimeout(t); reject(e); }
-        );
-    });
-}
+            <div class="qr-preview" id="qrPreviewWrap">
+                <img id="qrPreview" src="" alt="QR preview" />
+                <p>QR preview</p>
+            </div>
 
-async function fetchSettings() {
-    if (!FIREBASE_CONFIGURED || !db) {
-        cachedSettings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
-        return cachedSettings;
+            <p class="section-label">Telegram payment alert</p>
+            <div class="form-grid">
+                <div class="field">
+                    <label class="field-label" for="setTgToken">Bot token</label>
+                    <input class="input" type="password" id="setTgToken" placeholder="123456:ABC-..." />
+                </div>
+                <div class="field">
+                    <label class="field-label" for="setTgChat">Chat ID</label>
+                    <input class="input" type="text" id="setTgChat" placeholder="-1001234567890" />
+                </div>
+            </div>
+
+            <button class="btn primary" type="button" onclick="saveSettings()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                Save settings
+            </button>
+
+            <p class="help" style="margin-top:12px">Paste a QR image URL — registration page par wahi QR dikhega. UPI ID na ho to QR automatically generate hota hai.</p>
+        </div>
+    </section>
+
+    <!-- ================= RULES ================= -->
+    <section class="tab-panel" data-panel="rules">
+        <div id="rulesAdminList"></div>
+
+        <div class="panel" style="margin-top:16px">
+            <div class="panel-head">
+                <div>
+                    <h2 class="panel-title">Add new rule</h2>
+                    <p class="panel-sub">New rules appear on the public rules page immediately.</p>
+                </div>
+            </div>
+            <div class="field">
+                <label class="field-label" for="newRuleTitle">Rule title</label>
+                <input class="input" type="text" id="newRuleTitle" placeholder="e.g. Fair play only" />
+            </div>
+            <div class="field">
+                <label class="field-label" for="newRuleDesc">Rule description</label>
+                <textarea class="textarea" id="newRuleDesc" placeholder="Rule details..."></textarea>
+            </div>
+            <button class="btn primary" type="button" onclick="addRule()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                Add rule
+            </button>
+        </div>
+    </section>
+</main>
+
+<footer class="site-foot">
+    <a href="../index/index.html">Registration</a> &nbsp;·&nbsp;
+    <a href="../join/index.html">Players</a> &nbsp;·&nbsp;
+    <a href="../rule/index.html">Rules</a>
+</footer>
+
+<!-- ================= PLAYER DETAIL MODAL ================= -->
+<div class="overlay" id="playerModal" role="dialog" aria-modal="true" aria-labelledby="mName">
+    <div class="modal">
+        <div class="modal-head">
+            <div class="modal-title">
+                <h3 id="mName">Player</h3>
+                <p id="mSub">Details</p>
+            </div>
+            <button class="modal-close" type="button" onclick="closePlayer()" aria-label="Close">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        <div class="detail-rows" id="mDetails"></div>
+
+        <div class="shot-wrap" id="mShotWrap" style="display:none">
+            <img id="mShot" alt="Payment screenshot" />
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn success sm" type="button" id="mApprove" onclick="approvePlayer(currentPlayerId)">Approve</button>
+            <button class="btn danger sm" type="button" id="mReject" onclick="rejectPlayer(currentPlayerId)">Reject</button>
+            <button class="btn outline sm" type="button" id="mDelete" onclick="deletePlayer(currentPlayerId)">Delete</button>
+        </div>
+    </div>
+</div>
+
+<!-- ================= EDIT PLAYER MODAL ================= -->
+<div class="overlay" id="editPlayerModal" role="dialog" aria-modal="true" aria-labelledby="editTitle">
+    <div class="modal">
+        <div class="modal-head">
+            <div class="modal-title">
+                <h3 id="editTitle">Edit player</h3>
+                <p>Update the player details below.</p>
+            </div>
+            <button class="modal-close" type="button" onclick="closeEditPlayer()" aria-label="Close">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        <div class="field">
+            <label class="field-label" for="epName">User name <span class="req">*</span></label>
+            <input class="input" type="text" id="epName" placeholder="Player name" />
+        </div>
+        <div class="form-grid">
+            <div class="field">
+                <label class="field-label" for="epGameNum">Game ID number</label>
+                <input class="input" type="text" id="epGameNum" placeholder="e.g. 883421" />
+            </div>
+            <div class="field">
+                <label class="field-label" for="epGameIdName">Game ID name</label>
+                <input class="input" type="text" id="epGameIdName" placeholder="Game nickname" />
+            </div>
+            <div class="field">
+                <label class="field-label" for="epGameIdLevel">Game ID level</label>
+                <input class="input" type="text" id="epGameIdLevel" placeholder="e.g. 72" />
+            </div>
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn outline sm" type="button" onclick="closeEditPlayer()">Cancel</button>
+            <button class="btn success sm" type="button" onclick="saveEditPlayer()">Save changes</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="../firebase-config.js"></script>
+<script src="../assets/app.js"></script>
+<script>
+    "use strict";
+
+    var settings = null;
+    var allPlayers = [];
+    var currentFilter = "all";
+    var currentPlayerId = null;
+    var currentModalPlayer = null;
+
+    function $(id) { return document.getElementById(id); }
+    function escapeHtml(str) { return CA.esc(str); }
+    function showToast(message, type) { CA.toast(message, type); }
+
+    function initials(name) {
+        return String(name || "P").split(" ").filter(function (w) { return w; }).map(function (w) { return w[0]; }).slice(0, 2).join("").toUpperCase() || "P";
     }
-    try {
-        const snap = await withTimeout(db.collection('settings').doc('main').get(), 6000);
-        if (snap.exists) {
-            cachedSettings = Object.assign({}, DEFAULT_SETTINGS, snap.data());
-        } else {
-            cachedSettings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
-            try {
-                await withTimeout(db.collection('settings').doc('main').set(cachedSettings), 6000);
-            } catch (e) { }
-        }
-    } catch (e) {
-        cachedSettings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+
+    function statusBadge(status) {
+        if (status === "approved") return '<span class="badge success"><span class="dot"></span>Approved</span>';
+        if (status === "rejected") return '<span class="badge danger"><span class="dot"></span>Rejected</span>';
+        return '<span class="badge warning"><span class="dot"></span>Pending</span>';
     }
-    return cachedSettings;
-}
 
-function getSettings() {
-    if (!cachedSettings) return JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
-    return cachedSettings;
-}
+    function detailRow(k, v) {
+        return '<div class="detail-row"><span class="k">' + k + '</span><span class="v">' + escapeHtml(v || "—") + "</span></div>";
+    }
 
-function fmtTime(ts) {
-    if (!ts) return '';
-    const d = (ts && ts.toDate) ? ts.toDate() : new Date(ts);
-    return d.toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
-}
-</script>
+    /* ================= INIT ================= */
+    (async function init() {
+        settings = await fetchSettings();
 
-    <script>
-        let settings = null;
-        let allPlayers = [];
-        let currentFilter = 'all';
-        let currentPlayerId = null;
-        let currentModalPlayer = null;
+        document.querySelectorAll("[data-tournament-name]").forEach(function (el) {
+            el.textContent = settings.tournamentName;
+        });
+        $("panelTitle").textContent = settings.tournamentName + " — Admin";
 
-        function $(id) { return document.getElementById(id); }
+        fillSettingsForm();
+        renderRules();
+        startListening();
 
-        function escapeHtml(str) {
-            return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("sw.js").catch(function () { });
         }
+    })();
 
-        function showToast(msg) {
-            const t = $('toast');
-            t.textContent = msg;
-            t.classList.add('show');
-            clearTimeout(t._timer);
-            t._timer = setTimeout(() => t.classList.remove('show'), 2600);
-        }
+    /* ================= REALTIME DATA ================= */
+    function getPayments() {
+        return allPlayers.filter(function (p) { return !p.addedByAdmin; });
+    }
 
-        function initials(name) {
-            return String(name || 'P').split(' ').filter(w => w).map(w => w[0]).slice(0, 2).join('').toUpperCase() || 'P';
-        }
-
-        /* ===== INIT (No login - panel opens directly) ===== */
-        (async function init() {
-            settings = await fetchSettings();
-            $('panelTitle').textContent = settings.tournamentName + ' — Admin';
-            fillSettingsForm();
-            renderRules();
-            startListening();
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('sw.js').catch(function () { });
-            }
-        })();
-
-        /* ===== REALTIME PLAYERS ===== */
-        function getPayments() {
-            return allPlayers.filter(p => !p.addedByAdmin);
-        }
-
-        function startListening() {
-            if (!db) return;
-            db.collection('players').onSnapshot(snap => {
-                allPlayers = [];
-                snap.forEach(d => {
-                    const p = d.data();
-                    p.id = d.id;
-                    allPlayers.push(p);
-                });
-                allPlayers.sort((a, b) => {
-                    const ta = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
-                    const tb = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
-                    return tb - ta;
-                });
-                renderStats();
-                renderPayments();
-                renderJoined();
-            }, err => {
-                console.error(err);
-                showToast('Error loading players');
+    function startListening() {
+        if (!db) return;
+        db.collection("players").onSnapshot(function (snap) {
+            allPlayers = [];
+            snap.forEach(function (d) {
+                var p = d.data();
+                p.id = d.id;
+                allPlayers.push(p);
             });
-        }
-
-        function renderStats() {
-            const pays = getPayments();
-            let pending = 0, approved = 0, rejected = 0;
-            pays.forEach(p => {
-                if (p.status === 'pending') pending++;
-                else if (p.status === 'approved') approved++;
-                else if (p.status === 'rejected') rejected++;
+            allPlayers.sort(function (a, b) {
+                var ta = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
+                var tb = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
+                return tb - ta;
             });
-            $('statTotal').textContent = pays.length;
-            $('statPending').textContent = pending;
-            $('statApproved').textContent = approved;
-            $('statRejected').textContent = rejected;
-        }
-
-        function setFilter(status, el) {
-            currentFilter = status;
-            document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-            el.classList.add('active');
+            renderStats();
             renderPayments();
+            renderJoined();
+        }, function (err) {
+            console.error(err);
+            showToast("Error loading players", "danger");
+        });
+    }
+
+    function renderStats() {
+        var pays = getPayments();
+        var pending = 0, approved = 0, rejected = 0;
+        pays.forEach(function (p) {
+            if (p.status === "pending") pending++;
+            else if (p.status === "approved") approved++;
+            else if (p.status === "rejected") rejected++;
+        });
+        $("statTotal").textContent = pays.length;
+        $("statPending").textContent = pending;
+        $("statApproved").textContent = approved;
+        $("statRejected").textContent = rejected;
+    }
+
+    /* ================= PAYMENTS ================= */
+    function setFilter(status, el) {
+        currentFilter = status;
+        document.querySelectorAll(".chip[data-filter]").forEach(function (c) {
+            c.classList.toggle("is-on", c.getAttribute("data-filter") === status);
+        });
+        renderPayments();
+    }
+
+    function renderPayments() {
+        var list = $("adminPlayerList");
+        var empty = $("adminEmpty");
+        var term = $("adminSearch").value.trim().toLowerCase();
+
+        var filtered = getPayments().filter(function (p) {
+            if (currentFilter !== "all" && p.status !== currentFilter) return false;
+            if (!term) return true;
+            return (p.userName || "").toLowerCase().indexOf(term) !== -1 ||
+                (p.gameIdNumber || "").toLowerCase().indexOf(term) !== -1 ||
+                (p.mobileNumber || "").toLowerCase().indexOf(term) !== -1 ||
+                (p.utrNumber || "").toLowerCase().indexOf(term) !== -1;
+        });
+
+        list.innerHTML = "";
+
+        filtered.forEach(function (p) {
+            var item = document.createElement("article");
+            item.className = "row-card";
+            item.innerHTML =
+                '<span class="avatar">' + escapeHtml(initials(p.userName)) + "</span>" +
+                '<div class="row-main">' +
+                    '<p class="row-title">' + escapeHtml(p.userName) + "</p>" +
+                    '<p class="row-sub">Game ID: ' + escapeHtml(p.gameIdNumber || "—") + (p.gameIdLevel ? " · Level " + escapeHtml(p.gameIdLevel) : "") + "</p>" +
+                    '<p class="row-sub">' + escapeHtml(CA.fmtTime(p.createdAt)) + "</p>" +
+                "</div>" +
+                '<div class="row-actions">' +
+                    statusBadge(p.status || "pending") +
+                    '<button class="btn outline sm" type="button" onclick="openPlayer(\'' + p.id + '\')">View</button>' +
+                    (p.status !== "approved" ? '<button class="btn success sm" type="button" onclick="approvePlayer(\'' + p.id + '\')">Approve</button>' : "") +
+                    (p.status !== "rejected" ? '<button class="btn danger sm" type="button" onclick="rejectPlayer(\'' + p.id + '\')">Reject</button>' : "") +
+                    '<button class="btn secondary sm" type="button" onclick="deletePlayer(\'' + p.id + '\')">Delete</button>' +
+                "</div>";
+            list.appendChild(item);
+        });
+
+        empty.style.display = filtered.length === 0 ? "block" : "none";
+        if (filtered.length === 0) {
+            empty.querySelector("h3").textContent = currentFilter === "all" ? "No payments found" : "No " + currentFilter + " payments";
+        }
+    }
+
+    function renderJoined() {
+        var list = $("adminJoinedList");
+        var empty = $("adminJoinedEmpty");
+        var joined = allPlayers.filter(function (p) { return p.addedByAdmin; });
+
+        list.innerHTML = "";
+
+        joined.forEach(function (p) {
+            var item = document.createElement("article");
+            item.className = "row-card";
+            item.innerHTML =
+                '<span class="avatar">' + escapeHtml(initials(p.userName)) + "</span>" +
+                '<div class="row-main">' +
+                    '<p class="row-title">' + escapeHtml(p.userName) + "</p>" +
+                    '<p class="row-sub">Game ID: ' + escapeHtml(p.gameIdNumber || "—") + "</p>" +
+                    '<p class="row-sub">Joined ' + escapeHtml(CA.fmtTime(p.createdAt)) + "</p>" +
+                "</div>" +
+                '<div class="row-actions">' +
+                    '<span class="badge success"><span class="dot"></span>Approved</span>' +
+                    '<button class="btn outline sm" type="button" onclick="openEditPlayer(\'' + p.id + '\')">Edit</button>' +
+                    '<button class="btn danger sm" type="button" onclick="deletePlayer(\'' + p.id + '\')">Delete</button>' +
+                "</div>";
+            list.appendChild(item);
+        });
+
+        empty.style.display = joined.length === 0 ? "block" : "none";
+    }
+
+    /* ================= PLAYER ACTIONS ================= */
+    function findPlayer(id) {
+        return allPlayers.find(function (p) { return p.id === id; });
+    }
+
+    function openPlayer(id) {
+        var p = findPlayer(id);
+        if (!p) return;
+        currentPlayerId = id;
+        currentModalPlayer = p;
+
+        $("mName").textContent = p.userName || "Player";
+        $("mSub").textContent = "Joined " + CA.fmtTime(p.createdAt);
+        $("mDetails").innerHTML =
+            detailRow("Game ID name", p.gameIdName) +
+            detailRow("Game ID", p.gameIdNumber) +
+            detailRow("Level", p.gameIdLevel) +
+            detailRow("Mobile", p.mobileNumber) +
+            detailRow("Email", p.emailId) +
+            detailRow("Payment name", p.paymentName) +
+            detailRow("UTR number", p.utrNumber) +
+            detailRow("Status", p.status || "pending");
+
+        if (p.screenshot) {
+            $("mShot").src = p.screenshot;
+            $("mShotWrap").style.display = "block";
+        } else {
+            $("mShot").removeAttribute("src");
+            $("mShotWrap").style.display = "none";
         }
 
-        function renderPayments() {
-            const list = $('adminPlayerList');
-            const empty = $('adminEmpty');
-            list.innerHTML = '';
-            const term = $('adminSearch').value.toLowerCase();
-            const filtered = getPayments().filter(p => {
-                if (currentFilter !== 'all' && p.status !== currentFilter) return false;
-                if (!term) return true;
-                return (p.userName || '').toLowerCase().includes(term) ||
-                       (p.gameIdNumber || '').toLowerCase().includes(term) ||
-                       (p.mobileNumber || '').toLowerCase().includes(term) ||
-                       (p.utrNumber || '').toLowerCase().includes(term);
+        $("mApprove").style.display = p.status === "approved" ? "none" : "inline-flex";
+        $("mReject").style.display = p.status === "rejected" ? "none" : "inline-flex";
+        CA.openOverlay("playerModal");
+    }
+
+    function closePlayer() {
+        CA.closeOverlay("playerModal");
+        currentPlayerId = null;
+    }
+
+    async function setStatus(id, status) {
+        try {
+            await db.collection("players").doc(id).update({ status: status });
+            showToast("Player " + status, status === "approved" ? "success" : "danger");
+            closePlayer();
+        } catch (e) {
+            console.error(e);
+            showToast("Error updating player", "danger");
+        }
+    }
+
+    function approvePlayer(id) { setStatus(id, "approved"); }
+    function rejectPlayer(id) { setStatus(id, "rejected"); }
+
+    async function deletePlayer(id) {
+        if (!confirm("Delete this player? This cannot be undone.")) return;
+        try {
+            await db.collection("players").doc(id).delete();
+            showToast("Player deleted");
+            closePlayer();
+            closeEditPlayer();
+        } catch (e) {
+            console.error(e);
+            showToast("Error deleting player", "danger");
+        }
+    }
+
+    /* ================= ADD PLAYER ================= */
+    async function addPlayer() {
+        var name = $("apName").value.trim();
+        if (!name) { showToast("Enter user name", "danger"); return; }
+        try {
+            await db.collection("players").add({
+                userName: name,
+                gameIdNumber: $("apGameNum").value.trim(),
+                status: "approved",
+                addedByAdmin: true,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
             });
+            $("apName").value = "";
+            $("apGameNum").value = "";
+            showToast("Player added", "success");
+        } catch (e) {
+            console.error(e);
+            showToast("Error adding player", "danger");
+        }
+    }
 
-            filtered.forEach((p, i) => {
-                const item = document.createElement('div');
-                item.className = 'player-item';
-                item.style.animationDelay = Math.min(i * 0.05, 0.4) + 's';
-                item.innerHTML =
-                    '<div class="p-avatar">' + escapeHtml(initials(p.userName)) + '</div>' +
-                    '<div class="p-info">' +
-                        '<div class="p-name">' + escapeHtml(p.userName) + '</div>' +
-                        '<div class="p-uid">Game ID: ' + escapeHtml(p.gameIdNumber) + (p.gameIdLevel ? ' &bull; ' + escapeHtml(p.gameIdLevel) : '') + '</div>' +
-                        '<div class="p-time">' + escapeHtml(fmtTime(p.createdAt)) + '</div>' +
-                    '</div>' +
-                    '<span class="status-badge status-' + escapeHtml(p.status || 'pending') + '">' + escapeHtml(p.status || 'pending') + '</span>' +
-                    '<div class="p-actions">' +
-                        '<button class="mini-btn mb-blue" onclick="openPlayer(\'' + p.id + '\')">View</button>' +
-                        (p.status !== 'approved' ? '<button class="mini-btn mb-green" onclick="approvePlayer(\'' + p.id + '\')">Approve</button>' : '') +
-                        (p.status !== 'rejected' ? '<button class="mini-btn mb-red" onclick="rejectPlayer(\'' + p.id + '\')">Reject</button>' : '') +
-                        '<button class="mini-btn mb-gray" onclick="deletePlayer(\'' + p.id + '\')">Delete</button>' +
-                    '</div>';
-                list.appendChild(item);
+    /* ================= EDIT PLAYER ================= */
+    function openEditPlayer(id) {
+        var p = findPlayer(id);
+        if (!p) return;
+        currentPlayerId = id;
+        $("epName").value = p.userName || "";
+        $("epGameNum").value = p.gameIdNumber || "";
+        $("epGameIdName").value = p.gameIdName || "";
+        $("epGameIdLevel").value = p.gameIdLevel || "";
+        CA.openOverlay("editPlayerModal");
+    }
+
+    function closeEditPlayer() {
+        CA.closeOverlay("editPlayerModal");
+        currentPlayerId = null;
+    }
+
+    async function saveEditPlayer() {
+        var name = $("epName").value.trim();
+        if (!name) { showToast("Enter user name", "danger"); return; }
+        try {
+            await db.collection("players").doc(currentPlayerId).update({
+                userName: name,
+                gameIdNumber: $("epGameNum").value.trim(),
+                gameIdName: $("epGameIdName").value.trim(),
+                gameIdLevel: $("epGameIdLevel").value.trim()
             });
+            closeEditPlayer();
+            showToast("Player updated", "success");
+        } catch (e) {
+            console.error(e);
+            showToast("Error updating player", "danger");
+        }
+    }
 
-            empty.style.display = filtered.length === 0 ? 'block' : 'none';
+    /* ================= SETTINGS ================= */
+    function renderQrPreview() {
+        var url = $("setQrUrl").value.trim();
+        var img = $("qrPreview");
+        if (url) {
+            img.src = url;
+            img.style.display = "block";
+        } else {
+            img.removeAttribute("src");
+            img.style.display = "none";
+        }
+    }
+
+    function fillSettingsForm() {
+        if (!settings) return;
+        $("setEntryFee").value = settings.entryFee || 0;
+        $("setUpiId").value = settings.upiId || "";
+        $("setQrUrl").value = settings.qrUrl || "";
+        $("setTgToken").value = settings.telegramBotToken || "";
+        $("setTgChat").value = settings.telegramChatId || "";
+        renderQrPreview();
+    }
+
+    async function saveSettings() {
+        var updated = {
+            entryFee: Number($("setEntryFee").value) || 0,
+            upiId: $("setUpiId").value.trim(),
+            qrUrl: $("setQrUrl").value.trim(),
+            telegramBotToken: $("setTgToken").value.trim(),
+            telegramChatId: $("setTgChat").value.trim()
+        };
+        try {
+            await db.collection("settings").doc("main").set(Object.assign({}, settings, updated));
+            settings = Object.assign({}, settings, updated);
+            showToast("Settings saved", "success");
+        } catch (e) {
+            console.error(e);
+            showToast("Error saving settings", "danger");
+        }
+    }
+
+    /* ================= RULES ================= */
+    function renderRules() {
+        var list = $("rulesAdminList");
+        list.innerHTML = "";
+        var rules = (settings && settings.rules) || [];
+
+        if (rules.length === 0) {
+            list.innerHTML = '<div class="empty"><h3>No rules yet</h3><p>Add your first rule below.</p></div>';
+            return;
         }
 
-        function renderJoined() {
-            const list = $('adminJoinedList');
-            const empty = $('adminJoinedEmpty');
-            list.innerHTML = '';
-            const joined = allPlayers.filter(p => p.addedByAdmin);
+        rules.forEach(function (rule, i) {
+            var item = document.createElement("div");
+            item.className = "rule-edit";
+            item.innerHTML =
+                '<div class="rule-edit-head">' +
+                    '<span class="rule-num">' + (i + 1) + "</span>" +
+                    '<div class="btn-row">' +
+                        '<button class="btn success sm" type="button" onclick="saveRule(' + i + ')">Save</button>' +
+                        '<button class="btn danger sm" type="button" onclick="deleteRule(' + i + ')">Delete</button>' +
+                    "</div>" +
+                "</div>" +
+                '<div class="field">' +
+                    '<label class="field-label" for="ruleTitle_' + i + '">Rule title</label>' +
+                    '<input class="input" type="text" id="ruleTitle_' + i + '" value="' + escapeHtml(rule.title) + '" />' +
+                "</div>" +
+                '<div class="field">' +
+                    '<label class="field-label" for="ruleDesc_' + i + '">Description</label>' +
+                    '<textarea class="textarea" id="ruleDesc_' + i + '">' + escapeHtml(rule.description) + "</textarea>" +
+                "</div>";
+            list.appendChild(item);
+        });
+    }
 
-            joined.forEach((p, i) => {
-                const item = document.createElement('div');
-                item.className = 'player-item';
-                item.style.animationDelay = Math.min(i * 0.05, 0.4) + 's';
-                item.innerHTML =
-                    '<div class="p-avatar">' + escapeHtml(initials(p.userName)) + '</div>' +
-                    '<div class="p-info">' +
-                        '<div class="p-name">' + escapeHtml(p.userName) + '</div>' +
-                        '<div class="p-uid">Game ID: ' + escapeHtml(p.gameIdNumber) + '</div>' +
-                        '<div class="p-time">Joined ' + escapeHtml(fmtTime(p.createdAt)) + '</div>' +
-                    '</div>' +
-                    '<span class="status-badge status-approved">Approved</span>' +
-                    '<div class="p-actions">' +
-                        '<button class="mini-btn mb-blue" onclick="openEditPlayer(\'' + p.id + '\')">Edit</button>' +
-                        '<button class="mini-btn mb-red" onclick="deletePlayer(\'' + p.id + '\')">Delete</button>' +
-                    '</div>';
-                list.appendChild(item);
-            });
-
-            empty.style.display = joined.length === 0 ? 'block' : 'none';
+    async function persistRules(rules) {
+        try {
+            await db.collection("settings").doc("main").set({ rules: rules }, { merge: true });
+            settings = Object.assign({}, settings, { rules: rules });
+            showToast("Rules updated", "success");
+        } catch (e) {
+            console.error(e);
+            showToast("Error saving rules", "danger");
         }
+    }
 
-        /* ===== PLAYER ACTIONS ===== */
-        function findPlayer(id) {
-            return allPlayers.find(p => p.id === id);
-        }
+    function saveRule(index) {
+        var rules = (settings && settings.rules || []).slice();
+        rules[index] = {
+            title: $("ruleTitle_" + index).value.trim(),
+            description: $("ruleDesc_" + index).value.trim()
+        };
+        persistRules(rules).then(renderRules);
+    }
 
-        function openPlayer(id) {
-            const p = findPlayer(id);
-            if (!p) return;
-            currentPlayerId = id;
-            currentModalPlayer = p;
-            $('mName').textContent = p.userName || 'Player';
-            $('mSub').textContent = 'Joined ' + fmtTime(p.createdAt);
-            $('mDetails').innerHTML =
-                '<div class="detail-row"><span class="k">Game ID Name</span><span class="v">' + escapeHtml(p.gameIdName) + '</span></div>' +
-                '<div class="detail-row"><span class="k">Game ID</span><span class="v">' + escapeHtml(p.gameIdNumber) + '</span></div>' +
-                '<div class="detail-row"><span class="k">Level</span><span class="v">' + escapeHtml(p.gameIdLevel) + '</span></div>' +
-                '<div class="detail-row"><span class="k">Mobile</span><span class="v">' + escapeHtml(p.mobileNumber) + '</span></div>' +
-                '<div class="detail-row"><span class="k">Email</span><span class="v">' + escapeHtml(p.emailId) + '</span></div>' +
-                '<div class="detail-row"><span class="k">Payment Name</span><span class="v">' + escapeHtml(p.paymentName) + '</span></div>' +
-                '<div class="detail-row"><span class="k">UTR Number</span><span class="v">' + escapeHtml(p.utrNumber) + '</span></div>' +
-                '<div class="detail-row"><span class="k">Status</span><span class="v">' + escapeHtml(p.status || 'pending') + '</span></div>';
-            if (p.screenshot) {
-                $('mShot').src = p.screenshot;
-                $('mShotWrap').style.display = 'block';
-            } else {
-                $('mShotWrap').style.display = 'none';
-            }
-            $('mApprove').style.display = p.status === 'approved' ? 'none' : 'block';
-            $('mReject').style.display = p.status === 'rejected' ? 'none' : 'block';
-            $('playerModal').classList.add('active');
-        }
+    function deleteRule(index) {
+        if (!confirm("Delete this rule?")) return;
+        var rules = (settings && settings.rules || []).slice();
+        rules.splice(index, 1);
+        persistRules(rules).then(renderRules);
+    }
 
-        function closePlayer() {
-            $('playerModal').classList.remove('active');
-            currentPlayerId = null;
-        }
+    function addRule() {
+        var title = $("newRuleTitle").value.trim();
+        var desc = $("newRuleDesc").value.trim();
+        if (!title || !desc) { showToast("Fill title and description", "danger"); return; }
+        var rules = (settings && settings.rules || []).slice();
+        rules.push({ title: title, description: desc });
+        persistRules(rules).then(function () {
+            $("newRuleTitle").value = "";
+            $("newRuleDesc").value = "";
+            renderRules();
+        });
+    }
 
-        async function setStatus(id, status) {
-            try {
-                await db.collection('players').doc(id).update({ status: status });
-                showToast('Player ' + status);
-            } catch (e) {
-                console.error(e);
-                showToast('Error updating player');
-            }
-        }
+    /* ================= TABS ================= */
+    function switchTab(tab) {
+        document.querySelectorAll(".tab[data-tab]").forEach(function (btn) {
+            var on = btn.getAttribute("data-tab") === tab;
+            btn.classList.toggle("is-on", on);
+            btn.setAttribute("aria-selected", String(on));
+        });
+        document.querySelectorAll(".tab-panel[data-panel]").forEach(function (panel) {
+            panel.classList.toggle("is-on", panel.getAttribute("data-panel") === tab);
+        });
+    }
 
-        function approvePlayer(id) {
-            setStatus(id, 'approved');
-        }
-
-        function rejectPlayer(id) {
-            setStatus(id, 'rejected');
-        }
-
-        async function deletePlayer(id) {
-            if (!confirm('Delete this player? This cannot be undone.')) return;
-            try {
-                await db.collection('players').doc(id).delete();
-                showToast('Player deleted');
-            } catch (e) {
-                console.error(e);
-                showToast('Error deleting player');
-            }
-        }
-
-        /* ===== ADD PLAYER (MANUAL) ===== */
-        async function addPlayer() {
-            const name = $('apName').value.trim();
-            if (!name) { showToast('Enter user name'); return; }
-            try {
-                await db.collection('players').add({
-                    userName: name,
-                    gameIdNumber: $('apGameNum').value.trim(),
-                    status: 'approved',
-                    addedByAdmin: true,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                $('apName').value = '';
-                $('apGameNum').value = '';
-                showToast('Player added');
-            } catch (e) {
-                console.error(e);
-                showToast('Error adding player');
-            }
-        }
-
-        /* ===== EDIT PLAYER ===== */
-        function openEditPlayer(id) {
-            const p = findPlayer(id);
-            if (!p) return;
-            currentPlayerId = id;
-            $('epName').value = p.userName || '';
-            $('epGameNum').value = p.gameIdNumber || '';
-            $('epGameIdName').value = p.gameIdName || '';
-            $('epGameIdLevel').value = p.gameIdLevel || '';
-            $('editPlayerModal').classList.add('active');
-        }
-
-        function closeEditPlayer() {
-            $('editPlayerModal').classList.remove('active');
-            currentPlayerId = null;
-        }
-
-        async function saveEditPlayer() {
-            const name = $('epName').value.trim();
-            if (!name) { showToast('Enter user name'); return; }
-            try {
-                await db.collection('players').doc(currentPlayerId).update({
-                    userName: name,
-                    gameIdNumber: $('epGameNum').value.trim(),
-                    gameIdName: $('epGameIdName').value.trim(),
-                    gameIdLevel: $('epGameIdLevel').value.trim()
-                });
-                closeEditPlayer();
-                showToast('Player updated');
-            } catch (e) {
-                console.error(e);
-                showToast('Error updating player');
-            }
-        }
-
-        /* ===== SETTINGS ===== */
-        function renderQrPreview() {
-            const url = $('setQrUrl').value.trim();
-            const img = $('qrPreview');
-            if (url) {
-                img.src = url;
-                img.style.display = 'block';
-            } else {
-                img.style.display = 'none';
-            }
-        }
-
-        function fillSettingsForm() {
-            if (!settings) return;
-            $('setEntryFee').value = settings.entryFee || 0;
-            $('setUpiId').value = settings.upiId || '';
-            $('setQrUrl').value = settings.qrUrl || '';
-            $('setTgToken').value = settings.telegramBotToken || '';
-            $('setTgChat').value = settings.telegramChatId || '';
-            renderQrPreview();
-        }
-
-        async function saveSettings() {
-            const updated = {
-                entryFee: Number($('setEntryFee').value) || 0,
-                upiId: $('setUpiId').value.trim(),
-                qrUrl: $('setQrUrl').value.trim(),
-                telegramBotToken: $('setTgToken').value.trim(),
-                telegramChatId: $('setTgChat').value.trim()
-            };
-            try {
-                await db.collection('settings').doc('main').set(Object.assign({}, settings, updated));
-                settings = Object.assign({}, settings, updated);
-                showToast('Settings saved');
-            } catch (e) {
-                console.error(e);
-                showToast('Error saving settings');
-            }
-        }
-
-        /* ===== RULES ===== */
-        function renderRules() {
-            const list = $('rulesAdminList');
-            list.innerHTML = '';
-            const rules = (settings && settings.rules) || [];
-            if (rules.length === 0) {
-                list.innerHTML = '<div class="empty-state" style="display:block"><h3>No rules yet</h3></div>';
-                return;
-            }
-            rules.forEach((rule, i) => {
-                const item = document.createElement('div');
-                item.className = 'rule-edit';
-                item.innerHTML =
-                    '<div class="rule-edit-head">' +
-                        '<div class="rule-edit-num">' + (i + 1) + '</div>' +
-                        '<div class="rule-edit-actions">' +
-                            '<button class="mini-btn mb-blue" onclick="saveRule(' + i + ')">Save</button>' +
-                            '<button class="mini-btn mb-gray" onclick="deleteRule(' + i + ')">Delete</button>' +
-                        '</div>' +
-                    '</div>' +
-                    '<div class="form-row" style="margin-bottom:10px">' +
-                        '<input type="text" id="ruleTitle_' + i + '" value="' + escapeHtml(rule.title) + '">' +
-                    '</div>' +
-                    '<div class="form-row" style="margin-bottom:0">' +
-                        '<textarea id="ruleDesc_' + i + '">' + escapeHtml(rule.description) + '</textarea>' +
-                    '</div>';
-                list.appendChild(item);
-            });
-        }
-
-        async function persistRules(rules) {
-            try {
-                await db.collection('settings').doc('main').set({ rules: rules }, { merge: true });
-                settings = Object.assign({}, settings, { rules: rules });
-                showToast('Rules updated');
-            } catch (e) {
-                console.error(e);
-                showToast('Error saving rules');
-            }
-        }
-
-        function saveRule(index) {
-            const rules = (settings && settings.rules || []).slice();
-            rules[index] = {
-                title: $('ruleTitle_' + index).value.trim(),
-                description: $('ruleDesc_' + index).value.trim()
-            };
-            persistRules(rules).then(renderRules);
-        }
-
-        function deleteRule(index) {
-            if (!confirm('Delete this rule?')) return;
-            const rules = (settings && settings.rules || []).slice();
-            rules.splice(index, 1);
-            persistRules(rules).then(renderRules);
-        }
-
-        function addRule() {
-            const title = $('newRuleTitle').value.trim();
-            const desc = $('newRuleDesc').value.trim();
-            if (!title || !desc) { showToast('Fill title and description'); return; }
-            const rules = (settings && settings.rules || []).slice();
-            rules.push({ title: title, description: desc });
-            persistRules(rules).then(() => {
-                $('newRuleTitle').value = '';
-                $('newRuleDesc').value = '';
-                renderRules();
-            });
-        }
-
-        /* ===== TABS ===== */
-        function switchTab(tab) {
-            document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            $('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
-            $('tabBtn' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
-        }
-    </script>
+    document.querySelectorAll(".tab[data-tab]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            switchTab(btn.getAttribute("data-tab"));
+        });
+    });
+</script>
 </body>
 </html>

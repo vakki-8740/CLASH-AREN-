@@ -1,1550 +1,722 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tournament Registration</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        :root {
-            --ios-bg: #F5F5F7;
-            --ios-card: #FFFFFF;
-            --ios-sky: #0A84FF;
-            --ios-sky-glow: rgba(10, 132, 255, 0.08);
-            --ios-sky-light: rgba(10, 132, 255, 0.04);
-            --ios-text: #1C1C1E;
-            --ios-text-secondary: #8E8E93;
-            --ios-border: #E0E0E0;
-            --ios-radius: 14px;
-            --ios-radius-sm: 10px;
-            --shadow-ios: 0 1px 3px rgba(0,0,0,0.06);
-            --glow-sky: none;
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: var(--ios-bg);
-            min-height: 100vh;
-            overflow-x: hidden;
-            color: var(--ios-text);
-            -webkit-font-smoothing: antialiased;
-        }
-
-        /* Clean minimal background */
-
-        .page {
-            position: relative;
-            z-index: 1;
-            padding: 24px 20px 40px;
-            max-width: 420px;
-            margin: 0 auto;
-            min-height: 100vh;
-            display: none;
-        }
-        .page.active {
-            display: block;
-        }
-
-        /* iOS Slide Animations */
-        @keyframes slideInRight {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        @keyframes slideOutLeft {
-            from { transform: translateX(0); opacity: 1; }
-            to { transform: translateX(-40%); opacity: 0; }
-        }
-        @keyframes slideInLeft {
-            from { transform: translateX(-40%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        @keyframes slideOutRight {
-            from { transform: translateX(0); opacity: 1; }
-            to { transform: translateX(100%); opacity: 0; }
-        }
-        @keyframes fadeScaleUp {
-            from { transform: scale(0.92); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-        @keyframes fadeUp {
-            from { transform: translateY(14px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        @keyframes shakeGlow {
-            0%, 100% { box-shadow: 0 0 0 rgba(255, 59, 48, 0); }
-            50% { box-shadow: 0 4px 18px rgba(255, 59, 48, 0.25), 0 0 30px rgba(255, 59, 48, 0.08); }
-        }
-
-        .anim-enter {
-            animation: slideInRight 0.45s cubic-bezier(0.32, 0.72, 0, 1) forwards;
-        }
-        .anim-exit {
-            animation: slideOutLeft 0.4s cubic-bezier(0.32, 0.72, 0, 1) forwards;
-        }
-        .anim-enter-back {
-            animation: slideInLeft 0.45s cubic-bezier(0.32, 0.72, 0, 1) forwards;
-        }
-        .anim-exit-back {
-            animation: slideOutRight 0.4s cubic-bezier(0.32, 0.72, 0, 1) forwards;
-        }
-
-        /* Header */
-        .ios-header {
-            position: relative;
-            text-align: center;
-            margin-bottom: 28px;
-            padding-top: 8px;
-        }
-        .inbox-btn {
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 44px;
-            height: 44px;
-            background: white;
-            border: 1.5px solid var(--ios-border);
-            border-radius: 14px;
-            color: var(--ios-sky);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            animation: fadeScaleUp 0.5s cubic-bezier(0.32, 0.72, 0, 1) 0.05s both;
-        }
-        .inbox-btn:active {
-            transform: scale(0.9);
-        }
-        .inbox-btn svg {
-            width: 22px;
-            height: 22px;
-        }
-        .inbox-dot {
-            position: absolute;
-            top: 8px;
-            right: 9px;
-            width: 9px;
-            height: 9px;
-            background: #FF3B30;
-            border: 2px solid white;
-            border-radius: 50%;
-            display: none;
-        }
-        .inbox-dot.show {
-            display: block;
-            animation: pulseDot 1.6s ease-in-out infinite;
-        }
-        @keyframes pulseDot {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.3); }
-        }
-        .ios-header h1 {
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--ios-text);
-            margin: 0 0 6px;
-            letter-spacing: -0.5px;
-        }
-        .ios-header p {
-            font-size: 15px;
-            color: var(--ios-text-secondary);
-            margin: 0;
-            font-weight: 400;
-        }
-        .ios-header .trophy {
-            width: 64px;
-            height: 64px;
-            margin: 0 auto 16px;
-            background: linear-gradient(135deg, #0A84FF 0%, #5AC8FA 100%);
-            border-radius: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            animation: fadeScaleUp 0.6s cubic-bezier(0.32, 0.72, 0, 1) 0.1s both;
-        }
-        .ios-header .trophy svg {
-            width: 32px;
-            height: 32px;
-            color: white;
-        }
-
-        /* Form Card */
-        .ios-card {
-            background: var(--ios-card);
-            border-radius: var(--ios-radius);
-            border: 1px solid var(--ios-border);
-            overflow: hidden;
-            margin-bottom: 20px;
-            animation: fadeScaleUp 0.5s cubic-bezier(0.32, 0.72, 0, 1) 0.15s both;
-        }
-
-        /* Section Title */
-        .section-title {
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--ios-text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            margin: 0 4px 12px;
-            animation: fadeUp 0.5s cubic-bezier(0.32, 0.72, 0, 1) 0.05s both;
-        }
-
-        /* Progress Bar */
-        .progress-wrap {
-            background: var(--ios-card);
-            border-radius: var(--ios-radius);
-            padding: 14px 16px;
-            margin-bottom: 14px;
-            border: 1px solid var(--ios-border);
-            animation: fadeUp 0.5s cubic-bezier(0.32, 0.72, 0, 1) 0.12s both;
-        }
-        .progress-label {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--ios-text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.6px;
-            margin-bottom: 10px;
-        }
-        .progress-pct {
-            font-size: 15px;
-            font-weight: 700;
-            color: var(--ios-sky);
-            transition: color 0.3s ease;
-        }
-        .progress-pct.done {
-            color: #34C759;
-        }
-        .progress-track {
-            height: 8px;
-            background: var(--ios-sky-light);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        .progress-fill {
-            position: relative;
-            height: 100%;
-            width: 0%;
-            border-radius: 10px;
-            background: linear-gradient(90deg, #0A84FF 0%, #5AC8FA 100%);
-            transition: width 0.7s cubic-bezier(0.32, 0.72, 0, 1);
-            overflow: hidden;
-        }
-        .progress-fill::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: -40px;
-            width: 40px;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-            animation: shimmerMove 1.5s ease-in-out infinite;
-        }
-        .progress-fill.done {
-            background: linear-gradient(90deg, #34C759 0%, #30D158 100%);
-        }
-        .progress-fill.done::after {
-            animation: none;
-        }
-        @keyframes shimmerMove {
-            0% { left: -40px; }
-            100% { left: 100%; }
-        }
-
-        /* Inbox Sheet */
-        .inbox-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.45);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            display: none;
-            align-items: flex-end;
-            justify-content: center;
-            z-index: 120;
-        }
-        .inbox-overlay.active {
-            display: flex;
-        }
-        .inbox-sheet {
-            background: #F2F2F7;
-            border-radius: 22px 22px 0 0;
-            width: 100%;
-            max-width: 420px;
-            max-height: 84vh;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
-            animation: sheetUp 0.35s cubic-bezier(0.32, 0.72, 0, 1) both;
-        }
-        @keyframes sheetUp {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
-        }
-        .inbox-sheet-head {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 20px 20px 12px;
-        }
-        .inbox-sheet-head h3 {
-            font-size: 18px;
-            font-weight: 700;
-            letter-spacing: -0.3px;
-        }
-        .inbox-sheet-head p {
-            font-size: 12px;
-            color: var(--ios-text-secondary);
-            margin-top: 2px;
-        }
-        .inbox-close {
-            width: 34px;
-            height: 34px;
-            min-width: 34px;
-            background: white;
-            border: 1.5px solid var(--ios-border);
-            border-radius: 50%;
-            font-size: 20px;
-            color: var(--ios-text-secondary);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: inherit;
-        }
-        .inbox-close:active {
-            transform: scale(0.9);
-        }
-        .inbox-search {
-            position: relative;
-            margin: 0 20px 14px;
-        }
-        .inbox-search input {
-            width: 100%;
-            padding: 12px 14px 12px 40px;
-            border: 1.5px solid var(--ios-border);
-            border-radius: 12px;
-            background: white;
-            font-size: 14px;
-            font-family: inherit;
-            color: var(--ios-text);
-            outline: none;
-        }
-        .inbox-search input:focus {
-            border-color: var(--ios-sky);
-        }
-        .inbox-search input::placeholder {
-            color: #C7C7CC;
-        }
-        .inbox-search svg {
-            position: absolute;
-            left: 13px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 17px;
-            height: 17px;
-            color: #C7C7CC;
-        }
-        .inbox-list {
-            flex: 1;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-            padding: 0 16px 28px;
-        }
-
-        /* Status Check */
-        .status-card-item {
-            background: white;
-            border-radius: var(--ios-radius);
-            border: 1px solid var(--ios-border);
-            padding: 16px;
-            margin-bottom: 12px;
-            animation: fadeUp 0.5s cubic-bezier(0.32, 0.72, 0, 1) both;
-        }
-        .status-head {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 12px;
-        }
-        .status-avatar {
-            width: 42px;
-            height: 42px;
-            min-width: 42px;
-            background: linear-gradient(135deg, #0A84FF, #5AC8FA);
-            border-radius: 12px;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 15px;
-            font-weight: 700;
-            box-shadow: 0 2px 8px rgba(10,132,255,0.2);
-        }
-        .status-head-info {
-            flex: 1;
-            min-width: 0;
-        }
-        .status-name {
-            font-size: 15px;
-            font-weight: 700;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .status-sub {
-            font-size: 12px;
-            color: var(--ios-text-secondary);
-            margin-top: 2px;
-        }
-        .status-badge {
-            font-size: 11px;
-            font-weight: 800;
-            padding: 4px 10px;
-            border-radius: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.4px;
-            white-space: nowrap;
-        }
-        .status-pending { color: #FF9500; background: rgba(255,149,0,0.12); }
-        .status-approved { color: #34C759; background: rgba(52,199,89,0.12); }
-        .status-rejected { color: #FF3B30; background: rgba(255,59,48,0.12); }
-        .status-details {
-            background: #F9F9FB;
-            border-radius: 10px;
-            padding: 4px 14px;
-        }
-        .status-row {
-            display: flex;
-            justify-content: space-between;
-            gap: 12px;
-            padding: 8px 0;
-            border-bottom: 1px solid var(--ios-border);
-            font-size: 13px;
-        }
-        .status-row:last-child {
-            border-bottom: none;
-        }
-        .status-row .k {
-            color: var(--ios-text-secondary);
-            flex-shrink: 0;
-        }
-        .status-row .v {
-            font-weight: 600;
-            text-align: right;
-            word-break: break-word;
-        }
-        .status-empty {
-            text-align: center;
-            padding: 36px 20px;
-            background: white;
-            border-radius: var(--ios-radius);
-            border: 1px solid var(--ios-border);
-            animation: fadeUp 0.5s cubic-bezier(0.32, 0.72, 0, 1) both;
-        }
-        .status-empty svg {
-            width: 44px;
-            height: 44px;
-            color: #C7C7CC;
-            margin-bottom: 12px;
-        }
-        .status-empty h3 {
-            font-size: 16px;
-            font-weight: 700;
-            color: #8E8E93;
-        }
-        .status-empty p {
-            font-size: 13px;
-            color: #C7C7CC;
-            margin-top: 4px;
-        }
-        .status-loading {
-            text-align: center;
-            padding: 30px;
-            color: var(--ios-sky);
-            font-size: 14px;
-            font-weight: 700;
-            background: white;
-            border-radius: var(--ios-radius);
-            border: 1px solid var(--ios-border);
-            animation: fadeUp 0.3s ease both;
-        }
-        .status-loading::after {
-            content: '';
-            display: block;
-            width: 20px;
-            height: 20px;
-            margin: 10px auto 0;
-            border: 3px solid rgba(10,132,255,0.15);
-            border-top-color: var(--ios-sky);
-            border-radius: 50%;
-            animation: spinLoad 0.8s linear infinite;
-        }
-        @keyframes spinLoad {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Form Fields - Clean Minimal */
-        .field {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: transparent;
-            border: 1.5px solid var(--ios-border);
-            border-radius: 12px;
-            padding: 12px 14px;
-            margin: 0 12px 10px;
-            transition: all 0.25s ease;
-            animation: fadeUp 0.5s cubic-bezier(0.32, 0.72, 0, 1) both;
-        }
-        .field:nth-child(1) { animation-delay: 0.18s; }
-        .field:nth-child(2) { animation-delay: 0.24s; }
-        .field:nth-child(3) { animation-delay: 0.30s; }
-        .field:nth-child(4) { animation-delay: 0.36s; }
-        .field:nth-child(5) { animation-delay: 0.42s; }
-        .field:focus-within {
-            border-color: var(--ios-sky);
-            background: rgba(10, 132, 255, 0.03);
-        }
-        .field.error {
-            border-color: #FF3B30;
-            background: rgba(255, 59, 48, 0.03);
-            animation: shakeGlow 0.4s ease;
-        }
-        .field.filled {
-            border-color: rgba(52,199,89,0.5);
-            background: rgba(52,199,89,0.03);
-        }
-        .field.filled .field-icon {
-            background: rgba(52,199,89,0.12);
-            color: #34C759;
-        }
-        .field.filled .field-label {
-            color: #34C759;
-        }
-        .field.filled:focus-within {
-            border-color: #34C759;
-            background: rgba(52,199,89,0.04);
-        }
-        .field.filled:focus-within .field-icon {
-            background: linear-gradient(135deg, #34C759 0%, #30D158 100%);
-            color: white;
-            box-shadow: 0 2px 8px rgba(52,199,89,0.3);
-        }
-        .field.filled:focus-within .field-label {
-            color: #34C759;
-        }
-        .field-icon {
-            width: 38px;
-            height: 38px;
-            min-width: 38px;
-            background: rgba(10,132,255,0.10);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--ios-sky);
-            transition: all 0.25s ease;
-        }
-        .field-icon svg {
-            width: 20px;
-            height: 20px;
-        }
-        .field:focus-within .field-icon {
-            background: linear-gradient(135deg, #0A84FF 0%, #007AFF 100%);
-            color: white;
-            box-shadow: 0 2px 8px rgba(10,132,255,0.3);
-        }
-        .field-body {
-            flex: 1;
-            min-width: 0;
-        }
-        .field-label {
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--ios-text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 3px;
-            transition: color 0.25s ease;
-        }
-        .field:focus-within .field-label {
-            color: var(--ios-sky);
-        }
-        .field-body input {
-            width: 100%;
-            border: none;
-            outline: none;
-            background: transparent;
-            font-size: 16px;
-            color: var(--ios-text);
-            font-family: inherit;
-            padding: 0;
-        }
-        .field-body input::placeholder {
-            color: #C7C7CC;
-            font-size: 15px;
-        }
-
-        /* iOS Button - Clean */
-        .ios-btn {
-            width: 100%;
-            padding: 16px;
-            border: none;
-            border-radius: var(--ios-radius-sm);
-            background: linear-gradient(135deg, #0A84FF 0%, #007AFF 100%);
-            color: white;
-            font-size: 17px;
-            font-weight: 600;
-            font-family: inherit;
-            cursor: pointer;
-            box-shadow: 0 2px 10px rgba(10,132,255,0.3);
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            margin-top: 8px;
-            animation: fadeUp 0.55s cubic-bezier(0.32, 0.72, 0, 1) 0.55s both;
-        }
-        .ios-btn:hover {
-            box-shadow: 0 4px 16px rgba(10,132,255,0.4);
-        }
-        .ios-btn:active {
-            transform: scale(0.98);
-            box-shadow: 0 1px 4px rgba(10,132,255,0.2);
-        }
-        .ios-btn svg {
-            width: 20px;
-            height: 20px;
-        }
-
-        /* Back Button */
-        .ios-back {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            color: var(--ios-sky);
-            font-size: 17px;
-            font-weight: 500;
-            background: none;
-            border: none;
-            padding: 8px 0;
-            margin-bottom: 12px;
-            cursor: pointer;
-            font-family: inherit;
-        }
-        .ios-back svg {
-            width: 20px;
-            height: 20px;
-        }
-
-        /* QR Section */
-        .qr-container {
-            background: white;
-            border-radius: var(--ios-radius);
-            padding: 24px;
-            text-align: center;
-            border: 1px solid var(--ios-border);
-            margin-bottom: 20px;
-            animation: fadeScaleUp 0.5s cubic-bezier(0.32, 0.72, 0, 1) 0.1s both;
-        }
-        .qr-label {
-            font-size: 13px;
-            color: var(--ios-text-secondary);
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 16px;
-        }
-        .qr-box {
-            width: 180px;
-            height: 180px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 12px;
-            padding: 12px;
-            border: 1px solid var(--ios-border);
-            position: relative;
-        }
-        .qr-box svg {
-            width: 100%;
-            height: 100%;
-        }
-        .qr-amount {
-            margin-top: 16px;
-            text-align: center;
-        }
-        .qr-amount-label {
-            display: inline-block;
-            font-size: 11px;
-            font-weight: 800;
-            color: #34C759;
-            background: rgba(52,199,89,0.10);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            padding: 5px 14px;
-            border-radius: 20px;
-            box-shadow: 0 2px 10px rgba(52,199,89,0.12);
-            animation: fadeUp 0.5s cubic-bezier(0.32, 0.72, 0, 1) 0.2s both;
-        }
-        .qr-amount-value {
-            margin-top: 8px;
-            font-size: 34px;
-            font-weight: 800;
-            letter-spacing: -1px;
-            color: #34C759;
-            text-shadow: 0 0 24px rgba(52,199,89,0.40), 0 2px 8px rgba(52,199,89,0.15);
-            animation: fadeUp 0.5s cubic-bezier(0.32, 0.72, 0, 1) 0.26s both;
-        }
-        .qr-amount-value .rupee {
-            font-size: 22px;
-            font-weight: 800;
-            margin-right: 2px;
-        }
-
-        /* Upload Area */
-        .upload-area {
-            border: 2px dashed var(--ios-border);
-            border-radius: var(--ios-radius-sm);
-            padding: 28px 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.25s ease;
-            background: rgba(10,132,255,0.02);
-            margin-top: 8px;
-        }
-        .upload-area:hover {
-            border-color: var(--ios-sky);
-            background: rgba(10,132,255,0.04);
-        }
-        .upload-area.has-file {
-            border-color: #34C759;
-            border-style: solid;
-            background: rgba(52,199,89,0.03);
-        }
-        .upload-area svg {
-            width: 36px;
-            height: 36px;
-            color: var(--ios-sky);
-            margin-bottom: 8px;
-        }
-        .upload-area.has-file svg {
-            color: #34C759;
-        }
-        .upload-area .upload-text {
-            font-size: 14px;
-            color: var(--ios-text-secondary);
-            font-weight: 500;
-        }
-        .upload-area .upload-filename {
-            font-size: 13px;
-            color: var(--ios-text);
-            font-weight: 600;
-            margin-top: 4px;
-        }
-
-        /* Payment header */
-        .payment-header {
-            text-align: center;
-            margin-bottom: 20px;
-            animation: fadeScaleUp 0.5s cubic-bezier(0.32, 0.72, 0, 1) 0.05s both;
-        }
-        .payment-header h2 {
-            font-size: 22px;
-            font-weight: 700;
-            color: var(--ios-text);
-            margin: 0 0 4px;
-        }
-        .payment-header p {
-            font-size: 14px;
-            color: var(--ios-text-secondary);
-            margin: 0;
-        }
-
-        /* Section title */
-        .section-title {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--ios-text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.6px;
-            margin: 20px 0 10px 4px;
-        }
-
-        /* Success overlay */
-        .success-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.4);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
-            padding: 20px;
-        }
-        .success-overlay.active {
-            display: flex;
-            animation: fadeScaleUp 0.3s ease;
-        }
-        .success-card {
-            background: white;
-            border-radius: var(--ios-radius);
-            padding: 36px 28px;
-            text-align: center;
-            max-width: 300px;
-            width: 100%;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-        }
-        .success-card .check-circle {
-            width: 64px;
-            height: 64px;
-            background: linear-gradient(135deg, #34C759, #30D158);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-            box-shadow: 0 4px 20px rgba(52,199,89,0.3);
-        }
-        .success-card .check-circle svg {
-            width: 32px;
-            height: 32px;
-            color: white;
-        }
-        .success-card h3 {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--ios-text);
-            margin: 0 0 8px;
-        }
-        .success-card p {
-            font-size: 14px;
-            color: var(--ios-text-secondary);
-            margin: 0 0 20px;
-        }
-        .success-card .done-btn {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: var(--ios-radius-sm);
-            background: var(--ios-sky);
-            color: white;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            font-family: inherit;
-        }
-
-        /* Announcement bar */
-        .announcement-bar {
-            background: rgba(255, 149, 0, 0.08);
-            border: 1px solid rgba(255, 149, 0, 0.25);
-            border-radius: 12px;
-            padding: 12px 16px;
-            margin-bottom: 20px;
-            display: none;
-            align-items: center;
-            gap: 10px;
-            text-align: left;
-            animation: fadeScaleUp 0.5s cubic-bezier(0.32, 0.72, 0, 1) 0.1s both;
-        }
-        .announcement-bar svg {
-            width: 18px;
-            height: 18px;
-            color: #FF9500;
-            flex-shrink: 0;
-        }
-        .announcement-bar p {
-            font-size: 13px;
-            color: #8A5A00;
-            font-weight: 500;
-            line-height: 1.4;
-            margin: 0;
-        }
-        .setup-warning {
-            background: rgba(255, 59, 48, 0.05);
-            border: 1px solid rgba(255, 59, 48, 0.2);
-            border-radius: 12px;
-            padding: 12px 16px;
-            margin-bottom: 20px;
-            font-size: 13px;
-            color: #C0392B;
-            font-weight: 500;
-            display: none;
-            text-align: left;
-        }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Tournament Registration</title>
+<script>
+try {
+    var savedTheme = localStorage.getItem("theme");
+    if (savedTheme) document.documentElement.setAttribute("data-theme", savedTheme);
+    else if (window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches) document.documentElement.setAttribute("data-theme", "dark");
+} catch (e) {}
+</script>
+<link rel="stylesheet" href="../assets/ui.css" />
 </head>
 <body>
 
-    <!-- PAGE 1: Tournament Registration -->
-    <div class="page active" id="page1">
-        <div class="ios-header">
-            <button class="inbox-btn" onclick="openInbox()" aria-label="Your requests">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
-                <span class="inbox-dot" id="inboxDot"></span>
+<header class="topbar">
+    <div class="topbar-inner">
+        <a class="brand" href="../index/index.html">
+            <span class="brand-mark">
+                <img src="PROJECT%20LOGO/photo_2026-08-05_11-49-04.jpg" alt="Clash Arena logo" />
+            </span>
+            <span>
+                <strong class="brand-name" data-tournament-name>Clash Arena</strong>
+                <span class="brand-sub">Tournament registration</span>
+            </span>
+        </a>
+        <div class="topbar-actions">
+            <button class="icon-btn" type="button" onclick="openInbox()" aria-label="Your requests">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+                <span class="dot" id="inboxDot"></span>
             </button>
-            <div class="trophy" style="overflow:hidden;padding:0;">
-                <img src="PROJECT%20LOGO/photo_2026-08-05_11-49-04.jpg" alt="Clash Arena Logo" style="width:100%;height:100%;object-fit:cover;display:block;">
-            </div>
-            <h1 id="tournamentTitle">Join Tournament</h1>
-            <p>Fill your details to register</p>
+            <button class="icon-btn theme-toggle" type="button" data-theme-toggle aria-label="Toggle theme">
+                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+            </button>
         </div>
-
-        <div class="setup-warning" id="setupWarning">Firebase not configured. Add your config in firebase-config.js</div>
-        <div class="announcement-bar" id="announcementBar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-            <p id="announcementText"></p>
-        </div>
-
-        <div class="section-title">Player Details</div>
-
-        <div class="progress-wrap">
-            <div class="progress-label">
-                <span>Registration Progress</span>
-                <span class="progress-pct" id="progressPct">0%</span>
-            </div>
-            <div class="progress-track">
-                <div class="progress-fill" id="progressFill"></div>
-            </div>
-        </div>
-
-        <div class="ios-card">
-            <div class="field">
-                <div class="field-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                </div>
-                <div class="field-body">
-                    <div class="field-label">User Name</div>
-                    <input type="text" placeholder="Enter your name" id="userName" oninput="updateProgress()">
-                </div>
-            </div>
-            <div class="field">
-                <div class="field-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-                </div>
-                <div class="field-body">
-                    <div class="field-label">Game ID Name</div>
-                    <input type="text" placeholder="Your game nickname" id="gameIdName" oninput="updateProgress()">
-                </div>
-            </div>
-            <div class="field">
-                <div class="field-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
-                </div>
-                <div class="field-body">
-                    <div class="field-label">Game ID Number</div>
-                    <input type="tel" inputmode="numeric" maxlength="12" placeholder="e.g. 883421" id="gameIdNumber" oninput="this.value=this.value.replace(/\D/g,'');updateProgress()">
-                </div>
-            </div>
-            <div class="field">
-                <div class="field-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                </div>
-                <div class="field-body">
-                    <div class="field-label">Game ID Level</div>
-                    <input type="tel" inputmode="numeric" maxlength="2" placeholder="e.g. 72" id="gameIdLevel" oninput="this.value=this.value.replace(/\D/g,'');updateProgress()">
-                </div>
-            </div>
-            <div class="field">
-                <div class="field-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                </div>
-                <div class="field-body">
-                    <div class="field-label">Mobile Number</div>
-                    <input type="tel" placeholder="+91 98765 43210" id="mobileNumber" oninput="updateProgress()">
-                </div>
-            </div>
-
-        </div>
-
-        <button class="ios-btn" onclick="goToPayment()">
-            Next
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-        </button>
     </div>
+</header>
 
-    <!-- PAGE 2: Payment -->
-    <div class="page" id="page2">
-        <button class="ios-back" onclick="goBack()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-            Back
-        </button>
+<main class="shell narrow">
 
-        <div class="payment-header">
-            <h2>Payment</h2>
-            <p>Scan QR & complete payment</p>
-        </div>
+    <!-- ================= PAGE 1 · REGISTRATION ================= -->
+    <div class="page active" id="page1">
 
-        <div class="qr-container">
-            <div class="qr-label">Scan to Pay</div>
-            <div class="qr-box" id="qrBox">
-                <svg viewBox="0 0 100 100">
-                    <rect fill="white" width="100" height="100"/>
-                    <g fill="#1C1C1E">
-                        <rect x="5" y="5" width="25" height="25"/>
-                        <rect fill="white" x="9" y="9" width="17" height="17"/>
-                        <rect x="13" y="13" width="9" height="9"/>
-                        <rect x="70" y="5" width="25" height="25"/>
-                        <rect fill="white" x="74" y="9" width="17" height="17"/>
-                        <rect x="78" y="13" width="9" height="9"/>
-                        <rect x="5" y="70" width="25" height="25"/>
-                        <rect fill="white" x="9" y="74" width="17" height="17"/>
-                        <rect x="13" y="78" width="9" height="9"/>
-                        <rect x="35" y="5" width="5" height="5"/><rect x="45" y="5" width="5" height="5"/><rect x="55" y="10" width="5" height="5"/>
-                        <rect x="35" y="15" width="5" height="5"/><rect x="50" y="15" width="5" height="5"/><rect x="60" y="15" width="5" height="5"/>
-                        <rect x="40" y="25" width="5" height="5"/><rect x="55" y="25" width="5" height="5"/>
-                        <rect x="5" y="35" width="5" height="5"/><rect x="15" y="35" width="5" height="5"/><rect x="30" y="35" width="5" height="5"/><rect x="45" y="35" width="5" height="5"/><rect x="60" y="35" width="5" height="5"/><rect x="75" y="35" width="5" height="5"/><rect x="85" y="35" width="5" height="5"/>
-                        <rect x="10" y="45" width="5" height="5"/><rect x="25" y="45" width="5" height="5"/><rect x="40" y="45" width="5" height="5"/><rect x="55" y="45" width="5" height="5"/><rect x="70" y="45" width="5" height="5"/><rect x="80" y="45" width="5" height="5"/>
-                        <rect x="5" y="55" width="5" height="5"/><rect x="20" y="55" width="5" height="5"/><rect x="35" y="55" width="5" height="5"/><rect x="50" y="55" width="5" height="5"/><rect x="65" y="55" width="5" height="5"/><rect x="80" y="55" width="5" height="5"/>
-                        <rect x="15" y="65" width="5" height="5"/><rect x="30" y="65" width="5" height="5"/><rect x="45" y="65" width="5" height="5"/><rect x="60" y="65" width="5" height="5"/><rect x="75" y="65" width="5" height="5"/>
-                        <rect x="35" y="75" width="5" height="5"/><rect x="50" y="75" width="5" height="5"/><rect x="65" y="75" width="5" height="5"/><rect x="80" y="75" width="5" height="5"/>
-                        <rect x="40" y="85" width="5" height="5"/><rect x="55" y="85" width="5" height="5"/><rect x="70" y="85" width="5" height="5"/>
-                        <rect x="35" y="40" width="5" height="5"/><rect x="40" y="50" width="5" height="5"/><rect x="50" y="60" width="5" height="5"/>
-                    </g>
-                </svg>
+        <section class="hero">
+            <span class="badge info"><span class="dot"></span>Registration open</span>
+            <h1 id="tournamentTitle">Join the arena</h1>
+            <p>Fill in your player details, pay the entry fee and upload the payment screenshot to lock your slot.</p>
+            <div class="hero-meta">
+                <div class="hm">
+                    <span class="hm-lb">Entry fee</span>
+                    <strong class="hm-val">₹<span data-entry-fee>199</span></strong>
+                </div>
+                <div class="hm">
+                    <span class="hm-lb">Prize pool</span>
+                    <strong class="hm-val" data-prize>₹5,000</strong>
+                </div>
+                <div class="hm">
+                    <span class="hm-lb">Match time</span>
+                    <strong class="hm-val" data-match>9:00 PM</strong>
+                </div>
+                <div class="hm">
+                    <span class="hm-lb">Slots</span>
+                    <strong class="hm-val" data-slots>100</strong>
+                </div>
             </div>
-            <div class="qr-amount">
-                <div class="qr-amount-label">Entry Fee</div>
-                <div class="qr-amount-value"><span class="rupee">₹</span><span id="entryFeeAmt">199</span></div>
+        </section>
+
+        <div class="alert warning setup-warning" id="setupWarning">
+            <span class="alert-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+            </span>
+            <div class="alert-body">
+                <strong class="alert-title">Firebase not configured</strong>
+                <span class="alert-text">Add your project config in firebase-config.js to enable registration.</span>
             </div>
         </div>
 
-        <div class="section-title">Payment Details</div>
-        <div class="ios-card">
-            <div class="field">
-                <div class="field-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                </div>
-                <div class="field-body">
-                    <div class="field-label">Payment Name</div>
-                    <input type="text" placeholder="Name on UPI" id="paymentName">
-                </div>
-            </div>
-            <div class="field">
-                <div class="field-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-                </div>
-                <div class="field-body">
-                    <div class="field-label">UTR Number</div>
-                    <input type="text" placeholder="12-digit UTR" id="utrNumber">
-                </div>
+        <div class="alert info" id="announcementBar" style="display:none">
+            <span class="alert-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </span>
+            <div class="alert-body">
+                <strong class="alert-title">Announcement</strong>
+                <span class="alert-text" id="announcementText"></span>
             </div>
         </div>
 
-        <div class="section-title">Screenshot</div>
-        <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
-            <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleFile(this)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            <div class="upload-text" id="uploadText">Tap to upload payment screenshot</div>
-            <div class="upload-filename" id="uploadFilename"></div>
-        </div>
-
-        <button class="ios-btn" style="margin-top: 24px;" onclick="submitPayment(this)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            Confirm Payment
-        </button>
-    </div>
-
-    <!-- Inbox Sheet -->
-    <div class="inbox-overlay" id="inboxOverlay">
-        <div class="inbox-sheet">
-            <div class="inbox-sheet-head">
+        <section class="panel">
+            <div class="panel-head">
                 <div>
-                    <h3>Your Requests</h3>
-                    <p id="inboxSub">Sabhi registrations yahan stored hain</p>
+                    <h2 class="panel-title">Player details</h2>
+                    <p class="panel-sub">Fields marked <span class="req">*</span> are required.</p>
                 </div>
-                <button class="inbox-close" onclick="closeInbox()">&times;</button>
             </div>
-            <div class="inbox-search">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                <input type="text" placeholder="Mobile / Game ID / Name" id="inboxSearch" onkeydown="if(event.key==='Enter')loadInbox()">
+
+            <div class="progress-wrap">
+                <div class="progress-top">
+                    <span>Registration progress</span>
+                    <span class="progress-pct" id="progressPct">0%</span>
+                </div>
+                <div class="progress">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
             </div>
-            <div class="inbox-list" id="inboxList"></div>
-        </div>
+
+            <div class="form-grid">
+                <div class="field full">
+                    <label class="field-label" for="userName">User name <span class="req">*</span></label>
+                    <div class="control has-lead">
+                        <span class="lead" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        </span>
+                        <input class="input" type="text" placeholder="Enter your name" id="userName" autocomplete="name" oninput="updateProgress()" />
+                    </div>
+                    <span class="help">This name will be shown to the admin.</span>
+                </div>
+
+                <div class="field">
+                    <label class="field-label" for="gameIdName">Game ID name</label>
+                    <div class="control has-lead">
+                        <span class="lead" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                        </span>
+                        <input class="input" type="text" placeholder="Your game nickname" id="gameIdName" oninput="updateProgress()" />
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="field-label" for="gameIdNumber">Game ID number <span class="req">*</span></label>
+                    <div class="control has-lead">
+                        <span class="lead" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+                        </span>
+                        <input class="input" type="tel" inputmode="numeric" maxlength="12" placeholder="e.g. 883421" id="gameIdNumber" oninput="this.value=this.value.replace(/\D/g,'');updateProgress()" />
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="field-label" for="gameIdLevel">Game ID level</label>
+                    <div class="control has-lead">
+                        <span class="lead" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        </span>
+                        <input class="input" type="tel" inputmode="numeric" maxlength="2" placeholder="e.g. 72" id="gameIdLevel" oninput="this.value=this.value.replace(/\D/g,'');updateProgress()" />
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label class="field-label" for="mobileNumber">Mobile number <span class="req">*</span></label>
+                    <div class="control has-lead">
+                        <span class="lead" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                        </span>
+                        <input class="input" type="tel" placeholder="+91 98765 43210" id="mobileNumber" autocomplete="tel" oninput="updateProgress()" />
+                    </div>
+                    <span class="help">Used to search your registration status.</span>
+                </div>
+            </div>
+
+            <button class="btn primary lg full" type="button" onclick="goToPayment()">
+                Continue to payment
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </button>
+
+            <div class="btn-row" style="justify-content:center;margin-top:12px">
+                <a class="btn ghost sm" href="../rule/index.html">Read the rules</a>
+                <a class="btn ghost sm" href="../join/index.html">Joined players</a>
+            </div>
+        </section>
     </div>
 
-    <!-- Success Overlay -->
-    <div class="success-overlay" id="successOverlay">
-        <div class="success-card">
-            <div class="check-circle">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    <!-- ================= PAGE 2 · PAYMENT ================= -->
+    <div class="page" id="page2">
+        <div class="btn-row" style="margin-bottom:12px">
+            <button class="btn ghost sm" type="button" onclick="goBack()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+                Back
+            </button>
+            <span class="badge neutral" style="margin-left:auto"><span class="dot"></span>Step 2 of 2</span>
+        </div>
+
+        <section class="panel qr-panel">
+            <div class="panel-head" style="justify-content:center;text-align:center;margin-bottom:14px">
+                <div>
+                    <h2 class="panel-title">Scan &amp; pay</h2>
+                    <p class="panel-sub">Scan the QR or pay to the UPI ID, then upload the screenshot.</p>
+                </div>
             </div>
-            <h3>Registered!</h3>
-            <p>Your tournament slot is confirmed. Good luck!</p>
-            <button class="done-btn" onclick="closeSuccess()">Awesome</button>
+
+            <div class="qr-box" id="qrBox">
+                <div class="qr-empty">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM19 19h2v2h-2zM14 21h2M21 14v2"/></svg>
+                    <p>Payment QR is not configured yet.<br>Please contact the admin.</p>
+                </div>
+            </div>
+
+            <p class="qr-fee">Entry fee</p>
+            <p class="qr-price"><span class="rupee">₹</span><span data-entry-fee>199</span></p>
+        </section>
+
+        <section class="panel">
+            <div class="panel-head">
+                <div>
+                    <h2 class="panel-title">Payment details</h2>
+                    <p class="panel-sub">Enter the details exactly as shown in your payment app.</p>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="field-label" for="paymentName">Payment name <span class="req">*</span></label>
+                <div class="control has-lead">
+                    <span class="lead" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </span>
+                    <input class="input" type="text" placeholder="Name on UPI" id="paymentName" />
+                </div>
+            </div>
+
+            <div class="field" style="margin-bottom:0">
+                <label class="field-label" for="utrNumber">UTR number <span class="req">*</span></label>
+                <div class="control has-lead">
+                    <span class="lead" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                    </span>
+                    <input class="input" type="text" placeholder="12-digit UTR" id="utrNumber" />
+                </div>
+                <span class="help">Found in your UPI app's transaction history.</span>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-head">
+                <div>
+                    <h2 class="panel-title">Payment screenshot</h2>
+                    <p class="panel-sub">PNG or JPG. The image is compressed before upload.</p>
+                </div>
+            </div>
+
+            <label class="upload" id="uploadArea" for="fileInput">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="M7 9l5-5 5 5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+                <span class="upload-text" id="uploadText">Tap to upload payment screenshot</span>
+                <span class="upload-filename" id="uploadFilename"></span>
+                <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleFile(this)" />
+            </label>
+
+            <button class="btn primary lg full" type="button" style="margin-top:16px" onclick="submitPayment(this)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                Confirm payment
+            </button>
+        </section>
+    </div>
+</main>
+
+<footer class="site-foot">
+    <a href="../rule/index.html">Rules</a> &nbsp;·&nbsp;
+    <a href="../join/index.html">Players</a> &nbsp;·&nbsp;
+    <a href="../admin/index.html">Admin</a>
+</footer>
+
+<!-- ================= INBOX SHEET ================= -->
+<div class="sheet-overlay" id="inboxOverlay" role="dialog" aria-modal="true" aria-labelledby="inboxTitle">
+    <div class="sheet">
+        <span class="sheet-grip" aria-hidden="true"></span>
+        <div class="sheet-head">
+            <div class="modal-title">
+                <h3 id="inboxTitle">Your requests</h3>
+                <p id="inboxSub">Search with mobile, game ID or name</p>
+            </div>
+            <button class="modal-close" type="button" data-close-overlay="inboxOverlay" aria-label="Close">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div class="sheet-body">
+            <div class="sheet-search">
+                <span class="lead" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>
+                </span>
+                <input class="input" type="text" placeholder="Mobile / Game ID / Name" id="inboxSearch" onkeydown="if(event.key==='Enter')loadInbox()" />
+            </div>
+            <div id="inboxList"></div>
         </div>
     </div>
+</div>
 
-    <script>
-        function escapeHtml(str) {
-            return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-        }
+<!-- ================= SUCCESS ================= -->
+<div class="overlay" id="successOverlay" data-static>
+    <div class="modal success-card">
+        <div class="success-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h3>Registration submitted</h3>
+        <p>Your slot request is in. The admin will verify the payment and approve it shortly.</p>
+        <button class="btn primary full" type="button" onclick="closeSuccess()">Done</button>
+    </div>
+</div>
 
-        function statusBadgeHtml(status) {
-            if (status === 'approved') return '<span class="status-badge status-approved">Approved</span>';
-            if (status === 'rejected') return '<span class="status-badge status-rejected">Rejected</span>';
-            return '<span class="status-badge status-pending">Pending</span>';
-        }
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-        function statusRowHtml(k, v) {
-            if (!v) return '';
-            return '<div class="status-row"><span class="k">' + k + '</span><span class="v">' + escapeHtml(v) + '</span></div>';
-        }
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script src="../firebase-config.js"></script>
+<script src="../assets/app.js"></script>
+<script>
+    "use strict";
 
-        function getSavedIdentity() {
-            try { return JSON.parse(localStorage.getItem('ca_identity') || 'null'); } catch (e) { return null; }
-        }
+    var appSettings = null;
 
-        function showInboxDot() {
-            const saved = getSavedIdentity();
-            if (saved && (saved.mobile || saved.email)) {
-                document.getElementById('inboxDot').classList.add('show');
-            }
-        }
+    function escapeHtml(str) {
+        return CA.esc(str);
+    }
 
-        function openInbox() {
-            document.getElementById('inboxOverlay').classList.add('active');
-            document.body.style.overflow = 'hidden';
-            const saved = getSavedIdentity();
-            if (saved && saved.mobile && !document.getElementById('inboxSearch').value.trim()) {
-                document.getElementById('inboxSearch').value = saved.mobile;
-            }
-            loadInbox();
-        }
+    function notice(message, type) {
+        CA.toast(message, type);
+    }
 
-        function closeInbox() {
-            document.getElementById('inboxOverlay').classList.remove('active');
-            document.body.style.overflow = '';
-        }
+    /* ================= PROGRESS ================= */
+    function updateProgress() {
+        var ids = ["userName", "gameIdName", "gameIdNumber", "gameIdLevel", "mobileNumber"];
+        var filledCount = 0;
+        ids.forEach(function (id) {
+            var el = document.getElementById(id);
+            if (!el) return;
+            var has = el.value.trim() !== "";
+            if (has) filledCount++;
+            var field = el.closest(".field");
+            if (field) field.classList.toggle("filled", has);
+        });
+        var pct = Math.round((filledCount / ids.length) * 100);
+        var fill = document.getElementById("progressFill");
+        var pctEl = document.getElementById("progressPct");
+        fill.style.width = pct + "%";
+        fill.classList.toggle("done", pct === 100);
+        pctEl.classList.toggle("done", pct === 100);
+        pctEl.textContent = pct + "%";
+    }
 
-        async function loadInbox() {
-            const list = document.getElementById('inboxList');
-            let q = document.getElementById('inboxSearch').value.trim().toLowerCase();
-            if (!q) {
-                const saved = getSavedIdentity();
-                if (saved && saved.mobile) {
-                    q = saved.mobile.toLowerCase();
-                    document.getElementById('inboxSearch').value = saved.mobile;
-                }
-            }
-            document.getElementById('inboxSub').textContent = 'Sabhi registrations yahan stored hain';
-            if (!q) {
-                list.innerHTML = '<div class="status-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg><h3>Apna Mobile / Game ID / Name daalein</h3><p>Upar search box me apni details likhkar enter karein</p></div>';
-                return;
-            }
-            if (!FIREBASE_CONFIGURED) {
-                list.innerHTML = '<div class="status-empty"><h3>Firebase not configured</h3><p>Add your config in firebase-config.js</p></div>';
-                return;
-            }
-            list.innerHTML = '<div class="status-loading">Loading your requests</div>';
-            try {
-                const snap = await db.collection('players').get();
-                const matches = [];
-                snap.forEach(doc => {
-                    const p = doc.data();
-                    p.id = doc.id;
-                    const email = (p.emailId || '').toLowerCase();
-                    const mobile = (p.mobileNumber || '').toLowerCase();
-                    const gid = (p.gameIdNumber || '').toLowerCase();
-                    const name = (p.userName || '').toLowerCase();
-                    if (email === q || mobile === q || gid === q || name === q) matches.push(p);
-                });
-                matches.sort((a, b) => {
-                    const ta = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
-                    const tb = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
-                    return tb - ta;
-                });
-                renderInboxRequests(matches, list);
-            } catch (e) {
-                console.error(e);
-                list.innerHTML = '<div class="status-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg><h3>Something went wrong</h3><p>Please try again</p></div>';
-            }
-        }
+    /* ================= PAGE FLOW ================= */
+    function goToPayment() {
+        var name = document.getElementById("userName").value.trim();
+        var gid = document.getElementById("gameIdNumber").value.trim();
+        var mobile = document.getElementById("mobileNumber").value.trim();
+        var missing = [];
+        if (!name) missing.push("userName");
+        if (!gid) missing.push("gameIdNumber");
+        if (!mobile) missing.push("mobileNumber");
 
-        function renderInboxRequests(matches, list) {
-            document.getElementById('inboxSub').textContent = matches.length + (matches.length === 1 ? ' request found' : ' requests found');
-            if (matches.length === 0) {
-                list.innerHTML = '<div class="status-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><h3>No requests found</h3><p>Check your details and try again</p></div>';
-                return;
-            }
-            list.innerHTML = matches.map((p, i) => {
-                const status = p.status || 'pending';
-                const initials = (p.userName || 'P').split(' ').filter(w => w).map(w => w[0]).slice(0, 2).join('').toUpperCase() || 'P';
-                return '<div class="status-card-item" style="animation-delay:' + Math.min(0.08 + i * 0.06, 0.5) + 's">' +
-                    '<div class="status-head">' +
-                        '<div class="status-avatar">' + escapeHtml(initials) + '</div>' +
-                        '<div class="status-head-info">' +
-                            '<div class="status-name">' + escapeHtml(p.userName) + '</div>' +
-                            '<div class="status-sub">Registered ' + fmtTime(p.createdAt) + '</div>' +
-                        '</div>' +
-                        statusBadgeHtml(status) +
-                    '</div>' +
-                    '<div class="status-details">' +
-                        statusRowHtml('Game ID Name', p.gameIdName) +
-                        statusRowHtml('Game ID', p.gameIdNumber) +
-                        statusRowHtml('Level', p.gameIdLevel) +
-                        statusRowHtml('Mobile', p.mobileNumber) +
-                        statusRowHtml('Email', p.emailId) +
-                        statusRowHtml('Payment Name', p.paymentName) +
-                        statusRowHtml('UTR', p.utrNumber) +
-                        '<div class="status-row"><span class="k">Status</span><span class="v" style="color:' + (status === 'approved' ? '#34C759' : status === 'rejected' ? '#FF3B30' : '#FF9500') + ';text-transform:capitalize;">' + status + '</span></div>' +
-                    '</div>' +
-                '</div>';
-            }).join('');
-        }
-
-        function updateProgress() {
-            const ids = ['userName', 'gameIdName', 'gameIdNumber', 'gameIdLevel', 'mobileNumber'];
-            let filledCount = 0;
-            ids.forEach(id => {
-                const el = document.getElementById(id);
-                if (!el) return;
-                const has = el.value.trim() !== '';
-                if (has) filledCount++;
-                const field = el.closest('.field');
-                if (field) field.classList.toggle('filled', has);
+        if (missing.length) {
+            missing.forEach(function (id) {
+                var field = document.getElementById(id).closest(".field");
+                if (!field) return;
+                field.classList.remove("error");
+                void field.offsetWidth;
+                field.classList.add("error");
+                setTimeout(function () { field.classList.remove("error"); }, 700);
             });
-            const pct = Math.round(filledCount / ids.length * 100);
-            const fill = document.getElementById('progressFill');
-            const pctEl = document.getElementById('progressPct');
-            fill.style.width = pct + '%';
-            fill.classList.toggle('done', pct === 100);
-            pctEl.classList.toggle('done', pct === 100);
-            pctEl.textContent = pct + '%';
+            notice("Fill user name, game ID number and mobile number.", "danger");
+            return;
         }
-
-        function goToPayment() {
-            const name = document.getElementById('userName').value.trim();
-            const gid = document.getElementById('gameIdNumber').value.trim();
-            const mobile = document.getElementById('mobileNumber').value.trim();
-            const missing = [];
-            if (!name) missing.push('userName');
-            if (!gid) missing.push('gameIdNumber');
-            if (!mobile) missing.push('mobileNumber');
-            if (missing.length) {
-                missing.forEach(id => {
-                    const field = document.getElementById(id).closest('.field');
-                    if (field) {
-                        field.classList.remove('error');
-                        void field.offsetWidth;
-                        field.classList.add('error');
-                        setTimeout(() => field.classList.remove('error'), 700);
-                    }
-                });
-                alert('Please fill User Name, Game ID Number and Mobile Number');
-                return;
-            }
-            if (!FIREBASE_CONFIGURED) {
-                alert('Firebase not configured. Add your config in firebase-config.js');
-                return;
-            }
-            document.getElementById('paymentName').value = name;
-            const p1 = document.getElementById('page1');
-            const p2 = document.getElementById('page2');
-            p1.classList.add('anim-exit');
-            setTimeout(() => {
-                p1.classList.remove('active', 'anim-exit');
-                p2.classList.add('active', 'anim-enter');
-                setTimeout(() => p2.classList.remove('anim-enter'), 450);
-            }, 350);
+        if (!FIREBASE_CONFIGURED) {
+            notice("Firebase is not configured yet.", "danger");
+            return;
         }
+        document.getElementById("paymentName").value = name;
+        document.getElementById("page1").classList.remove("active");
+        document.getElementById("page2").classList.add("active");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }
 
-        function goBack() {
-            const p1 = document.getElementById('page1');
-            const p2 = document.getElementById('page2');
-            p2.classList.add('anim-exit-back');
-            setTimeout(() => {
-                p2.classList.remove('active', 'anim-exit-back');
-                p1.classList.add('active', 'anim-enter-back');
-                setTimeout(() => p1.classList.remove('anim-enter-back'), 450);
-            }, 350);
+    function goBack() {
+        document.getElementById("page2").classList.remove("active");
+        document.getElementById("page1").classList.add("active");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function handleFile(input) {
+        var area = document.getElementById("uploadArea");
+        var text = document.getElementById("uploadText");
+        var filename = document.getElementById("uploadFilename");
+        if (input.files && input.files[0]) {
+            area.classList.add("has-file");
+            text.textContent = "Screenshot selected";
+            filename.textContent = input.files[0].name;
         }
+    }
 
-        function handleFile(input) {
-            const area = document.getElementById('uploadArea');
-            const text = document.getElementById('uploadText');
-            const filename = document.getElementById('uploadFilename');
-            if (input.files && input.files[0]) {
-                area.classList.add('has-file');
-                text.textContent = 'Screenshot uploaded';
-                filename.textContent = input.files[0].name;
-            }
+    /* ================= SUBMIT ================= */
+    function dataURLtoBlob(dataUrl) {
+        var arr = dataUrl.split(",");
+        var mime = arr[0].match(/:(.*?);/)[1];
+        var bstr = atob(arr[1]);
+        var n = bstr.length;
+        var u8arr = new Uint8Array(n);
+        for (var i = 0; i < n; i++) u8arr[i] = bstr.charCodeAt(i);
+        return new Blob([u8arr], { type: mime });
+    }
+
+    async function sendToTelegram(dataUrl) {
+        try {
+            if (!appSettings) return;
+            var token = appSettings.telegramBotToken;
+            var chatId = appSettings.telegramChatId;
+            if (!token || !chatId) return;
+            var form = new FormData();
+            form.append("chat_id", chatId);
+            form.append("photo", dataURLtoBlob(dataUrl), "payment.jpg");
+            await fetch("https://api.telegram.org/bot" + token + "/sendPhoto", {
+                method: "POST",
+                body: form
+            });
+        } catch (e) {
+            console.error("Telegram send failed", e);
         }
+    }
 
-        async function submitPayment(btn) {
-            const paymentName = document.getElementById('paymentName').value.trim();
-            const utr = document.getElementById('utrNumber').value.trim();
-            const file = document.getElementById('fileInput').files[0];
-            if (!paymentName || !utr || !file) {
-                alert('Please fill Payment Name, UTR Number and upload the screenshot');
-                return;
-            }
-            if (!FIREBASE_CONFIGURED) {
-                alert('Firebase not configured. Add your config in firebase-config.js');
-                return;
-            }
-            btn.disabled = true;
-            btn.style.opacity = '0.6';
-            try {
-                const screenshot = await compressImage(file);
-                sendToTelegram(screenshot);
-                await db.collection('players').add({
-                    userName: document.getElementById('userName').value.trim(),
-                    gameIdName: document.getElementById('gameIdName').value.trim(),
-                    gameIdNumber: document.getElementById('gameIdNumber').value.trim(),
-                    gameIdLevel: document.getElementById('gameIdLevel').value.trim(),
-                    mobileNumber: document.getElementById('mobileNumber').value.trim(),
-                    paymentName: paymentName,
-                    utrNumber: utr,
-                    screenshot: screenshot,
-                    status: 'pending',
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                try {
-                    localStorage.setItem('ca_identity', JSON.stringify({
-                        name: document.getElementById('userName').value.trim(),
-                        mobile: document.getElementById('mobileNumber').value.trim()
-                    }));
-                    showInboxDot();
-                } catch (e) { }
-                document.getElementById('successOverlay').classList.add('active');
-            } catch (e) {
-                alert('Something went wrong. Please try again.');
-            } finally {
-                btn.disabled = false;
-                btn.style.opacity = '1';
-            }
-        }
-
-        function dataURLtoBlob(dataUrl) {
-            const arr = dataUrl.split(',');
-            const mime = arr[0].match(/:(.*?);/)[1];
-            const bstr = atob(arr[1]);
-            const n = bstr.length;
-            const u8arr = new Uint8Array(n);
-            for (let i = 0; i < n; i++) u8arr[i] = bstr.charCodeAt(i);
-            return new Blob([u8arr], { type: mime });
-        }
-
-        async function sendToTelegram(dataUrl) {
-            try {
-                const token = appSettings.telegramBotToken;
-                const chatId = appSettings.telegramChatId;
-                if (!token || !chatId) return;
-                const form = new FormData();
-                form.append('chat_id', chatId);
-                form.append('photo', dataURLtoBlob(dataUrl), 'payment.jpg');
-                await fetch('https://api.telegram.org/bot' + token + '/sendPhoto', { method: 'POST', body: form });
-            } catch (e) {
-                console.error('Telegram send failed', e);
-            }
-        }
-
-        function compressImage(file, maxSize, quality) {
-            maxSize = maxSize || 700;
-            quality = quality || 0.6;
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    const img = new Image();
-                    img.onload = function () {
-                        const canvas = document.createElement('canvas');
-                        let w = img.width;
-                        let h = img.height;
-                        const scale = Math.min(1, maxSize / Math.max(w, h));
-                        canvas.width = Math.round(w * scale);
-                        canvas.height = Math.round(h * scale);
-                        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-                        resolve(canvas.toDataURL('image/jpeg', quality));
-                    };
-                    img.onerror = reject;
-                    img.src = e.target.result;
+    function compressImage(file, maxSize, quality) {
+        maxSize = maxSize || 700;
+        quality = quality || 0.6;
+        return new Promise(function (resolve, reject) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var img = new Image();
+                img.onload = function () {
+                    var canvas = document.createElement("canvas");
+                    var w = img.width;
+                    var h = img.height;
+                    var scale = Math.min(1, maxSize / Math.max(w, h));
+                    canvas.width = Math.round(w * scale);
+                    canvas.height = Math.round(h * scale);
+                    canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+                    resolve(canvas.toDataURL("image/jpeg", quality));
                 };
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
-            });
-        }
-
-        function closeSuccess() {
-            document.getElementById('successOverlay').classList.remove('active');
-            document.getElementById('page2').classList.remove('active');
-            document.getElementById('page1').classList.add('active');
-            document.querySelectorAll('input[type="text"], input[type="tel"], input[type="email"]').forEach(i => i.value = '');
-            document.getElementById('uploadArea').classList.remove('has-file');
-            document.getElementById('uploadText').textContent = 'Tap to upload payment screenshot';
-            document.getElementById('uploadFilename').textContent = '';
-            document.getElementById('fileInput').value = '';
-            updateProgress();
-        }
-    </script>
-
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-    <script>
-const FIREBASE_CONFIG = {
-    apiKey: "AIzaSyCXSv7eNl7KcttNvKF46BCAkhYv6t6S0bI",
-    authDomain: "user-manage-bot.firebaseapp.com",
-    databaseURL: "https://user-manage-bot-default-rtdb.firebaseio.com",
-    projectId: "user-manage-bot",
-    storageBucket: "user-manage-bot.firebasestorage.app",
-    messagingSenderId: "17364199534",
-    appId: "1:17364199534:web:dce4f0df3efe163930de7f"
-};
-
-const FIREBASE_CONFIGURED = FIREBASE_CONFIG.apiKey !== "YOUR_API_KEY";
-
-let firebaseApp = null;
-let db = null;
-
-if (FIREBASE_CONFIGURED && typeof firebase !== 'undefined') {
-    firebaseApp = firebase.initializeApp(FIREBASE_CONFIG);
-    db = firebase.firestore();
-}
-
-const DEFAULT_SETTINGS = {
-    tournamentName: 'Clash Arena',
-    entryFee: 199,
-    upiId: '',
-    qrUrl: '',
-    telegramBotToken: '',
-    telegramChatId: '',
-    upiName: 'Clash Arena',
-    prizePool: '₹5,000',
-    matchTime: '9:00 PM',
-    maxPlayers: 100,
-    announcement: '',
-    adminPass: 'admin123',
-    rules: [
-        { title: 'Fair Play Only', description: 'Any use of hacks, mods, or third-party tools will result in immediate disqualification.' },
-        { title: 'Entry Fee Non-Refundable', description: 'Once paid, the entry fee is non-refundable under any circumstances.' },
-        { title: 'On-Time Check-In', description: 'Players must check in 15 minutes before match start. Late entries will not be allowed.' },
-        { title: 'Valid ID Required', description: 'All players must use the same Game ID submitted during registration throughout the tournament.' },
-        { title: 'No Team Switching', description: 'Once teams are finalized, no player substitutions or team changes are permitted.' },
-        { title: 'Recording Mandatory', description: 'Every player must screen-record their gameplay. Failure to provide proof may void results.' },
-        { title: 'Dispute Resolution', description: 'All disputes will be resolved by tournament admins. Their decision is final and binding.' },
-        { title: 'Prize Distribution', description: 'Prizes will be credited within 48 hours after tournament completion to the registered UPI.' },
-        { title: 'Communication Rules', description: 'Toxic behaviour, abuse, or harassment in chat or voice will lead to a permanent ban.' },
-        { title: 'Device Responsibility', description: 'Players are responsible for their own internet and device issues. No rematches will be given.' }
-    ]
-};
-
-let cachedSettings = null;
-
-function withTimeout(promise, ms) {
-    return new Promise((resolve, reject) => {
-        const t = setTimeout(() => reject(new Error('timeout')), ms);
-        promise.then(
-            v => { clearTimeout(t); resolve(v); },
-            e => { clearTimeout(t); reject(e); }
-        );
-    });
-}
-
-async function fetchSettings() {
-    if (!FIREBASE_CONFIGURED || !db) {
-        cachedSettings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
-        return cachedSettings;
+                img.onerror = reject;
+                img.src = e.target.result;
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
     }
-    try {
-        const snap = await withTimeout(db.collection('settings').doc('main').get(), 6000);
-        if (snap.exists) {
-            cachedSettings = Object.assign({}, DEFAULT_SETTINGS, snap.data());
-        } else {
-            cachedSettings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+
+    async function submitPayment(btn) {
+        var paymentName = document.getElementById("paymentName").value.trim();
+        var utr = document.getElementById("utrNumber").value.trim();
+        var file = document.getElementById("fileInput").files[0];
+
+        if (!paymentName || !utr || !file) {
+            notice("Fill payment name, UTR number and upload the screenshot.", "danger");
+            return;
+        }
+        if (!FIREBASE_CONFIGURED) {
+            notice("Firebase is not configured yet.", "danger");
+            return;
+        }
+
+        var label = btn.innerHTML;
+        btn.disabled = true;
+        btn.classList.add("loading");
+        btn.innerHTML = '<span class="spin" aria-hidden="true"></span>Submitting...';
+
+        try {
+            var screenshot = await compressImage(file);
+            sendToTelegram(screenshot);
+            await db.collection("players").add({
+                userName: document.getElementById("userName").value.trim(),
+                gameIdName: document.getElementById("gameIdName").value.trim(),
+                gameIdNumber: document.getElementById("gameIdNumber").value.trim(),
+                gameIdLevel: document.getElementById("gameIdLevel").value.trim(),
+                mobileNumber: document.getElementById("mobileNumber").value.trim(),
+                paymentName: paymentName,
+                utrNumber: utr,
+                screenshot: screenshot,
+                status: "pending",
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
             try {
-                await withTimeout(db.collection('settings').doc('main').set(cachedSettings), 6000);
+                localStorage.setItem("ca_identity", JSON.stringify({
+                    name: document.getElementById("userName").value.trim(),
+                    mobile: document.getElementById("mobileNumber").value.trim()
+                }));
+                showInboxDot();
             } catch (e) { }
+            document.getElementById("successOverlay").classList.add("active");
+            document.body.style.overflow = "hidden";
+        } catch (e) {
+            console.error(e);
+            notice("Something went wrong. Please try again.", "danger");
+        } finally {
+            btn.disabled = false;
+            btn.classList.remove("loading");
+            btn.innerHTML = label;
         }
-    } catch (e) {
-        cachedSettings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
     }
-    return cachedSettings;
-}
 
-function getSettings() {
-    if (!cachedSettings) return JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
-    return cachedSettings;
-}
+    function closeSuccess() {
+        CA.closeOverlay("successOverlay");
+        document.getElementById("page2").classList.remove("active");
+        document.getElementById("page1").classList.add("active");
+        document.querySelectorAll('input[type="text"], input[type="tel"], input[type="email"]').forEach(function (i) {
+            i.value = "";
+        });
+        document.getElementById("uploadArea").classList.remove("has-file");
+        document.getElementById("uploadText").textContent = "Tap to upload payment screenshot";
+        document.getElementById("uploadFilename").textContent = "";
+        document.getElementById("fileInput").value = "";
+        updateProgress();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }
 
-function fmtTime(ts) {
-    if (!ts) return '';
-    const d = (ts && ts.toDate) ? ts.toDate() : new Date(ts);
-    return d.toLocaleString('en-IN', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
-}
-</script>
+    /* ================= INBOX ================= */
+    function getSavedIdentity() {
+        try { return JSON.parse(localStorage.getItem("ca_identity") || "null"); } catch (e) { return null; }
+    }
 
-    <script>
-        let appSettings = null;
+    function showInboxDot() {
+        var saved = getSavedIdentity();
+        if (saved && (saved.mobile || saved.email)) {
+            document.getElementById("inboxDot").classList.add("show");
+        }
+    }
 
-        (async function init() {
-            appSettings = await fetchSettings();
-            document.getElementById('tournamentTitle').textContent = appSettings.tournamentName;
-            document.getElementById('entryFeeAmt').textContent = appSettings.entryFee;
-            if (appSettings.announcement) {
-                document.getElementById('announcementText').textContent = appSettings.announcement;
-                document.getElementById('announcementBar').style.display = 'flex';
+    function openInbox() {
+        CA.openOverlay("inboxOverlay");
+        var saved = getSavedIdentity();
+        var input = document.getElementById("inboxSearch");
+        if (saved && saved.mobile && !input.value.trim()) input.value = saved.mobile;
+        loadInbox();
+    }
+
+    function closeInbox() {
+        CA.closeOverlay("inboxOverlay");
+    }
+
+    async function loadInbox() {
+        var list = document.getElementById("inboxList");
+        var q = document.getElementById("inboxSearch").value.trim().toLowerCase();
+        if (!q) {
+            var saved = getSavedIdentity();
+            if (saved && saved.mobile) {
+                q = saved.mobile.toLowerCase();
+                document.getElementById("inboxSearch").value = saved.mobile;
             }
-            if (!FIREBASE_CONFIGURED) {
-                document.getElementById('setupWarning').style.display = 'block';
-            }
-            buildQR();
-            updateProgress();
-            showInboxDot();
-        })();
+        }
+        document.getElementById("inboxSub").textContent = "Search with mobile, game ID or name";
 
-        function buildQR() {
-            const box = document.getElementById('qrBox');
-            if (!FIREBASE_CONFIGURED || !db) {
-                box.innerHTML = '<svg viewBox="0 0 100 100"><rect fill="white" width="100" height="100"/><g fill="#C7C7CC"><rect x="35" y="35" width="30" height="30"/></g></svg>';
-                return;
-            }
-            if (!appSettings.upiId && !appSettings.qrUrl) return;
-            if (appSettings.qrUrl) {
-                box.innerHTML = '<img src="' + appSettings.qrUrl + '" alt="QR" style="width:100%;height:100%;object-fit:contain;border-radius:8px;" onerror="qrImageFailed()">';
-                return;
-            }
-            buildUPIQR();
+        if (!q) {
+            list.innerHTML =
+                '<div class="empty">' +
+                    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>' +
+                    "<h3>Enter your details</h3>" +
+                    "<p>Search box me apna mobile, game ID ya name daalein.</p>" +
+                "</div>";
+            return;
+        }
+        if (!FIREBASE_CONFIGURED) {
+            list.innerHTML = '<div class="empty"><h3>Firebase not configured</h3><p>Add your config in firebase-config.js</p></div>';
+            return;
         }
 
-        function buildUPIQR() {
-            const box = document.getElementById('qrBox');
-            box.innerHTML = '';
-            const uri = 'upi://pay?pa=' + encodeURIComponent(appSettings.upiId) +
-                '&pn=' + encodeURIComponent(appSettings.upiName || 'Tournament') +
-                '&am=' + encodeURIComponent(appSettings.entryFee) +
-                '&cu=INR&tn=' + encodeURIComponent(appSettings.tournamentName + ' Entry Fee');
-            new QRCode(box, {
-                text: uri,
-                width: 156,
-                height: 156,
-                colorDark: '#1C1C1E',
-                colorLight: '#FFFFFF',
-                correctLevel: QRCode.CorrectLevel.M
+        list.innerHTML = '<div class="loading">Loading your requests</div>';
+        try {
+            var snap = await db.collection("players").get();
+            var matches = [];
+            snap.forEach(function (doc) {
+                var p = doc.data();
+                p.id = doc.id;
+                var email = (p.emailId || "").toLowerCase();
+                var mobile = (p.mobileNumber || "").toLowerCase();
+                var gid = (p.gameIdNumber || "").toLowerCase();
+                var name = (p.userName || "").toLowerCase();
+                if (email === q || mobile === q || gid === q || name === q) matches.push(p);
             });
+            matches.sort(function (a, b) {
+                var ta = a.createdAt && a.createdAt.toMillis ? a.createdAt.toMillis() : 0;
+                var tb = b.createdAt && b.createdAt.toMillis ? b.createdAt.toMillis() : 0;
+                return tb - ta;
+            });
+            renderInboxRequests(matches, list);
+        } catch (e) {
+            console.error(e);
+            list.innerHTML =
+                '<div class="empty">' +
+                    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>' +
+                    "<h3>Something went wrong</h3><p>Please try again.</p>" +
+                "</div>";
         }
+    }
 
-        function qrImageFailed() {
-            if (appSettings.upiId) {
-                buildUPIQR();
-            } else {
-                document.getElementById('qrBox').innerHTML = '<svg viewBox="0 0 100 100"><rect fill="white" width="100" height="100"/><g fill="#C7C7CC"><rect x="35" y="35" width="30" height="30"/></g></svg>';
-            }
+    function statusBadgeHtml(status) {
+        if (status === "approved") return '<span class="badge success"><span class="dot"></span>Approved</span>';
+        if (status === "rejected") return '<span class="badge danger"><span class="dot"></span>Rejected</span>';
+        return '<span class="badge warning"><span class="dot"></span>Pending</span>';
+    }
+
+    function statusRowHtml(k, v) {
+        if (!v) return "";
+        return '<div class="status-row"><span class="k">' + k + '</span><span class="v">' + escapeHtml(v) + "</span></div>";
+    }
+
+    function renderInboxRequests(matches, list) {
+        document.getElementById("inboxSub").textContent = matches.length + (matches.length === 1 ? " request found" : " requests found");
+        if (matches.length === 0) {
+            list.innerHTML =
+                '<div class="empty">' +
+                    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg>' +
+                    "<h3>No requests found</h3><p>Check your details and try again.</p>" +
+                "</div>";
+            return;
         }
-    </script>
+        list.innerHTML = matches.map(function (p) {
+            var status = p.status || "pending";
+            var initials = (p.userName || "P").split(" ").filter(function (w) { return w; }).map(function (w) { return w[0]; }).slice(0, 2).join("").toUpperCase() || "P";
+            return '<article class="status-card">' +
+                '<div class="status-head">' +
+                    '<span class="avatar">' + escapeHtml(initials) + "</span>" +
+                    '<div class="row-main">' +
+                        '<p class="row-title">' + escapeHtml(p.userName) + "</p>" +
+                        '<p class="row-sub">Registered ' + escapeHtml(CA.fmtTime(p.createdAt)) + "</p>" +
+                    "</div>" +
+                    statusBadgeHtml(status) +
+                "</div>" +
+                '<div class="status-rows">' +
+                    statusRowHtml("Game ID name", p.gameIdName) +
+                    statusRowHtml("Game ID", p.gameIdNumber) +
+                    statusRowHtml("Level", p.gameIdLevel) +
+                    statusRowHtml("Mobile", p.mobileNumber) +
+                    statusRowHtml("Payment name", p.paymentName) +
+                    statusRowHtml("UTR", p.utrNumber) +
+                "</div>" +
+            "</article>";
+        }).join("");
+    }
+
+    /* ================= SETTINGS / QR ================= */
+    function applySettings(settings) {
+        document.querySelectorAll("[data-tournament-name]").forEach(function (el) {
+            el.textContent = settings.tournamentName;
+        });
+        var title = document.getElementById("tournamentTitle");
+        if (title) title.textContent = "Join " + settings.tournamentName;
+
+        document.querySelectorAll("[data-entry-fee]").forEach(function (el) {
+            el.textContent = settings.entryFee;
+        });
+        var prize = document.querySelector("[data-prize]");
+        if (prize) prize.textContent = settings.prizePool || "—";
+        var match = document.querySelector("[data-match]");
+        if (match) match.textContent = settings.matchTime || "—";
+        var slots = document.querySelector("[data-slots]");
+        if (slots) slots.textContent = settings.maxPlayers || "—";
+
+        if (settings.announcement) {
+            document.getElementById("announcementText").textContent = settings.announcement;
+            document.getElementById("announcementBar").style.display = "flex";
+        }
+        if (!FIREBASE_CONFIGURED) {
+            document.getElementById("setupWarning").style.display = "flex";
+        }
+    }
+
+    function qrPlaceholder() {
+        return '<div class="qr-empty">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM19 19h2v2h-2zM14 21h2M21 14v2"/></svg>' +
+            "<p>Payment QR is not configured yet.<br>Please contact the admin.</p>" +
+        "</div>";
+    }
+
+    function buildQR() {
+        var box = document.getElementById("qrBox");
+        if (!FIREBASE_CONFIGURED || !db || !appSettings) {
+            box.innerHTML = qrPlaceholder();
+            return;
+        }
+        if (!appSettings.upiId && !appSettings.qrUrl) {
+            box.innerHTML = qrPlaceholder();
+            return;
+        }
+        if (appSettings.qrUrl) {
+            box.innerHTML = '<img src="' + escapeHtml(appSettings.qrUrl) + '" alt="UPI QR code" onerror="qrImageFailed()">';
+            return;
+        }
+        buildUPIQR();
+    }
+
+    function buildUPIQR() {
+        var box = document.getElementById("qrBox");
+        box.innerHTML = "";
+        var uri = "upi://pay?pa=" + encodeURIComponent(appSettings.upiId) +
+            "&pn=" + encodeURIComponent(appSettings.upiName || "Tournament") +
+            "&am=" + encodeURIComponent(appSettings.entryFee) +
+            "&cu=INR&tn=" + encodeURIComponent(appSettings.tournamentName + " Entry Fee");
+        new QRCode(box, {
+            text: uri,
+            width: 160,
+            height: 160,
+            colorDark: "#1f2430",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.M
+        });
+    }
+
+    function qrImageFailed() {
+        if (appSettings && appSettings.upiId) {
+            buildUPIQR();
+        } else {
+            document.getElementById("qrBox").innerHTML = qrPlaceholder();
+        }
+    }
+
+    /* ================= INIT ================= */
+    (async function init() {
+        appSettings = await fetchSettings();
+        applySettings(appSettings);
+        buildQR();
+        updateProgress();
+        showInboxDot();
+    })();
+</script>
 </body>
 </html>
