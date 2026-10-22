@@ -128,6 +128,8 @@ export default function AdminPage() {
     const [users, setUsers] = useState([]);
     const [tournaments, setTournaments] = useState([]);
     const [results, setResults] = useState([]);
+    const [walletRequests, setWalletRequests] = useState([]);
+    const [walletBusyId, setWalletBusyId] = useState("");
     const [search, setSearch] = useState("");
     const [emailSearch, setEmailSearch] = useState("");
     const [filter, setFilter] = useState("all");
@@ -246,6 +248,7 @@ export default function AdminPage() {
         let unsubPlayers;
         let unsubTournaments;
         let unsubResults;
+        let unsubWalletRequests;
 
         (async () => {
             const publicSettings = await fetchSettings(true);
@@ -307,6 +310,16 @@ export default function AdminPage() {
             if (active) toast("Error loading results", "danger");
         });
 
+        unsubWalletRequests = db.collection("transactions").onSnapshot(snapshot => {
+            const list = [];
+            snapshot.forEach(doc => list.push({ ...doc.data(), id: doc.id }));
+            list.sort((a, b) => toMillis(b.createdAt) - toMillis(a.createdAt));
+            if (active) setWalletRequests(list);
+        }, err => {
+            console.error(err);
+            if (active) toast("Error loading wallet requests", "danger");
+        });
+
         if ("serviceWorker" in navigator) {
             navigator.serviceWorker.register(`${import.meta.env.BASE_URL}admin/sw.js`).catch(() => {});
         }
@@ -317,6 +330,7 @@ export default function AdminPage() {
             unsubPlayers?.();
             unsubTournaments?.();
             unsubResults?.();
+            unsubWalletRequests?.();
         };
     }, [adminUser]);
 
@@ -348,6 +362,9 @@ export default function AdminPage() {
             return [user.userName, user.email, user.userId].some(value => String(value || "").toLowerCase().includes(term));
         });
     }, [users, emailSearch]);
+
+    const pendingWalletRequests = useMemo(() => walletRequests.filter(request => String(request.status || "").toLowerCase() === "pending"), [walletRequests]);
+    const recentWalletRequests = useMemo(() => walletRequests.filter(request => String(request.status || "").toLowerCase() !== "pending").slice(0, 12), [walletRequests]);
 
     function findPlayer(id) {
         return players.find(player => player.id === id);
@@ -466,6 +483,81 @@ export default function AdminPage() {
         } catch (err) {
             console.error(err);
             toast(err?.code === "permission-denied" ? "Firestore rules update publish karo" : "Email verify nahi hua", "danger");
+        }
+    }
+
+    function walletRequestLabel(type) {
+        return String(type || "").toLowerCase() === "withdrawal" ? "Withdrawal" : "Deposit";
+    }
+
+    function walletRequestBadge(status) {
+        const value = String(status || "pending").toLowerCase();
+        if (value === "successful" || value === "approved") return <span className="badge success"><span className="dot" />Approved</span>;
+        if (value === "rejected" || value === "failed") return <span className="badge danger"><span className="dot" />Rejected</span>;
+        return <span className="badge warning"><span className="dot" />Pending</span>;
+    }
+
+    async function processWalletRequest(request, approve) {
+        if (!request?.id || walletBusyId) return;
+        setWalletBusyId(request.id);
+        try {
+            await db.runTransaction(async transaction => {
+                const requestRef = db.collection("transactions").doc(request.id);
+                const requestSnap = await transaction.get(requestRef);
+                if (!requestSnap.exists) throw new Error("request-not-found");
+                const data = requestSnap.data() || {};
+                if (String(data.status || "").toLowerCase() !== "pending") throw new Error("already-processed");
+                const amount = Number(data.amount) || 0;
+                if (amount <= 0) throw new Error("invalid-amount");
+
+                if (approve) {
+                    const userRef = db.collection("users").doc(data.userId);
+                    const userSnap = await transaction.get(userRef);
+                    if (!userSnap.exists) throw new Error("user-not-found");
+                    const current = userSnap.data() || {};
+                    const wallet = current.wallet || {};
+                    const balance = Number(wallet.balance) || 0;
+                    let nextBalance = balance;
+                    let nextDeposits = Number(wallet.totalDeposits) || 0;
+                    let nextWithdrawals = Number(wallet.totalWithdrawals) || 0;
+
+                    if (String(data.type || "").toLowerCase() === "deposit") {
+                        nextBalance += amount;
+                        nextDeposits += amount;
+                    } else if (String(data.type || "").toLowerCase() === "withdrawal") {
+                        if (balance < amount) throw new Error("insufficient-balance");
+                        nextBalance -= amount;
+                        nextWithdrawals += amount;
+                    } else {
+                        throw new Error("invalid-type");
+                    }
+
+                    transaction.update(userRef, {
+                        wallet: {
+                            ...wallet,
+                            balance: nextBalance,
+                            totalDeposits: nextDeposits,
+                            totalWithdrawals: nextWithdrawals
+                        }
+                    });
+                }
+
+                transaction.update(requestRef, {
+                    status: approve ? "successful" : "rejected",
+                    processedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    processedBy: adminUser?.uid || ""
+                });
+            });
+            toast(approve ? "Wallet request approved" : "Wallet request rejected", approve ? "success" : "danger");
+        } catch (err) {
+            console.error(err);
+            let message = approve ? "Wallet request approve nahi hui." : "Wallet request reject nahi hui.";
+            if (err?.message === "insufficient-balance") message = "User ke wallet me enough balance nahi hai.";
+            if (err?.message === "already-processed") message = "Ye request already process ho chuki hai.";
+            if (err?.message === "user-not-found") message = "User profile nahi mila.";
+            toast(message, "danger");
+        } finally {
+            setWalletBusyId("");
         }
     }
 
@@ -731,7 +823,7 @@ export default function AdminPage() {
 
                 <div className="tabs" role="tablist" aria-label="Admin sections">
                     {[
-                        ["players", "Players"], ["emails", "Email verify"], ["payments", "Payments"], ["tournaments", "Tournaments"],
+                        ["players", "Players"], ["emails", "Email verify"], ["payments", "Payments"], ["wallet", "Wallet"], ["tournaments", "Tournaments"],
                         ["results", "Results"], ["settings", "Settings"], ["rules", "Rules"]
                     ].map(([key, label]) => (
                         <button key={key} className={"tab" + (tab === key ? " is-on" : "")} type="button" role="tab" data-tab={key} aria-selected={tab === key} onClick={() => setTab(key)}>{label}</button>
@@ -853,6 +945,62 @@ export default function AdminPage() {
                             ))}
                         </div>
                     ) : <EmptyState id="adminEmpty" icon={<><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></>} title={filter === "all" ? "No payments found" : `No ${filter} payments`} text="Registrations with payment proof will appear here." />}
+                </section>
+
+                <section className="tab-panel is-on" data-panel="wallet" style={{ display: tab === "wallet" ? "block" : "none" }}>
+                    <div className="panel">
+                        <PanelHead title="Wallet requests" sub="Deposit approve karne par balance add hoga. Withdrawal approve karne se pehle UPI ID par payment confirm karo; approve karne par balance deduct hoga." />
+                    </div>
+
+                    <p className="section-label">Pending requests</p>
+                    {pendingWalletRequests.length ? (
+                        <div className="list" id="adminWalletRequests">
+                            {pendingWalletRequests.map(request => (
+                                <article className="row-card" key={request.id}>
+                                    <span className="avatar">{initials(request.userName)}</span>
+                                    <div className="row-main">
+                                        <p className="row-title">{walletRequestLabel(request.type)} · {money(request.amount)}</p>
+                                        <p className="row-sub">{request.userName || "Player"}{request.userMobile ? " · +91 " + request.userMobile : ""}</p>
+                                        <p className="row-sub">
+                                            {String(request.type || "").toLowerCase() === "withdrawal"
+                                                ? "UPI: " + (request.upiId || "—")
+                                                : "UTR: " + (request.utr || "—")}
+                                            {" · "}{fmtTime(request.createdAt) || "—"}
+                                        </p>
+                                    </div>
+                                    <div className="row-actions">
+                                        {walletRequestBadge(request.status)}
+                                        <button className="btn success sm" type="button" disabled={walletBusyId === request.id} onClick={() => processWalletRequest(request, true)}>Approve</button>
+                                        <button className="btn danger sm" type="button" disabled={walletBusyId === request.id} onClick={() => processWalletRequest(request, false)}>Reject</button>
+                                    </div>
+                                </article>
+                            ))}
+                        </div>
+                    ) : <EmptyState id="adminWalletEmpty" icon={<><path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z" /><path d="M16 12h3" /><path d="M3 9h18" /></>} title="Koi pending wallet request nahi" text="User deposit ya withdrawal request bhejega, phir yahan dikhega." />}
+
+                    <p className="section-label">Recent processed requests</p>
+                    {recentWalletRequests.length ? (
+                        <div className="list" id="adminWalletHistory">
+                            {recentWalletRequests.map(request => (
+                                <article className="row-card" key={request.id}>
+                                    <span className="avatar">{initials(request.userName)}</span>
+                                    <div className="row-main">
+                                        <p className="row-title">{walletRequestLabel(request.type)} · {money(request.amount)}</p>
+                                        <p className="row-sub">{request.userName || "Player"}{request.userMobile ? " · +91 " + request.userMobile : ""}</p>
+                                        <p className="row-sub">
+                                            {String(request.type || "").toLowerCase() === "withdrawal"
+                                                ? "UPI: " + (request.upiId || "—")
+                                                : "UTR: " + (request.utr || "—")}
+                                            {" · "}{fmtTime(request.processedAt || request.createdAt) || "—"}
+                                        </p>
+                                    </div>
+                                    <div className="row-actions">
+                                        {walletRequestBadge(request.status)}
+                                    </div>
+                                </article>
+                            ))}
+                        </div>
+                    ) : <EmptyState id="adminWalletHistoryEmpty" icon={<><path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z" /><path d="M16 12h3" /><path d="M3 9h18" /></>} title="Abhi koi processed request nahi" text="Approve ya reject ki gayi requests yahan dikhengi." />}
                 </section>
 
                 <section className="tab-panel is-on" data-panel="tournaments" style={{ display: tab === "tournaments" ? "block" : "none" }}>

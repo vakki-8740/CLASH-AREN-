@@ -1917,6 +1917,94 @@ select.input {
 }
 
 /* ================= Wallet ================= */
+.amount-chips {
+    margin: 10px 0 12px;
+}
+
+.amount-chips .chip {
+    font-size: 0.82rem;
+    padding: 8px 14px;
+}
+
+.pay-card {
+    padding: 18px;
+}
+
+.pay-amount-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+    font-size: 0.76rem;
+    color: var(--muted);
+}
+
+.pay-amount-row strong {
+    font-size: 1.9rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--text);
+}
+
+.pay-qr {
+    display: block;
+    width: min(260px, 100%);
+    height: auto;
+    margin: 0 auto 14px;
+    padding: 8px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.pay-qr-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-height: 150px;
+    margin-bottom: 14px;
+    padding: 16px;
+    text-align: center;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--muted);
+}
+
+.pay-qr-empty strong { color: var(--text); font-size: 0.82rem; }
+.pay-qr-empty span { max-width: 240px; font-size: 0.72rem; line-height: 1.4; }
+
+.upi-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg);
+}
+
+.upi-label {
+    display: block;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+.upi-id {
+    display: block;
+    margin-top: 2px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.85rem;
+    word-break: break-all;
+}
+
 .wallet-hero {
     position: relative;
     overflow: hidden;

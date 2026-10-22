@@ -9,6 +9,9 @@ import JoinPage from "./pages/JoinPage";
 import RulesPage from "./pages/RulesPage";
 import ReferralPage from "./pages/ReferralPage";
 import WalletPage from "./pages/WalletPage";
+import DepositPage from "./pages/DepositPage";
+import DepositPayPage from "./pages/DepositPayPage";
+import WithdrawPage from "./pages/WithdrawPage";
 import ProfilePage from "./pages/ProfilePage";
 import AdminPage from "./pages/AdminPage";
 import NotFoundPage from "./pages/NotFoundPage";
@@ -33,6 +36,9 @@ function UserApp() {
                     <Route path="/rule" element={<RulesPage />} />
                     <Route path="/referral" element={<Protected><ReferralPage /></Protected>} />
                     <Route path="/wallet" element={<Protected><WalletPage /></Protected>} />
+                    <Route path="/wallet/deposit" element={<Protected><DepositPage /></Protected>} />
+                    <Route path="/wallet/deposit/pay" element={<Protected><DepositPayPage /></Protected>} />
+                    <Route path="/wallet/withdraw" element={<Protected><WithdrawPage /></Protected>} />
                     <Route path="/profile" element={<Protected><ProfilePage /></Protected>} />
                     <Route path="*" element={<NotFoundPage />} />
                 </Routes>

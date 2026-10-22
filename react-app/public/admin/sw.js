@@ -1,4 +1,4 @@
-const CACHE = 'qren-admin-v14';
+const CACHE = 'qren-admin-v15';
 const BASE = new URL('../', self.location.href).pathname;
 const CORE = [
     BASE,

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { db } from "../lib/firebase";
 import { fmtTime, money, toMillis } from "../lib/format";
 import { useAuth } from "../context/AuthContext";
@@ -29,7 +30,8 @@ function isCredit(type) {
 }
 
 export default function WalletPage() {
-    const { user, profile } = useAuth();
+    const navigate = useNavigate();
+    const { user, profile, refreshProfile } = useAuth();
     const [transactions, setTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -37,6 +39,10 @@ export default function WalletPage() {
     useEffect(() => {
         document.title = "QREN Esports — Wallet";
     }, []);
+
+    useEffect(() => {
+        refreshProfile().catch(() => {});
+    }, [refreshProfile]);
 
     useEffect(() => {
         if (!user) return;
@@ -75,12 +81,12 @@ export default function WalletPage() {
                     <p className="lb">Available balance</p>
                     <p className="balance" id="walletBalance">{money(wallet.balance || 0)}</p>
                     <div className="wallet-actions">
-                        <button className="btn" type="button" disabled title="Payment gateway configured nahi hai">Deposit</button>
-                        <button className="btn" type="button" disabled title="Withdrawal workflow configured nahi hai">Withdraw</button>
+                        <button className="btn" type="button" onClick={() => navigate("/wallet/deposit")}>Deposit</button>
+                        <button className="btn" type="button" onClick={() => navigate("/wallet/withdraw")}>Withdraw</button>
                     </div>
                 </section>
 
-                <p className="help" style={{ fontSize: ".72rem", color: "var(--muted)", margin: "-4px 0 14px" }}>Deposit aur withdrawal abhi unavailable hain — secure payment gateway configure hone ke baad hi enable honge.</p>
+                <p className="help" style={{ fontSize: ".72rem", color: "var(--muted)", margin: "-4px 0 14px" }}>Deposit UPI QR se karo. Withdrawal sirf UPI ID par milega. Admin verification ke baad wallet balance update hoga.</p>
 
                 <div className="wallet-summary">
                     <div className="ws"><span>Total earnings</span><strong id="totalEarnings">{money(wallet.totalEarnings || 0)}</strong></div>
