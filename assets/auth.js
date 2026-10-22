@@ -210,15 +210,94 @@
         }
     }
 
+    function emptyProfileForUser(user) {
+        var email = String((user && user.email) || "");
+        var mobile = "";
+        var match = email.match(/^m(\d{10})@/i);
+        if (match) mobile = match[1];
+
+        var userName = String((user && user.displayName) || "").trim();
+        if (!userName) userName = email ? email.split("@")[0] : "Player";
+        if (!userName || userName.length < 3) userName = "Player";
+
+        var code = codeFromUid(user.uid);
+        return {
+            userName: userName,
+            mobile: mobile,
+            referralCode: code,
+            referredBy: "",
+            wallet: {
+                balance: 0,
+                totalEarnings: 0,
+                totalDeposits: 0,
+                totalWithdrawals: 0
+            }
+        };
+    }
+
+    async function createMissingProfile(user) {
+        if (!user || !user.uid) return null;
+        var profile = emptyProfileForUser(user);
+        var stamp = firebase.firestore.FieldValue.serverTimestamp();
+
+        try {
+            var batch = db.batch();
+            batch.set(db.collection("users").doc(user.uid), {
+                userName: profile.userName,
+                mobile: profile.mobile,
+                referralCode: profile.referralCode,
+                referredBy: "",
+                createdAt: stamp,
+                wallet: profile.wallet
+            });
+            batch.set(db.collection("referralCodes").doc(profile.referralCode), {
+                code: profile.referralCode,
+                uid: user.uid,
+                userName: profile.userName,
+                createdAt: stamp
+            });
+            await batch.commit();
+        } catch (e) {
+            return await db.runTransaction(async function (tx) {
+                var ref = db.collection("users").doc(user.uid);
+                var snap = await tx.get(ref);
+                if (snap.exists) {
+                    var current = snap.data() || {};
+                    current.uid = user.uid;
+                    return current;
+                }
+                tx.set(ref, {
+                    userName: profile.userName,
+                    mobile: profile.mobile,
+                    referralCode: profile.referralCode,
+                    referredBy: "",
+                    createdAt: stamp,
+                    wallet: profile.wallet
+                });
+                profile.uid = user.uid;
+                return profile;
+            });
+        }
+
+        profile.uid = user.uid;
+        return profile;
+    }
+
     async function loadProfile(uid) {
         if (!db) return null;
         try {
             var snap = await withTimeout(db.collection("users").doc(uid).get(), 8000);
-            if (!snap.exists) return null;
-            var data = snap.data();
-            data.uid = uid;
-            return data;
+            if (snap.exists) {
+                var data = snap.data();
+                data.uid = uid;
+                return data;
+            }
+
+            var user = auth && auth.currentUser;
+            if (!user || user.uid !== uid) return null;
+            return await createMissingProfile(user);
         } catch (e) {
+            console.error("Profile load/create failed:", e);
             return null;
         }
     }
@@ -296,6 +375,7 @@
         register: register,
         login: login,
         loadProfile: loadProfile,
+        createMissingProfile: createMissingProfile,
         requireUser: requireUser,
         redirectIfLoggedIn: redirectIfLoggedIn,
         logout: logout,

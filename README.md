@@ -42,6 +42,8 @@ m<10-digit-mobile>@clasharena.app
 
 Player ko email dikhti nahi hai. Sirf mobile number se login hota hai. Registration par `users`, `referralCodes` aur (agar referral use hua ho) `referrals` docs ek batch me save hote hain.
 
+Agar kisi Firebase Auth account ka `users/{uid}` profile missing ho (jaise manually create kiya gaya account), pehli user-page load par app safe zero-wallet profile auto-create kar deta hai. Isse profile, wallet aur referral pages load ho jate hain.
+
 ## Admin Setup
 
 1. Firebase Console → Authentication → Sign-in method → **Email/Password** enable karo.

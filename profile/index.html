@@ -321,7 +321,7 @@ try {
             state.profile = boot.profile;
 
             if (!state.profile) {
-                $("profileErrorText").textContent = "Profile load nahi hua. Logout karke dobara login karo.";
+                $("profileErrorText").textContent = "Profile initialize nahi ho paya. Internet/Firestore rules check karke reload karo.";
                 $("profileError").style.display = "flex";
                 return;
             }
@@ -330,7 +330,7 @@ try {
             await loadJoins();
         } catch (err) {
             console.error(err);
-            $("profileErrorText").textContent = "Profile load nahi hua. Reload karke try karo.";
+            $("profileErrorText").textContent = "Profile load nahi ho paya. Internet check karke reload karo.";
             $("profileError").style.display = "flex";
         }
     })();

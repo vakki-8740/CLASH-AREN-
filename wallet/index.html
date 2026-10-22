@@ -78,7 +78,7 @@ try {
     </div>
 
     <div class="alert danger" id="txError" style="display:none">
-        <span>Transaction history load nahi ho payi.</span>
+        <span id="txErrorText">Transaction history load nahi ho payi.</span>
     </div>
 </main>
 
@@ -181,6 +181,7 @@ try {
             console.error(err);
             $("txList").innerHTML = "";
             $("txEmpty").style.display = "none";
+            $("txErrorText").textContent = "Transaction history load nahi ho payi. Internet check karke reload karo.";
             $("txError").style.display = "flex";
         }
     }
@@ -192,6 +193,7 @@ try {
             state.profile = boot.profile;
 
             if (!state.profile) {
+                $("txErrorText").textContent = "Profile initialize nahi ho paya. Reload karke try karo.";
                 $("txError").style.display = "flex";
                 return;
             }
@@ -200,6 +202,7 @@ try {
             await loadTransactions();
         } catch (err) {
             console.error(err);
+            $("txErrorText").textContent = "Wallet load nahi ho paya. Reload karke try karo.";
             $("txError").style.display = "flex";
         }
     })();
