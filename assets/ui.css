@@ -12,6 +12,7 @@
     --shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
     --accent: #4f6bed;
     --accent-soft: rgba(79, 107, 237, 0.10);
+    --accent-ink: #ffffff;
     --yes: #22a06b;
     --no: #e5484d;
     --warn: #c2740a;
@@ -29,11 +30,49 @@
     --shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
     --accent: #7b92ff;
     --accent-soft: rgba(123, 146, 255, 0.14);
+    --accent-ink: #ffffff;
     --yes: #34c98f;
     --no: #ff6b6f;
     --warn: #f0b543;
     --track-off: #3a4050;
     color-scheme: dark;
+}
+
+/* Accent themes: default blue, neon green, aqua cyan */
+[data-accent="default"] {
+    --accent: #4f6bed;
+    --accent-soft: rgba(79, 107, 237, 0.10);
+    --accent-ink: #ffffff;
+}
+
+[data-theme="dark"][data-accent="default"] {
+    --accent: #7b92ff;
+    --accent-soft: rgba(123, 146, 255, 0.14);
+    --accent-ink: #ffffff;
+}
+
+[data-accent="green"] {
+    --accent: #00ff80;
+    --accent-soft: rgba(0, 255, 128, 0.14);
+    --accent-ink: #062015;
+}
+
+[data-theme="dark"][data-accent="green"] {
+    --accent: #00ff80;
+    --accent-soft: rgba(0, 255, 128, 0.18);
+    --accent-ink: #062015;
+}
+
+[data-accent="cyan"] {
+    --accent: #57feff;
+    --accent-soft: rgba(87, 254, 255, 0.16);
+    --accent-ink: #052024;
+}
+
+[data-theme="dark"][data-accent="cyan"] {
+    --accent: #57feff;
+    --accent-soft: rgba(87, 254, 255, 0.18);
+    --accent-ink: #052024;
 }
 
 * {
@@ -371,7 +410,7 @@ svg { flex: 0 0 auto; }
 .btn:active:not(:disabled) { transform: translateY(0); }
 .btn:disabled { opacity: 0.45; cursor: not-allowed; }
 
-.btn.primary { background: var(--accent); color: #fff; }
+.btn.primary { background: var(--accent); color: var(--accent-ink); }
 .btn.success { background: var(--yes); color: #fff; }
 .btn.danger { background: var(--no); color: #fff; }
 .btn.secondary { background: var(--bg); border-color: var(--border); color: var(--text); }
@@ -864,7 +903,7 @@ select.input {
 }
 
 .tab:hover { color: var(--text); }
-.tab.is-on { background: var(--accent); color: #fff; }
+.tab.is-on { background: var(--accent); color: var(--accent-ink); }
 
 .tab-panel { display: none; }
 .tab-panel.is-on { display: block; animation: fadeUp 0.25s ease both; }
@@ -893,7 +932,7 @@ select.input {
 }
 
 .chip:hover { color: var(--text); border-color: var(--muted); }
-.chip.is-on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.chip.is-on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 
 .search { position: relative; flex: 1; min-width: 180px; }
 .search .lead {
@@ -1942,6 +1981,97 @@ select.input {
     font-size: 0.72rem;
     color: var(--muted);
     margin-top: 5px;
+}
+
+/* ================= Theme settings ================= */
+.theme-options {
+    display: grid;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.theme-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--card);
+    color: var(--text);
+    text-align: left;
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+
+.theme-option:hover {
+    border-color: var(--accent);
+    transform: translateY(-1px);
+}
+
+.theme-option.is-on {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.theme-swatch {
+    width: 38px;
+    height: 38px;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    background: var(--swatch, var(--accent));
+    box-shadow: inset 0 0 0 4px var(--card);
+}
+
+.theme-copy {
+    flex: 1;
+    min-width: 0;
+}
+
+.theme-copy strong {
+    display: block;
+    font-size: 0.88rem;
+    line-height: 1.25;
+}
+
+.theme-copy small {
+    display: block;
+    margin-top: 2px;
+    color: var(--muted);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+}
+
+.theme-check {
+    width: 22px;
+    height: 22px;
+    flex: 0 0 auto;
+    color: var(--accent);
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity 0.2s, transform 0.2s;
+}
+
+.theme-check svg { width: 100%; height: 100%; }
+.theme-option.is-on .theme-check { opacity: 1; transform: scale(1); }
+
+.theme-preview {
+    margin-top: 16px;
+    padding: 14px;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+    background: var(--bg);
+}
+
+.theme-preview .btn-row { margin-top: 9px; }
+
+@media (max-width: 420px) {
+    .theme-option { padding: 11px 12px; }
+    .theme-swatch { width: 34px; height: 34px; }
 }
 
 /* ================= Skeleton ================= */

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>QREN Esports — Settings</title>
+<script>
+try {
+    var savedTheme = localStorage.getItem("theme");
+    if (savedTheme) document.documentElement.setAttribute("data-theme", savedTheme);
+    else if (window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches) document.documentElement.setAttribute("data-theme", "dark");
+    var savedAccent = localStorage.getItem("accent");
+    if (savedAccent) document.documentElement.setAttribute("data-accent", savedAccent);
+} catch (e) {}
+</script>
+<link rel="stylesheet" href="../assets/ui.css" />
+</head>
+<body>
+
+<header class="topbar">
+    <div class="topbar-inner">
+        <a class="brand" href="../home/">
+            <span class="brand-mark">
+                <img src="../PROJECT%20LOGO/qren-logo.png" alt="QREN Esports logo" />
+            </span>
+            <span>
+                <strong class="brand-name" data-tournament-name>QREN Esports</strong>
+                <span class="brand-sub">Settings</span>
+            </span>
+        </a>
+        <div class="topbar-actions">
+            <a class="icon-btn" href="../profile/" aria-label="Back to profile" title="Back to profile">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+            </a>
+        </div>
+    </div>
+</header>
+
+<main class="shell narrow">
+    <div class="detail-block">
+        <h2>Appearance</h2>
+        <p class="settings-note">Apna mode aur theme color choose karo. Selection is device par save rahegi.</p>
+
+        <p class="section-label" style="margin-top:18px">Mode</p>
+        <div class="chips" role="group" aria-label="Color mode">
+            <button class="chip" type="button" data-mode-set="light" aria-pressed="false">Light</button>
+            <button class="chip" type="button" data-mode-set="dark" aria-pressed="false">Dark</button>
+        </div>
+
+        <p class="section-label" style="margin-top:18px">Theme color</p>
+        <div class="theme-options" role="group" aria-label="Theme color">
+            <button class="theme-option" type="button" data-accent-set="default" aria-pressed="false">
+                <span class="theme-swatch" style="--swatch:#4f6bed" aria-hidden="true"></span>
+                <span class="theme-copy">
+                    <strong>Default</strong>
+                    <small>#4F6BED</small>
+                </span>
+                <span class="theme-check" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg>
+                </span>
+            </button>
+
+            <button class="theme-option" type="button" data-accent-set="green" aria-pressed="false">
+                <span class="theme-swatch" style="--swatch:#00FF80" aria-hidden="true"></span>
+                <span class="theme-copy">
+                    <strong>Neon Green</strong>
+                    <small>#00FF80</small>
+                </span>
+                <span class="theme-check" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg>
+                </span>
+            </button>
+
+            <button class="theme-option" type="button" data-accent-set="cyan" aria-pressed="false">
+                <span class="theme-swatch" style="--swatch:#57FEFF" aria-hidden="true"></span>
+                <span class="theme-copy">
+                    <strong>Aqua Cyan</strong>
+                    <small>#57FEFF</small>
+                </span>
+                <span class="theme-check" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg>
+                </span>
+            </button>
+        </div>
+
+        <div class="theme-preview">
+            <p class="settings-note" style="margin-top:0">Preview</p>
+            <span class="badge info"><span class="dot"></span>Theme active</span>
+            <div class="btn-row">
+                <span class="btn primary sm">Join Tournament</span>
+                <span class="btn outline sm">View Rules</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="detail-block">
+        <h2>Settings info</h2>
+        <p class="settings-note">Theme Home, Tournaments, Results, Referral, Wallet, Profile aur Admin panel par apply hoti hai.</p>
+        <p class="settings-note">Purana mode/theme reset karna ho to browser data clear karo.</p>
+    </div>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="../firebase-config.js"></script>
+<script src="../assets/app.js"></script>
+<script src="../assets/auth.js"></script>
+<script src="../assets/app-nav.js"></script>
+<script>
+    "use strict";
+    (async function () {
+        try {
+            await CA_PAGE.boot("profile");
+        } catch (e) {
+            // requireUser redirects unauthenticated visitors.
+        }
+    })();
+</script>
+</body>
+</html>
