@@ -87,6 +87,7 @@ try {
     <!-- ================= TABS ================= -->
     <div class="tabs" role="tablist" aria-label="Admin sections">
         <button class="tab is-on" type="button" role="tab" data-tab="players" aria-selected="true">Players</button>
+        <button class="tab" type="button" role="tab" data-tab="emails" aria-selected="false">Email verify</button>
         <button class="tab" type="button" role="tab" data-tab="payments" aria-selected="false">Payments</button>
         <button class="tab" type="button" role="tab" data-tab="tournaments" aria-selected="false">Tournaments</button>
         <button class="tab" type="button" role="tab" data-tab="results" aria-selected="false">Results</button>
@@ -125,6 +126,30 @@ try {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             <h3>No joined players yet</h3>
             <p>Add a player above to build the roster.</p>
+        </div>
+    </section>
+
+    <!-- ================= EMAIL VERIFY ================= -->
+    <section class="tab-panel" data-panel="emails">
+        <div class="panel">
+            <div class="panel-head">
+                <div>
+                    <h2 class="panel-title">Email verification</h2>
+                    <p class="panel-sub">Player ke email ko verify karo. Verify karne par profile me Verified status dikhega.</p>
+                </div>
+            </div>
+            <div class="field">
+                <label class="field-label" for="emailSearch">Search</label>
+                <input class="input" type="text" id="emailSearch" placeholder="Name, email ya user ID" oninput="renderEmailRequests()" />
+            </div>
+        </div>
+
+        <p class="section-label">Email requests</p>
+        <div class="list" id="emailRequestList"></div>
+        <div class="empty" id="emailRequestEmpty" style="display:none">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4z"/><path d="m22 6-10 7L2 6"/></svg>
+            <h3>Koi email request nahi</h3>
+            <p>Player profile se email add karega, phir yahan dikhega.</p>
         </div>
     </section>
 
@@ -468,6 +493,7 @@ try {
 
     var settings = null;
     var allPlayers = [];
+    var allUsers = [];
     var currentFilter = "all";
     var currentPlayerId = null;
     var currentModalPlayer = null;
@@ -632,6 +658,22 @@ try {
 
     function startListening() {
         if (!db) return;
+        db.collection("users").onSnapshot(function (snap) {
+            allUsers = [];
+            snap.forEach(function (d) {
+                var u = d.data();
+                u.id = d.id;
+                allUsers.push(u);
+            });
+            allUsers.sort(function (a, b) {
+                return toMillis(b.emailVerificationRequestedAt) - toMillis(a.emailVerificationRequestedAt);
+            });
+            renderEmailRequests();
+        }, function (err) {
+            console.error(err);
+            showToast("Error loading emails", "danger");
+        });
+
         db.collection("players_private").onSnapshot(function (snap) {
             allPlayers = [];
             snap.forEach(function (d) {
@@ -744,6 +786,56 @@ try {
         });
 
         empty.style.display = joined.length === 0 ? "block" : "none";
+    }
+
+    /* ================= EMAIL VERIFY ================= */
+    function renderEmailRequests() {
+        var list = $("emailRequestList");
+        var empty = $("emailRequestEmpty");
+        if (!list || !empty) return;
+
+        var search = $("emailSearch");
+        var term = search ? search.value.trim().toLowerCase() : "";
+        var users = allUsers.filter(function (u) {
+            if (!u.email) return false;
+            if (!term) return true;
+            return (u.userName || "").toLowerCase().indexOf(term) !== -1 ||
+                (u.email || "").toLowerCase().indexOf(term) !== -1 ||
+                (u.userId || "").toLowerCase().indexOf(term) !== -1;
+        });
+
+        list.innerHTML = "";
+        users.forEach(function (u) {
+            var item = document.createElement("article");
+            item.className = "row-card";
+            var verified = !!u.emailVerified;
+            item.innerHTML =
+                '<span class="avatar">' + escapeHtml(initials(u.userName)) + "</span>" +
+                '<div class="row-main">' +
+                    '<p class="row-title">' + escapeHtml(u.userName || "Player") + "</p>" +
+                    '<p class="row-sub">User ID: ' + escapeHtml(u.userId || "—") + "</p>" +
+                    '<p class="row-sub">' + escapeHtml(u.email || "—") + "</p>" +
+                "</div>" +
+                '<div class="row-actions">' +
+                    (verified
+                        ? '<span class="badge success"><span class="dot"></span>Verified</span>'
+                        : '<span class="badge warning"><span class="dot"></span>Pending</span>' +
+                          '<button class="btn success sm" type="button" onclick="verifyEmail(\'' + u.id + '\')">Verify</button>') +
+                "</div>";
+            list.appendChild(item);
+        });
+
+        empty.style.display = users.length === 0 ? "block" : "none";
+    }
+
+    async function verifyEmail(uid) {
+        try {
+            await db.collection("users").doc(uid).update({ emailVerified: true });
+            showToast("Email verified", "success");
+        } catch (e) {
+            console.error(e);
+            showToast(e && e.code === "permission-denied" ? "Firestore rules update publish karo" : "Email verify nahi hua", "danger");
+        }
     }
 
     /* ================= PLAYER ACTIONS ================= */

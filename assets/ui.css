@@ -1945,6 +1945,7 @@ select.input {
 /* ================= Profile ================= */
 .profile-card {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 14px;
     background: var(--card);
@@ -1961,12 +1962,42 @@ select.input {
     flex: 0 0 auto;
 }
 
-.photo-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 6px;
+.profile-edit-btn {
+    margin-left: auto;
+    flex: 0 0 auto;
 }
+
+.avatar-picker {
+    position: relative;
+    flex: 0 0 auto;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius);
+    background: transparent;
+    line-height: 0;
+    cursor: default;
+}
+
+.avatar-picker.is-editing { cursor: pointer; }
+.avatar-picker.is-editing .avatar { box-shadow: 0 0 0 2px var(--accent); }
+
+.avatar-edit-mark {
+    position: absolute;
+    right: -5px;
+    bottom: -5px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--card);
+    background: var(--accent);
+    color: var(--accent-ink);
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.avatar-picker.is-editing .avatar-edit-mark { display: flex; }
+.avatar-edit-mark svg { width: 11px; height: 11px; }
 
 .profile-name {
     font-size: 1.05rem;

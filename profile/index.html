@@ -33,48 +33,56 @@ try {
 
 <main class="shell">
     <div class="profile-card">
-        <span class="avatar lg" id="profileAvatar">P</span>
+        <button class="avatar-picker" type="button" id="avatarBtn" disabled aria-label="Change profile photo">
+            <span class="avatar lg" id="profileAvatar">P</span>
+            <span class="avatar-edit-mark" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+            </span>
+        </button>
         <div style="min-width:0">
             <div class="profile-name" id="profileName">Loading...</div>
             <div class="profile-meta" id="profileMeta">Profile load ho raha hai</div>
             <div class="profile-uid" id="profileUid"></div>
         </div>
+        <button class="btn secondary sm profile-edit-btn" type="button" id="editProfileBtn">Edit profile</button>
     </div>
 
-    <div class="detail-block">
+    <div class="detail-block" id="accountDetailsBlock">
         <h2>Account details</h2>
         <div class="detail-rows" id="accountDetails"></div>
     </div>
 
-    <div class="detail-block">
-        <h2>Account settings</h2>
-        <div class="field" style="margin-bottom:16px">
-            <label class="field-label">Profile photo</label>
-            <div class="photo-actions">
-                <button class="btn secondary sm" type="button" id="photoBtn">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
-                    Choose from gallery
-                </button>
-                <button class="btn ghost sm" type="button" id="removePhotoBtn" style="display:none">Remove photo</button>
-            </div>
-            <input type="file" id="photoInput" accept="image/*" hidden />
-            <p class="settings-note">Gallery se image select karo. Photo automatically 256px me compress hoke save hoti hai.</p>
-        </div>
-        <form id="nameForm" novalidate>
+    <div class="detail-block" id="profileEditBlock" style="display:none">
+        <h2>Edit profile</h2>
+        <form id="profileForm" novalidate>
             <div class="field">
                 <label class="field-label" for="nameInput">User name</label>
                 <input class="input" type="text" id="nameInput" maxlength="40" autocomplete="nickname" />
                 <span class="field-error"></span>
             </div>
-            <div class="alert success" id="nameMsg" style="display:none;margin-bottom:10px"></div>
-            <button class="btn primary" type="submit" id="nameBtn">Save name</button>
+            <div class="field">
+                <label class="field-label" for="emailInput">Email address</label>
+                <input class="input" type="email" id="emailInput" maxlength="120" autocomplete="email" placeholder="you@example.com" />
+                <span class="field-error"></span>
+                <p class="settings-note" id="emailStatus">Email add karo. Admin verify karega.</p>
+            </div>
+            <div class="field">
+                <label class="field-label" for="mobileInput">Registered mobile number</label>
+                <input class="input" type="tel" id="mobileInput" disabled />
+                <p class="settings-note">Mobile number change karne ke liye verification zaroori hai — support se contact karo.</p>
+            </div>
+            <div class="field">
+                <label class="field-label">Profile photo</label>
+                <p class="settings-note">Photo change karne ke liye upar avatar par tap karo. Photo automatically 256px me compress hoti hai.</p>
+                <button class="btn ghost sm" type="button" id="removePhotoBtn" style="display:none;margin-top:8px">Remove photo</button>
+            </div>
+            <div class="alert success" id="profileMsg" style="display:none;margin-bottom:10px"></div>
+            <div class="btn-row" style="margin-top:4px">
+                <button class="btn primary" type="submit" id="saveProfileBtn">Save changes</button>
+                <button class="btn ghost" type="button" id="cancelEditBtn">Cancel</button>
+            </div>
         </form>
-
-        <div class="field" style="margin-top:16px">
-            <label class="field-label" for="mobileInput">Registered mobile number</label>
-            <input class="input" type="tel" id="mobileInput" disabled />
-            <p class="settings-note">Mobile number change karne ke liye verification zaroori hai — support se contact karo.</p>
-        </div>
+        <input type="file" id="photoInput" accept="image/*" hidden />
     </div>
 
     <div class="detail-block">
@@ -142,7 +150,7 @@ try {
 <script>
     "use strict";
 
-    var state = { user: null, profile: null, joins: [], results: [] };
+    var state = { user: null, profile: null, joins: [], results: [], editing: false, photoDirty: false, draftPhoto: "" };
 
     function $(id) { return document.getElementById(id); }
 
@@ -168,17 +176,22 @@ try {
         return isNaN(d.getTime()) ? 0 : d.getTime();
     }
 
+    function currentPhoto() {
+        var p = state.profile || {};
+        return state.editing && state.photoDirty ? String(state.draftPhoto || "") : String(p.photo || "");
+    }
+
     function paintAvatar() {
         var p = state.profile || {};
         var el = $("profileAvatar");
-        var photo = String(p.photo || "");
+        var photo = currentPhoto();
         var safePhoto = /^data:image\/(jpeg|png|webp);base64,/i.test(photo);
         if (safePhoto) {
             el.innerHTML = '<img src="' + CA.esc(photo) + '" alt="Profile photo" />';
         } else {
             el.textContent = CA.initials(p.userName);
         }
-        $("removePhotoBtn").style.display = safePhoto ? "inline-flex" : "none";
+        $("removePhotoBtn").style.display = state.editing && safePhoto ? "inline-flex" : "none";
     }
 
     function renderProfile() {
@@ -192,10 +205,64 @@ try {
             detailRow("User name", p.userName) +
             detailRow("Registered mobile", p.mobile ? "+91 " + p.mobile : "") +
             detailRow("User ID", p.userId || "") +
+            detailRow("Email", p.email ? p.email + (p.emailVerified ? " (verified)" : " (pending)") : "") +
             detailRow("Referral code", p.referralCode || "—");
 
         $("nameInput").value = p.userName || "";
         $("mobileInput").value = p.mobile ? "+91 " + p.mobile : "";
+        $("emailInput").value = p.email || "";
+
+        var emailStatus = $("emailStatus");
+        if (!p.email) emailStatus.textContent = "Email add karo. Admin verify karega.";
+        else if (p.emailVerified) emailStatus.textContent = "Verified: " + p.email;
+        else emailStatus.textContent = "Verification pending: " + p.email;
+
+        $("profileEditBlock").style.display = state.editing ? "block" : "none";
+        $("accountDetailsBlock").style.display = state.editing ? "none" : "block";
+        $("editProfileBtn").style.display = state.editing ? "none" : "inline-flex";
+        $("avatarBtn").disabled = !state.editing;
+        $("avatarBtn").classList.toggle("is-editing", state.editing);
+    }
+
+    function clearFieldError(input) {
+        var field = input.closest(".field");
+        if (!field) return;
+        field.classList.remove("invalid");
+        var errEl = field.querySelector(".field-error");
+        if (errEl) errEl.textContent = "";
+    }
+
+    function setFieldError(input, message) {
+        var field = input.closest(".field");
+        if (!field) return;
+        field.classList.add("invalid");
+        var errEl = field.querySelector(".field-error");
+        if (errEl) errEl.textContent = message;
+    }
+
+    function saveErrorText(err, fallback) {
+        if (err && err.code === "permission-denied") return "Firestore rules update publish karo.";
+        return (err && err.message) || fallback;
+    }
+
+    function enterEditMode() {
+        if (!state.profile) return;
+        state.editing = true;
+        state.photoDirty = false;
+        state.draftPhoto = String(state.profile.photo || "");
+        hideMsg("profileMsg");
+        clearFieldError($("nameInput"));
+        clearFieldError($("emailInput"));
+        renderProfile();
+        $("nameInput").focus();
+    }
+
+    function exitEditMode() {
+        state.editing = false;
+        state.photoDirty = false;
+        state.draftPhoto = "";
+        hideMsg("profileMsg");
+        renderProfile();
     }
 
     function readFileAsDataUrl(file) {
@@ -309,18 +376,18 @@ try {
         renderHistory();
     }
 
-    $("photoBtn").addEventListener("click", function () {
-        $("photoInput").click();
+    $("editProfileBtn").addEventListener("click", enterEditMode);
+
+    $("cancelEditBtn").addEventListener("click", exitEditMode);
+
+    $("avatarBtn").addEventListener("click", function () {
+        if (state.editing) $("photoInput").click();
     });
 
     $("photoInput").addEventListener("change", async function () {
         var file = this.files && this.files[0];
         this.value = "";
-        if (!file) return;
-        if (!state.profile) {
-            CA.toast("Profile load ho raha hai. Thoda wait karo.", "danger");
-            return;
-        }
+        if (!file || !state.editing) return;
         if (!/^image\//.test(file.type)) {
             CA.toast("Sirf image file select karo.", "danger");
             return;
@@ -330,78 +397,119 @@ try {
             return;
         }
 
-        var btn = $("photoBtn");
-        var oldPhoto = state.profile.photo || "";
-        btn.disabled = true;
-        btn.classList.add("loading");
+        $("avatarBtn").classList.add("loading");
         try {
-            var photo = await makeProfilePhoto(file);
-            var saved = await CA_AUTH.updatePhoto(state.user, photo);
-            state.profile.photo = saved;
+            state.draftPhoto = await makeProfilePhoto(file);
+            state.photoDirty = true;
             paintAvatar();
-            CA.toast("Profile photo update ho gayi.", "success");
         } catch (err) {
-            state.profile.photo = oldPhoto;
-            paintAvatar();
-            var message = err.code === "permission-denied"
-                ? "Photo save nahi hui. Firestore rules update publish karo."
-                : (err.message || "Photo save nahi hui.");
-            CA.toast(message, "danger");
+            CA.toast(err.message || "Photo process nahi ho payi.", "danger");
         } finally {
-            btn.disabled = false;
-            btn.classList.remove("loading");
+            $("avatarBtn").classList.remove("loading");
         }
     });
 
-    $("removePhotoBtn").addEventListener("click", async function () {
-        if (!state.profile || !state.profile.photo) return;
-        var btn = $("removePhotoBtn");
-        var oldPhoto = state.profile.photo;
-        btn.disabled = true;
-        btn.classList.add("loading");
-        try {
-            await CA_AUTH.updatePhoto(state.user, "");
-            state.profile.photo = "";
-            paintAvatar();
-            CA.toast("Profile photo remove ho gayi.", "success");
-        } catch (err) {
-            state.profile.photo = oldPhoto;
-            paintAvatar();
-            CA.toast(err.message || "Photo remove nahi hui.", "danger");
-        } finally {
-            btn.disabled = false;
-            btn.classList.remove("loading");
-        }
+    $("removePhotoBtn").addEventListener("click", function () {
+        if (!state.editing) return;
+        state.draftPhoto = "";
+        state.photoDirty = true;
+        paintAvatar();
     });
 
-    $("nameForm").addEventListener("submit", async function (e) {
+    $("profileForm").addEventListener("submit", async function (e) {
         e.preventDefault();
-        var btn = $("nameBtn");
-        var input = $("nameInput");
-        var field = input.closest(".field");
-        hideMsg("nameMsg");
-        field.classList.remove("invalid");
+        if (!state.profile) {
+            CA.toast("Profile load ho raha hai. Thoda wait karo.", "danger");
+            return;
+        }
 
+        var nameInput = $("nameInput");
+        var emailInput = $("emailInput");
+        var name = nameInput.value.trim();
+        var email = emailInput.value.trim().toLowerCase();
+        var valid = true;
+
+        hideMsg("profileMsg");
+        clearFieldError(nameInput);
+        clearFieldError(emailInput);
+
+        if (name.length < 3) {
+            setFieldError(nameInput, "User name kam se kam 3 characters ka hona chahiye.");
+            valid = false;
+        } else if (name.length > 40) {
+            setFieldError(nameInput, "User name 40 characters se chhota rakho.");
+            valid = false;
+        }
+
+        if (email && !CA_AUTH.isValidEmail(email)) {
+            setFieldError(emailInput, "Valid email address daalo.");
+            valid = false;
+        } else if (!email && state.profile.email) {
+            setFieldError(emailInput, "Email remove nahi ho sakta. Naya email daalo.");
+            valid = false;
+        }
+        if (!valid) return;
+
+        var nameChanged = name !== (state.profile.userName || "");
+        var emailChanged = !!email && email !== (state.profile.email || "");
+        var photoChanged = state.photoDirty;
+        if (!nameChanged && !emailChanged && !photoChanged) {
+            exitEditMode();
+            CA.toast("Koi change nahi kiya.", "info");
+            return;
+        }
+
+        var btn = $("saveProfileBtn");
         btn.disabled = true;
         btn.classList.add("loading");
-        btn.dataset.label = btn.textContent;
-        btn.innerHTML = '<span class="spin" aria-hidden="true"></span>Saving...';
+        btn.textContent = "Saving...";
 
-        try {
-            var name = await CA_AUTH.updateUserName(state.user, input.value);
-            state.profile.userName = name;
-            renderProfile();
-            showMsg("nameMsg", "User name update ho gaya.", "success");
-        } catch (err) {
-            field.classList.add("invalid");
-            var errEl = field.querySelector(".field-error");
-            if (errEl) errEl.textContent = err.message || "Name update nahi hua.";
-            showMsg("nameMsg", err.message || "Name update nahi hua.", "danger");
-        } finally {
-            btn.disabled = false;
-            btn.classList.remove("loading");
-            btn.textContent = btn.dataset.label || "Save name";
+        var errors = [];
+        if (nameChanged) {
+            try {
+                state.profile.userName = await CA_AUTH.updateUserName(state.user, name);
+            } catch (err) {
+                errors.push(saveErrorText(err, "Name update nahi hua."));
+            }
         }
+        if (photoChanged) {
+            try {
+                state.profile.photo = await CA_AUTH.updatePhoto(state.user, state.draftPhoto);
+                state.photoDirty = false;
+                state.draftPhoto = state.profile.photo;
+            } catch (err) {
+                errors.push(saveErrorText(err, "Photo save nahi hui."));
+            }
+        }
+        if (emailChanged) {
+            try {
+                await CA_AUTH.requestEmailVerification(state.user, email);
+                state.profile.email = email;
+                state.profile.emailVerified = false;
+            } catch (err) {
+                errors.push(saveErrorText(err, "Email save nahi hui."));
+            }
+        }
+
+        btn.disabled = false;
+        btn.classList.remove("loading");
+        btn.textContent = "Save changes";
+
+        if (errors.length) {
+            var keepName = name;
+            var keepEmail = email;
+            renderProfile();
+            $("nameInput").value = keepName;
+            $("emailInput").value = keepEmail;
+            showMsg("profileMsg", errors.join(" "), "danger");
+            return;
+        }
+
+        state.editing = false;
+        state.photoDirty = false;
+        state.draftPhoto = "";
+        renderProfile();
+        CA.toast("Profile update ho gaya.", "success");
     });
 
     $("passwordForm").addEventListener("submit", async function (e) {

@@ -59,7 +59,7 @@ service cloud.firestore {
         && request.resource.data.wallet.totalEarnings == 0
         && request.resource.data.wallet.totalDeposits == 0
         && request.resource.data.wallet.totalWithdrawals == 0;
-      allow update: if isOwner(userId) && changedOnly(['userName', 'photo', 'userId'])
+      allow update: if isOwner(userId) && changedOnly(['userName', 'photo', 'userId', 'email', 'emailVerified', 'emailVerificationRequestedAt'])
         && (
           !request.resource.data.diff(resource.data).affectedKeys().hasAny(['photo'])
           || request.resource.data.photo == ''
@@ -70,7 +70,20 @@ service cloud.firestore {
         && (
           !request.resource.data.diff(resource.data).affectedKeys().hasAny(['userId'])
           || (request.resource.data.userId.matches('^[0-9]{5}$') && !('userId' in resource.data))
+        )
+        && (
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['email', 'emailVerified', 'emailVerificationRequestedAt'])
+          || (request.resource.data.email is string
+              && request.resource.data.email.size() <= 120
+              && request.resource.data.email.matches('^[^@ ]+@[^@ ]+[.][^@ ]+$')
+              && request.resource.data.emailVerified == false
+              && request.resource.data.emailVerificationRequestedAt == request.time)
         );
+      allow update: if isAdmin()
+        && changedOnly(['emailVerified'])
+        && request.resource.data.emailVerified == true
+        && resource.data.email is string
+        && resource.data.email.size() > 0;
       allow delete: if false;
     }
 

@@ -32,6 +32,10 @@
         return "m" + mobile + "@" + AUTH_DOMAIN;
     }
 
+    function isValidEmail(value) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(value == null ? "" : value).trim());
+    }
+
     function passwordProblem(password) {
         if (!password || password.length < 8) return "Password kam se kam 8 characters ka hona chahiye.";
         if (!/[A-Za-z]/.test(password) || !/\d/.test(password)) return "Password me letter aur number dono hone chahiye.";
@@ -474,6 +478,22 @@
         return name;
     }
 
+    async function requestEmailVerification(user, emailValue) {
+        ensureReady();
+        if (!user || !user.uid) throw makeError("profile/email", "Profile load nahi hua. Reload karo.");
+        var email = String(emailValue == null ? "" : emailValue).trim().toLowerCase();
+        if (!isValidEmail(email)) throw makeError("form/email", "Valid email address daalo.");
+        if (email.length > 120) throw makeError("form/email", "Email 120 characters se chhota rakho.");
+
+        await withTimeout(db.collection("users").doc(user.uid).update({
+            email: email,
+            emailVerified: false,
+            emailVerificationRequestedAt: firebase.firestore.FieldValue.serverTimestamp()
+        }), 10000);
+
+        return email;
+    }
+
     async function updatePhoto(user, photo) {
         ensureReady();
         if (!user || !user.uid) throw makeError("profile/photo", "Profile load nahi hua. Reload karo.");
@@ -514,12 +534,14 @@
         isValidMobile: isValidMobile,
         mobileToEmail: mobileToEmail,
         passwordProblem: passwordProblem,
+        isValidEmail: isValidEmail,
         friendlyAuthError: friendlyAuthError,
         register: register,
         login: login,
         loadProfile: loadProfile,
         createMissingProfile: createMissingProfile,
         ensureUserId: ensureUserId,
+        requestEmailVerification: requestEmailVerification,
         updatePhoto: updatePhoto,
         requireUser: requireUser,
         redirectIfLoggedIn: redirectIfLoggedIn,

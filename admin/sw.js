@@ -1,4 +1,4 @@
-const CACHE = 'qren-admin-v4';
+const CACHE = 'qren-admin-v5';
 const CORE = [
     './',
     './manifest.json',

@@ -16,7 +16,7 @@ Admin panel password-protected hai. Admin tournaments, winners, settings, rules,
 | Results | `/results/` | Published winners aur prize details |
 | Referral | `/referral/` | Referral code, share link, referred users |
 | Wallet | `/wallet/` | Balance, totals, transaction history (read-only) |
-| Profile | `/profile/` | 5-digit user ID, profile photo, account details, joined tournaments, password change, logout |
+| Profile | `/profile/` | Single **Edit profile** mode for photo/name/email, 5-digit user ID, verification status, joined tournaments, password change, logout |
 | Joined Players | `/join/` | Approved public player list |
 | Rules | `/rule/` | Admin-editable tournament rules |
 | Admin Panel | `/admin/` | Login-protected admin dashboard |
@@ -29,7 +29,7 @@ Admin panel password-protected hai. Admin tournaments, winners, settings, rules,
 4. **Join Tournament** — Firestore transaction duplicate join aur slot overbooking rokta hai.
 5. **Room details** — join ke baad hi room ID/password dikhte hain.
 6. **Results** — admin ke publish kiye winners aur prizes.
-7. **Profile** — 5-digit user ID, gallery se profile photo, naam update, password change, joined matches aur logout.
+7. **Profile** — **Edit profile** button se photo/name/email update, 5-digit user ID, email verification request, password change, joined matches aur logout.
 
 ### Auth kaise kaam karta hai?
 
@@ -56,6 +56,7 @@ Current single-admin setup me UID `E8mVnZXrGhQVvVFr5Sj3tdLZrSg1` `firestore.rule
 ## Admin Panel
 
 - **Players** — player add/edit/delete; approve/reject.
+- **Email verify** — player ke email verification requests dekhna aur verify karna.
 - **Payments** — pending/approved/rejected payment requests, screenshot, approve/reject.
 - **Tournaments** — create/edit/delete, status, slots, room details, prize distribution.
 - **Results** — winner entries publish/delete.
@@ -70,7 +71,7 @@ Payment screenshots aur UTR admin-only `players_private` me rehte hain. Public `
 - Firebase Firestore + Firebase Authentication (compat SDK 10.12.0).
 - OWN Library design system: `assets/ui.css`, `assets/app.js`.
 - Shared auth/page shell: `assets/auth.js`, `assets/app-nav.js`.
-- PWA admin panel: `admin/manifest.json`, `admin/sw.js` (cache `qren-admin-v4`).
+- PWA admin panel: `admin/manifest.json`, `admin/sw.js` (cache `qren-admin-v5`).
 - Hosting: GitHub Pages, Netlify, Vercel ya Firebase Hosting.
 
 ## Project Structure
@@ -97,7 +98,7 @@ qren-esports/
   admin/
     index.html             # admin login + panel
     manifest.json          # PWA manifest
-    sw.js                  # service worker (cache v4)
+    sw.js                  # service worker (cache v5)
     icons/                 # PWA icons
   PROJECT LOGO/            # logo images
 ```
@@ -112,6 +113,9 @@ qren-esports/
 | `mobile` | string | 10-digit mobile number |
 | `userId` | string | Unique 5-digit public user ID, jaise `12345` |
 | `photo` | string | Compressed profile photo data URL (optional, max 250KB) |
+| `email` | string | Player ka contact email |
+| `emailVerified` | boolean | Admin verification ke baad `true` |
+| `emailVerificationRequestedAt` | timestamp | Last email request time |
 | `referralCode` | string | Unique code (`CA` + UID prefix) |
 | `referredBy` | string | Referrer ka UID, ya empty |
 | `createdAt` | timestamp | Account creation time |
@@ -182,6 +186,7 @@ Rules ka summary:
 - Users apna profile read kar sakte hain; wallet/transactions client se write nahi ho sakte.
 - 5-digit user ID `userIds` collection me reserve hota hai; ek ID sirf ek account le sakta hai.
 - Profile photo owner-only compressed data URL hai (JPEG/PNG/WebP, max 250KB).
+- Email owner save kar sakta hai, lekin `emailVerified` sirf admin `true` kar sakta hai. Email change karne par status dobara pending ho jata hai.
 - Public tournaments/results/settings read hain; private room/token data admin-only.
 - Join transaction `joins` + `joinLocks` + `joinedCount` rules se validate hota hai.
 - Admin writes `admins/{uid}` doc se gate hain.
@@ -211,6 +216,8 @@ Phir `http://localhost:8080/` kholo. Direct file open karne par Firebase aur ser
 ## Important Limitations
 
 - **Wallet read-only hai.** Deposit/withdraw buttons disabled hain; payment gateway/backend nahi hai.
+- **Mobile number profile se change nahi hota.** Mobile login identity hai; change ke liye verification/support flow chahiye.
+- **Email verification manual hai.** Player email save karta hai; admin panel ke **Email verify** tab se admin verify karta hai. Automatic verification email bhejne ke liye backend/email service chahiye.
 - **Referral reward automatically credit nahi hota.** Sirf configured reward aur referred users dikhte hain.
 - **Join hone par entry fee debit nahi hoti.** Join transaction sirf slot reserve karta hai.
 - **Admin player-wise joins list nahi dikhata.** Tournament manager count dikhata hai.
