@@ -201,6 +201,7 @@ try {
         var joined = CA_PAGE.number(t.joinedCount);
         var remaining = CA_PAGE.remainingSlots(t);
         var pct = total > 0 ? Math.min(Math.round((joined / total) * 100), 100) : 0;
+        var imageUrl = CA.safeHttpUrl(t.imageUrl);
 
         $("tName").textContent = t.name || "Tournament";
         $("tGame").textContent = (t.game || "Game") + " · " + CA.fmtTime(t.matchDate);
@@ -208,7 +209,10 @@ try {
 
         $("detailContent").innerHTML =
             '<section class="detail-hero">' +
-                '<span class="badge ' + status.cls + '"><span class="dot"></span>' + CA.esc(status.label) + "</span>" +
+                '<div class="detail-hero-top">' +
+                    '<span class="badge ' + status.cls + '"><span class="dot"></span>' + CA.esc(status.label) + "</span>" +
+                    (imageUrl ? '<img class="detail-thumb" src="' + CA.esc(imageUrl) + '" alt="" loading="lazy" decoding="async" onerror="this.style.display=\'none\'" />' : "") +
+                "</div>" +
                 "<h1>" + CA.esc(t.name || "Tournament") + "</h1>" +
                 '<div class="game-line">' + gameIcon() + "<span>" + CA.esc(t.game || "Game") + "</span><span>·</span><span>" + CA.esc(CA.fmtTime(t.matchDate) || "Time TBA") + "</span></div>" +
                 '<div class="detail-price">' +

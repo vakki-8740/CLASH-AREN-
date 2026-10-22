@@ -199,6 +199,15 @@ try {
                     <label class="field-label" for="tGame">Game <span class="req">*</span></label>
                     <input class="input" type="text" id="tGame" placeholder="Free Fire" />
                 </div>
+                <div class="field full">
+                    <label class="field-label" for="tImageUrl">Tournament image URL</label>
+                    <input class="input" type="text" id="tImageUrl" inputmode="url" placeholder="https://.../tournament.jpg" oninput="renderTournamentImagePreview()" />
+                    <div class="t-image-preview" id="tImagePreviewWrap" style="display:none">
+                        <img id="tImagePreview" alt="Tournament image preview" />
+                        <span>Thumbnail preview</span>
+                    </div>
+                    <p class="settings-note">Optional. Image user app me 68×68 thumbnail ke roop me dikhegi.</p>
+                </div>
                 <div class="field">
                     <label class="field-label" for="tEntryFee">Entry fee (₹)</label>
                     <input class="input" type="number" id="tEntryFee" min="0" value="0" />
@@ -1136,11 +1145,26 @@ try {
         return allTournaments.find(function (t) { return t.id === id; });
     }
 
+    function renderTournamentImagePreview() {
+        var wrap = $("tImagePreviewWrap");
+        var img = $("tImagePreview");
+        var url = CA.safeHttpUrl($("tImageUrl").value);
+        if (!url) {
+            wrap.style.display = "none";
+            img.removeAttribute("src");
+            return;
+        }
+        img.src = url;
+        wrap.style.display = "flex";
+    }
+
     function clearTournamentForm() {
         editingTournamentId = null;
         $("tEditId").value = "";
         $("tName").value = "";
         $("tGame").value = "";
+        $("tImageUrl").value = "";
+        renderTournamentImagePreview();
         $("tEntryFee").value = "0";
         $("tPrizePool").value = "";
         $("tTotalSlots").value = "48";
@@ -1173,6 +1197,8 @@ try {
         $("tEditId").value = id;
         $("tName").value = t.name || "";
         $("tGame").value = t.game || "";
+        $("tImageUrl").value = t.imageUrl || "";
+        renderTournamentImagePreview();
         $("tEntryFee").value = Number(t.entryFee) || 0;
         $("tPrizePool").value = t.prizePool || "";
         $("tTotalSlots").value = Number(t.totalSlots) || 1;
@@ -1195,9 +1221,12 @@ try {
         var game = $("tGame").value.trim();
         var slots = Number($("tTotalSlots").value);
         var dateVal = $("tMatchDate").value;
+        var imageUrlRaw = $("tImageUrl").value.trim();
+        var imageUrl = imageUrlRaw ? CA.safeHttpUrl(imageUrlRaw) : "";
 
         if (!name) { showToast("Tournament name daalo", "danger"); return; }
         if (!game) { showToast("Game name daalo", "danger"); return; }
+        if (imageUrlRaw && !imageUrl) { showToast("Image URL http:// ya https:// se start hona chahiye", "danger"); return; }
         if (!slots || slots < 1) { showToast("Total slots 1 ya zyada rakho", "danger"); return; }
         if (!dateVal) { showToast("Match date aur time select karo", "danger"); return; }
 
@@ -1211,6 +1240,7 @@ try {
         var payload = {
             name: name,
             game: game,
+            imageUrl: imageUrl,
             entryFee: Number($("tEntryFee").value) || 0,
             prizePool: $("tPrizePool").value.trim(),
             totalSlots: slots,
@@ -1312,6 +1342,7 @@ try {
             tournamentId: id,
             tournamentName: t.name || "Tournament",
             game: t.game || "",
+            imageUrl: t.imageUrl || "",
             matchDate: t.matchDate || null,
             winnerName: winner,
             rank: Number($("rRank").value) || 1,

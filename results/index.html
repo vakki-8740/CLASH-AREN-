@@ -104,22 +104,29 @@ try {
         var badge = status === "published"
             ? '<span class="badge success"><span class="dot"></span>Published</span>'
             : '<span class="badge neutral">' + CA.esc(status) + "</span>";
+        var imageUrl = CA.safeHttpUrl(r.imageUrl);
+        var thumb = imageUrl
+            ? '<span class="t-thumb"><img src="' + CA.esc(imageUrl) + '" alt="" loading="lazy" decoding="async" onerror="this.style.display=\'none\'" /></span>'
+            : "";
 
-        return '<button class="result-card" type="button" onclick="openResult(\'' + r.id + '\')">' +
-            '<div class="result-top">' +
-                '<div>' +
-                    '<div class="result-title">' + CA.esc(r.tournamentName || "Tournament") + '</div>' +
-                    '<div class="result-sub">' + CA.esc(CA.fmtDate(r.matchDate) || "Date TBA") + (r.game ? " · " + CA.esc(r.game) : "") + '</div>' +
+        return '<button class="result-card' + (thumb ? " has-thumb" : "") + '" type="button" onclick="openResult(\'' + r.id + '\')">' +
+            thumb +
+            '<div class="result-body">' +
+                '<div class="result-top">' +
+                    '<div>' +
+                        '<div class="result-title">' + CA.esc(r.tournamentName || "Tournament") + '</div>' +
+                        '<div class="result-sub">' + CA.esc(CA.fmtDate(r.matchDate) || "Date TBA") + (r.game ? " · " + CA.esc(r.game) : "") + '</div>' +
+                    '</div>' +
+                    badge +
                 '</div>' +
-                badge +
-            '</div>' +
-            '<div class="result-win">' +
-                '<span>Winner: <strong>' + CA.esc(r.winnerName || "—") + '</strong></span>' +
-                '<span class="rank-pill">#' + CA.esc(r.rank || "—") + '</span>' +
-            '</div>' +
-            '<div class="result-win" style="border-top:0;padding-top:4px;margin-top:0">' +
-                '<span class="muted" style="font-size:.72rem">Prize won</span>' +
-                '<span class="prize">' + CA.esc(CA_PAGE.money(r.prize)) + '</span>' +
+                '<div class="result-win">' +
+                    '<span>Winner: <strong>' + CA.esc(r.winnerName || "—") + '</strong></span>' +
+                    '<span class="rank-pill">#' + CA.esc(r.rank || "—") + '</span>' +
+                '</div>' +
+                '<div class="result-win" style="border-top:0;padding-top:4px;margin-top:0">' +
+                    '<span class="muted" style="font-size:.72rem">Prize won</span>' +
+                    '<span class="prize">' + CA.esc(CA_PAGE.money(r.prize)) + '</span>' +
+                '</div>' +
             '</div>' +
         '</button>';
     }

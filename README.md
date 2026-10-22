@@ -12,7 +12,7 @@ Admin panel password-protected hai. Admin tournaments, winners, settings, rules,
 |------|-----|------|
 | Login / Register | `/` | Mobile + password auth, optional referral code |
 | Home | `/home/` | Tournaments list, slots, entry fee, status |
-| Tournament Details | `/tournament/?id=...` | Details, rules, room credentials (join ke baad), Join button |
+| Tournament Details | `/tournament/?id=...` | Image thumbnail, details, rules, room credentials (join ke baad), Join button |
 | Results | `/results/` | Published winners aur prize details |
 | Referral | `/referral/` | Referral code, share link, referred users |
 | Wallet | `/wallet/` | Balance, totals, transaction history (read-only) |
@@ -58,7 +58,7 @@ Current single-admin setup me UID `E8mVnZXrGhQVvVFr5Sj3tdLZrSg1` `firestore.rule
 - **Players** — player add/edit/delete; approve/reject.
 - **Email verify** — player ke email verification requests dekhna aur verify karna.
 - **Payments** — pending/approved/rejected payment requests, screenshot, approve/reject.
-- **Tournaments** — create/edit/delete, status, slots, room details, prize distribution.
+- **Tournaments** — create/edit/delete, image URL thumbnail, status, slots, room details, prize distribution.
 - **Results** — winner entries publish/delete.
 - **Settings** — tournament name, entry fee, UPI/QR, prize pool, slots, announcement, Telegram, referral reward.
 - **Rules** — rules add/edit/delete; `/rule/` page par dikhte hain.
@@ -71,7 +71,7 @@ Payment screenshots aur UTR admin-only `players_private` me rehte hain. Public `
 - Firebase Firestore + Firebase Authentication (compat SDK 10.12.0).
 - OWN Library design system: `assets/ui.css`, `assets/app.js`.
 - Shared auth/page shell: `assets/auth.js`, `assets/app-nav.js`.
-- PWA admin panel: `admin/manifest.json`, `admin/sw.js` (cache `qren-admin-v5`).
+- PWA admin panel: `admin/manifest.json`, `admin/sw.js` (cache `qren-admin-v6`).
 - Hosting: GitHub Pages, Netlify, Vercel ya Firebase Hosting.
 
 ## Project Structure
@@ -98,7 +98,7 @@ qren-esports/
   admin/
     index.html             # admin login + panel
     manifest.json          # PWA manifest
-    sw.js                  # service worker (cache v5)
+    sw.js                  # service worker (cache v6)
     icons/                 # PWA icons
   PROJECT LOGO/            # logo images
 ```
@@ -133,7 +133,7 @@ Public `get`-only lookup doc: `code`, `uid`, `userName`, `createdAt`. Isme mobil
 
 ### `tournaments/{id}`
 
-Public data: `name`, `game`, `description`, `entryFee`, `prizePool`, `matchDate`, `totalSlots`, `joinedCount`, `status`, `matchFormat`, `rules`, `prizeDistribution`, `createdAt`, `updatedAt`.
+Public data: `name`, `game`, `imageUrl`, `description`, `entryFee`, `prizePool`, `matchDate`, `totalSlots`, `joinedCount`, `status`, `matchFormat`, `rules`, `prizeDistribution`, `createdAt`, `updatedAt`.
 
 **Room ID/password public doc me nahi hote.** Wo `tournament_private/{id}` me hain.
 

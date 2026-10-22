@@ -41,6 +41,17 @@
             .map(function (w) { return w[0]; }).slice(0, 2).join("").toUpperCase() || "P";
     }
 
+    function safeHttpUrl(value) {
+        var raw = String(value == null ? "" : value).trim();
+        if (!raw) return "";
+        try {
+            var url = new URL(raw);
+            return url.protocol === "http:" || url.protocol === "https:" ? url.href : "";
+        } catch (e) {
+            return "";
+        }
+    }
+
     function toast(message, type) {
         var el = document.getElementById("toast");
         if (!el) {
@@ -97,6 +108,7 @@
         fmtTime: fmtTime,
         fmtDate: fmtDate,
         initials: initials,
+        safeHttpUrl: safeHttpUrl,
         toast: toast,
         openOverlay: openOverlay,
         closeOverlay: closeOverlay
