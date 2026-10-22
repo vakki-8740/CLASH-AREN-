@@ -1453,6 +1453,7 @@ select.input {
 }
 
 .nav-item {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1470,6 +1471,17 @@ select.input {
 }
 
 .nav-item svg { width: 22px; height: 22px; }
+
+.nav-alert-dot {
+    position: absolute;
+    top: 4px;
+    left: calc(50% + 5px);
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--no);
+    border: 2px solid var(--card);
+}
 .nav-item:hover { color: var(--text); }
 .nav-item.is-active { color: var(--accent); background: var(--accent-soft); }
 
@@ -2073,11 +2085,126 @@ select.input {
 .avatar-picker.is-editing .avatar-edit-mark { display: flex; }
 .avatar-edit-mark svg { width: 11px; height: 11px; }
 
+.profile-name-row {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    min-width: 0;
+}
+
 .profile-name {
     font-size: 1.05rem;
     font-weight: 800;
     letter-spacing: -0.01em;
 }
+
+.profile-incomplete-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+    background: var(--no);
+    box-shadow: 0 0 0 3px rgba(229, 72, 77, 0.14);
+    flex: 0 0 auto;
+    display: inline-block;
+}
+
+.profile-completion-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.profile-completion-head h2 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.profile-completion-head p {
+    font-size: 0.76rem;
+    color: var(--muted);
+    line-height: 1.45;
+}
+
+.completion-bar {
+    height: 7px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+    margin: 12px 0;
+}
+
+.completion-bar > span {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+    border-radius: inherit;
+    transition: width 0.25s ease;
+}
+
+.completion-list {
+    list-style: none;
+    display: grid;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+}
+
+.completion-list li {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 8px 0;
+    border-top: 1px dashed var(--border);
+}
+
+.completion-list li:first-child { border-top: 0; }
+
+.completion-mark {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 800;
+    flex: 0 0 auto;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    background: var(--bg);
+}
+
+.completion-list li.done .completion-mark {
+    background: rgba(34, 160, 107, 0.12);
+    border-color: transparent;
+    color: var(--yes);
+}
+
+.completion-text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.completion-text strong {
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.completion-text small {
+    font-size: 0.68rem;
+    color: var(--muted);
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+}
+
+.completion-list .badge { flex: 0 0 auto; }
 
 .profile-meta {
     font-size: 0.75rem;

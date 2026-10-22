@@ -1,5 +1,7 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { isProfileComplete } from "../lib/profileCompletion";
 
 const ICONS = {
     home: <><path d="M3 10.5 12 3l9 7.5" /><path d="M5 9.5V21h14V9.5" /><path d="M9 21v-6h6v6" /></>,
@@ -18,6 +20,9 @@ const ITEMS = [
 ];
 
 export default function BottomNav({ active }) {
+    const { profile } = useAuth();
+    const profileIncomplete = !!profile && !isProfileComplete(profile);
+
     useEffect(() => {
         document.body.classList.add("app-page");
         return () => document.body.classList.remove("app-page");
@@ -28,6 +33,7 @@ export default function BottomNav({ active }) {
             <div className="bottom-nav-inner">
                 {ITEMS.map(item => (
                     <Link key={item.key} className={"nav-item" + (item.key === active ? " is-active" : "")} to={item.href} aria-current={item.key === active ? "page" : undefined}>
+                        {item.key === "profile" && profileIncomplete ? <span className="nav-alert-dot" role="status" aria-label="Profile incomplete" /> : null}
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{ICONS[item.key]}</svg>
                         <span>{item.label}</span>
                     </Link>

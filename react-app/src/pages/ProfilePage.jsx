@@ -5,6 +5,7 @@ import { changePassword, isValidEmail, requestEmailVerification, updatePhoto, up
 import { fmtDate, fmtTime, initials, money, number, toMillis } from "../lib/format";
 import { toast } from "../lib/toast";
 import { useAuth } from "../context/AuthContext";
+import { getProfileCompletion } from "../lib/profileCompletion";
 import Topbar from "../components/Topbar";
 import BottomNav from "../components/BottomNav";
 import DetailRow from "../components/DetailRow";
@@ -271,6 +272,7 @@ export default function ProfilePage() {
     });
     const photo = currentPhoto();
     const safePhoto = /^data:image\/(jpeg|png|webp);base64,/i.test(photo);
+    const completion = getProfileCompletion(localProfile);
 
     return (
         <>
@@ -285,13 +287,44 @@ export default function ProfilePage() {
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" /><circle cx="12" cy="13" r="3" /></svg>
                         </span>
                     </button>
-                    <div style={{ minWidth: 0 }}>
-                        <div className="profile-name" id="profileName">{localProfile?.userName || "Loading..."}</div>
+                    <div style={{ minWidth: 0, flex: "1 1 auto" }}>
+                        <div className="profile-name-row">
+                            <div className="profile-name" id="profileName">{localProfile?.userName || "Loading..."}</div>
+                            {localProfile && !completion.complete ? <span className="profile-incomplete-dot" role="status" aria-label={completion.pending + " profile details pending"} title={completion.pending + " profile details pending"} /> : null}
+                        </div>
                         <div className="profile-meta" id="profileMeta">{localProfile ? (localProfile.mobile ? "+91 " + localProfile.mobile : "Mobile not available") : "Profile load ho raha hai"}</div>
                         <div className="profile-uid" id="profileUid">{localProfile ? "User ID: " + (localProfile.userId || "—") : ""}</div>
                     </div>
                     <button className="btn secondary sm profile-edit-btn" type="button" id="editProfileBtn" style={{ display: editing ? "none" : "inline-flex" }} onClick={enterEditMode}>Edit profile</button>
                 </div>
+
+                {localProfile && !completion.complete ? (
+                    <div className="detail-block profile-completion" id="profileCompletion" style={{ display: editing ? "none" : "block" }}>
+                        <div className="profile-completion-head">
+                            <div>
+                                <h2>Complete your profile <span className="profile-incomplete-dot" aria-hidden="true" /></h2>
+                                <p>{completion.completed}/{completion.total} details complete. Red dot tab tak dikhega jab tak sab details fill na ho.</p>
+                            </div>
+                            <span className="badge danger">{completion.pending} pending</span>
+                        </div>
+                        <div className="completion-bar" aria-hidden="true"><span style={{ width: completion.percent + "%" }} /></div>
+                        <ul className="completion-list">
+                            {completion.items.map(item => (
+                                <li key={item.key} className={item.done ? "done" : "pending"}>
+                                    <span className="completion-mark" aria-hidden="true">{item.done ? "✓" : ""}</span>
+                                    <span className="completion-text">
+                                        <strong>{item.label}</strong>
+                                        <small>{item.done ? (item.doneText || "Complete") : item.hint}</small>
+                                    </span>
+                                    <span className={"badge " + (item.done ? "success" : "warning")}>{item.done ? "Done" : "Pending"}</span>
+                                </li>
+                            ))}
+                        </ul>
+                        <div className="btn-row" style={{ marginTop: 12 }}>
+                            <button className="btn primary sm" type="button" onClick={enterEditMode}>Add missing details</button>
+                        </div>
+                    </div>
+                ) : null}
 
                 <div className="detail-block" id="accountDetailsBlock" style={{ display: editing ? "none" : "block" }}>
                     <h2>Account details</h2>
