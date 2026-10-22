@@ -177,11 +177,10 @@ try {
     function ensureCode() {
         if (state.profile && state.profile.referralCode) {
             state.code = state.profile.referralCode;
-            return Promise.resolve();
+        } else {
+            state.code = ("CA" + String(state.user.uid).replace(/[^a-z0-9]/gi, "").slice(0, 6)).toUpperCase();
         }
-        var code = ("CA" + String(state.user.uid).replace(/[^a-z0-9]/gi, "").slice(0, 6)).toUpperCase();
-        state.code = code;
-        return db.collection("users").doc(state.user.uid).update({ referralCode: code }).catch(function () { });
+        return Promise.resolve();
     }
 
     function toMillis(ts) {
@@ -204,10 +203,11 @@ try {
 
         empty.style.display = "none";
         list.innerHTML = state.referrals.map(function (u) {
+            var name = u.referredUserName || u.userName || "Player";
             return '<div class="row-card">' +
-                '<span class="avatar">' + CA.esc(CA.initials(u.userName)) + "</span>" +
+                '<span class="avatar">' + CA.esc(CA.initials(name)) + "</span>" +
                 '<div class="row-main">' +
-                    '<p class="row-title">' + CA.esc(u.userName || "Player") + "</p>" +
+                    '<p class="row-title">' + CA.esc(name) + "</p>" +
                     '<p class="row-sub">Joined ' + CA.esc(CA.fmtDate(u.createdAt) || "recently") + "</p>" +
                 "</div>" +
                 '<span class="badge success"><span class="dot"></span>Referred</span>' +
@@ -217,11 +217,11 @@ try {
 
     async function loadReferrals() {
         try {
-            var snap = await db.collection("users").where("referredBy", "==", state.user.uid).get();
+            var snap = await db.collection("referrals").where("referrerUid", "==", state.user.uid).get();
             var list = [];
             snap.forEach(function (doc) {
                 var u = doc.data();
-                u.uid = doc.id;
+                u.id = doc.id;
                 list.push(u);
             });
             list.sort(function (a, b) { return toMillis(b.createdAt) - toMillis(a.createdAt); });

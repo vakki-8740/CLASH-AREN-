@@ -20,7 +20,30 @@ try {
 <meta name="apple-mobile-web-app-title" content="Clash Admin" />
 <link rel="stylesheet" href="../assets/ui.css" />
 </head>
-<body>
+<body class="admin-locked">
+
+<div class="admin-gate" id="adminGate">
+    <div class="admin-login-card">
+        <span class="brand-mark"><img src="icons/LOGO-09.jpg" alt="Clash Arena logo" /></span>
+        <h1>Admin login</h1>
+        <p class="muted">Sirf authorized admin account access kar sakta hai.</p>
+        <form id="adminLoginForm" novalidate>
+            <div class="field">
+                <label class="field-label" for="adminEmail">Admin email</label>
+                <input class="input" type="email" id="adminEmail" autocomplete="username" placeholder="admin@example.com" />
+            </div>
+            <div class="field">
+                <label class="field-label" for="adminPassword">Password</label>
+                <input class="input" type="password" id="adminPassword" autocomplete="current-password" placeholder="Your password" />
+            </div>
+            <div class="alert danger" id="adminLoginError" style="display:none;margin-bottom:14px">
+                <span id="adminLoginErrorText"></span>
+            </div>
+            <button class="btn primary full" type="submit" id="adminLoginBtn">Login</button>
+        </form>
+        <p class="help" style="margin-top:14px">Admin account Firebase Authentication me hona chahiye, aur <code>admins/{UID}</code> doc Firestore me.</p>
+    </div>
+</div>
 
 <header class="topbar">
     <div class="topbar-inner">
@@ -41,6 +64,9 @@ try {
             <button class="icon-btn theme-toggle" type="button" data-theme-toggle aria-label="Toggle theme">
                 <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
                 <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+            </button>
+            <button class="icon-btn" type="button" onclick="adminLogout()" aria-label="Logout">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
             </button>
         </div>
     </div>
@@ -436,6 +462,7 @@ try {
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="../firebase-config.js"></script>
 <script src="../assets/app.js"></script>
 <script>
@@ -468,9 +495,41 @@ try {
         return '<div class="detail-row"><span class="k">' + k + '</span><span class="v">' + escapeHtml(v || "—") + "</span></div>";
     }
 
-    /* ================= INIT ================= */
-    (async function init() {
+    /* ================= ADMIN AUTH ================= */
+    var adminAuth = null;
+    var adminStarted = false;
+    var adminGateMessage = "";
+
+    try {
+        if (typeof firebase !== "undefined" && FIREBASE_CONFIGURED) adminAuth = firebase.auth();
+    } catch (e) {
+        adminAuth = null;
+    }
+
+    function showAdminLogin(message) {
+        document.body.classList.add("admin-locked");
+        adminStarted = false;
+        if (message !== undefined) adminGateMessage = message || "";
+        var box = $("adminLoginError");
+        if (adminGateMessage) {
+            $("adminLoginErrorText").textContent = adminGateMessage;
+            box.style.display = "flex";
+        } else {
+            box.style.display = "none";
+        }
+    }
+
+    async function startAdmin() {
+        if (adminStarted) return;
+        adminStarted = true;
+
         settings = await fetchSettings();
+        try {
+            var privateSnap = await db.collection("settings").doc("private").get();
+            if (privateSnap.exists) Object.assign(settings, privateSnap.data());
+        } catch (e) {
+            console.error(e);
+        }
 
         document.querySelectorAll("[data-tournament-name]").forEach(function (el) {
             el.textContent = settings.tournamentName;
@@ -486,7 +545,66 @@ try {
         if ("serviceWorker" in navigator) {
             navigator.serviceWorker.register("sw.js").catch(function () { });
         }
-    })();
+    }
+
+    async function handleAdminUser(user) {
+        if (!user) {
+            showAdminLogin();
+            return;
+        }
+        try {
+            var adminSnap = await db.collection("admins").doc(user.uid).get();
+            if (!adminSnap.exists) {
+                showAdminLogin("Ye account admin nahi hai. Firestore me admins/" + user.uid + " doc banao.");
+                await adminAuth.signOut();
+                return;
+            }
+            adminGateMessage = "";
+            document.body.classList.remove("admin-locked");
+            $("adminBadge").style.display = "inline-flex";
+            $("adminBadge").textContent = user.email || "Admin";
+            $("adminLoginError").style.display = "none";
+            await startAdmin();
+        } catch (e) {
+            console.error(e);
+            showAdminLogin("Admin verify nahi ho paya. Firestore rules aur internet check karo.");
+        }
+    }
+
+    function adminLogout() {
+        adminGateMessage = "";
+        if (adminAuth) adminAuth.signOut().finally(function () { location.reload(); });
+    }
+
+    if (!adminAuth) {
+        showAdminLogin("Firebase Auth load nahi hua. Page reload karo.");
+    } else {
+        $("adminLoginForm").addEventListener("submit", async function (e) {
+            e.preventDefault();
+            var email = $("adminEmail").value.trim();
+            var password = $("adminPassword").value;
+            var btn = $("adminLoginBtn");
+            if (!email || !password) {
+                showAdminLogin("Email aur password dono daalo.");
+                return;
+            }
+            btn.disabled = true;
+            btn.textContent = "Checking...";
+            try {
+                await adminAuth.signInWithEmailAndPassword(email, password);
+            } catch (err) {
+                console.error(err);
+                var msg = "Login nahi ho paya. Email/password check karo.";
+                if (err && err.code === "auth/too-many-requests") msg = "Bahut attempts ho gaye. Thodi der baad try karo.";
+                if (err && err.code === "auth/network-request-failed") msg = "Internet connection check karo.";
+                showAdminLogin(msg);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "Login";
+            }
+        });
+        adminAuth.onAuthStateChanged(handleAdminUser);
+    }
 
     /* ================= REALTIME DATA ================= */
     function getPayments() {
@@ -495,7 +613,7 @@ try {
 
     function startListening() {
         if (!db) return;
-        db.collection("players").onSnapshot(function (snap) {
+        db.collection("players_private").onSnapshot(function (snap) {
             allPlayers = [];
             snap.forEach(function (d) {
                 var p = d.data();
@@ -650,9 +768,34 @@ try {
         currentPlayerId = null;
     }
 
+    function publicPlayerData(p) {
+        return {
+            userName: p.userName || "",
+            gameIdName: p.gameIdName || "",
+            gameIdNumber: p.gameIdNumber || "",
+            gameIdLevel: p.gameIdLevel || "",
+            status: p.status || "approved",
+            addedByAdmin: !!p.addedByAdmin,
+            createdAt: p.createdAt || firebase.firestore.FieldValue.serverTimestamp()
+        };
+    }
+
+    async function syncPublicPlayer(id, player) {
+        var ref = db.collection("players_public").doc(id);
+        if (String(player.status || "") === "approved") {
+            await ref.set(publicPlayerData(player), { merge: true });
+        } else {
+            await ref.delete();
+        }
+    }
+
     async function setStatus(id, status) {
         try {
-            await db.collection("players").doc(id).update({ status: status });
+            var player = findPlayer(id);
+            if (!player) throw new Error("player-not-found");
+            await db.collection("players_private").doc(id).update({ status: status });
+            player.status = status;
+            await syncPublicPlayer(id, player);
             showToast("Player " + status, status === "approved" ? "success" : "danger");
             closePlayer();
         } catch (e) {
@@ -667,7 +810,10 @@ try {
     async function deletePlayer(id) {
         if (!confirm("Delete this player? This cannot be undone.")) return;
         try {
-            await db.collection("players").doc(id).delete();
+            var batch = db.batch();
+            batch.delete(db.collection("players_private").doc(id));
+            batch.delete(db.collection("players_public").doc(id));
+            await batch.commit();
             showToast("Player deleted");
             closePlayer();
             closeEditPlayer();
@@ -682,13 +828,18 @@ try {
         var name = $("apName").value.trim();
         if (!name) { showToast("Enter user name", "danger"); return; }
         try {
-            await db.collection("players").add({
+            var ref = db.collection("players_private").doc();
+            var player = {
                 userName: name,
                 gameIdNumber: $("apGameNum").value.trim(),
                 status: "approved",
                 addedByAdmin: true,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
+            };
+            var batch = db.batch();
+            batch.set(ref, player);
+            batch.set(db.collection("players_public").doc(ref.id), publicPlayerData(player));
+            await batch.commit();
             $("apName").value = "";
             $("apGameNum").value = "";
             showToast("Player added", "success");
@@ -719,12 +870,17 @@ try {
         var name = $("epName").value.trim();
         if (!name) { showToast("Enter user name", "danger"); return; }
         try {
-            await db.collection("players").doc(currentPlayerId).update({
+            var player = findPlayer(currentPlayerId);
+            if (!player) throw new Error("player-not-found");
+            var patch = {
                 userName: name,
                 gameIdNumber: $("epGameNum").value.trim(),
                 gameIdName: $("epGameIdName").value.trim(),
                 gameIdLevel: $("epGameIdLevel").value.trim()
-            });
+            };
+            await db.collection("players_private").doc(currentPlayerId).update(patch);
+            Object.assign(player, patch);
+            await syncPublicPlayer(currentPlayerId, player);
             closeEditPlayer();
             showToast("Player updated", "success");
         } catch (e) {
@@ -893,9 +1049,15 @@ try {
         clearTournamentForm();
     }
 
-    function editTournament(id) {
+    async function editTournament(id) {
         var t = findTournament(id);
         if (!t) return;
+        try {
+            var privateSnap = await db.collection("tournament_private").doc(id).get();
+            if (privateSnap.exists) Object.assign(t, privateSnap.data());
+        } catch (e) {
+            console.error(e);
+        }
         editingTournamentId = id;
         $("tEditId").value = id;
         $("tName").value = t.name || "";
@@ -932,6 +1094,9 @@ try {
         if (isNaN(date.getTime())) { showToast("Match date valid nahi hai", "danger"); return; }
 
         var existing = editingTournamentId ? findTournament(editingTournamentId) : null;
+        var tournamentRef = editingTournamentId
+            ? db.collection("tournaments").doc(editingTournamentId)
+            : db.collection("tournaments").doc();
         var payload = {
             name: name,
             game: game,
@@ -942,11 +1107,17 @@ try {
             matchDate: firebase.firestore.Timestamp.fromDate(date),
             status: $("tStatus").value || "open",
             matchFormat: $("tMatchFormat").value.trim(),
-            roomId: $("tRoomId").value.trim(),
-            roomPassword: $("tRoomPassword").value.trim(),
             description: $("tDescription").value.trim(),
             prizeDistribution: $("tPrizeDistribution").value.trim(),
             rules: $("tRules").value.trim(),
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        if (!editingTournamentId) payload.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+
+        var privatePayload = {
+            tournamentId: tournamentRef.id,
+            roomId: $("tRoomId").value.trim(),
+            roomPassword: $("tRoomPassword").value.trim(),
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         };
 
@@ -954,14 +1125,11 @@ try {
         btn.disabled = true;
 
         try {
-            if (editingTournamentId) {
-                await db.collection("tournaments").doc(editingTournamentId).set(payload, { merge: true });
-                showToast("Tournament updated", "success");
-            } else {
-                payload.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-                await db.collection("tournaments").add(payload);
-                showToast("Tournament added", "success");
-            }
+            var batch = db.batch();
+            batch.set(tournamentRef, payload, { merge: true });
+            batch.set(db.collection("tournament_private").doc(tournamentRef.id), privatePayload, { merge: true });
+            await batch.commit();
+            showToast(editingTournamentId ? "Tournament updated" : "Tournament added", "success");
             clearTournamentForm();
         } catch (e) {
             console.error(e);
@@ -976,9 +1144,12 @@ try {
         try {
             var joins = await db.collection("joins").where("tournamentId", "==", id).get();
             var results = await db.collection("results").where("tournamentId", "==", id).get();
+            var locks = await db.collection("joinLocks").where("tournamentId", "==", id).get();
             var batch = db.batch();
             joins.forEach(function (doc) { batch.delete(doc.ref); });
             results.forEach(function (doc) { batch.delete(doc.ref); });
+            locks.forEach(function (doc) { batch.delete(doc.ref); });
+            batch.delete(db.collection("tournament_private").doc(id));
             batch.delete(db.collection("tournaments").doc(id));
             await batch.commit();
             if (editingTournamentId === id) clearTournamentForm();
@@ -1086,17 +1257,25 @@ try {
     }
 
     async function saveSettings() {
-        var updated = {
+        var publicUpdate = {
             entryFee: Number($("setEntryFee").value) || 0,
             referralReward: Number($("setReferralReward").value) || 0,
             upiId: $("setUpiId").value.trim(),
-            qrUrl: $("setQrUrl").value.trim(),
+            qrUrl: $("setQrUrl").value.trim()
+        };
+        var privateUpdate = {
             telegramBotToken: $("setTgToken").value.trim(),
             telegramChatId: $("setTgChat").value.trim()
         };
+        var publicPayload = Object.assign({}, settings, publicUpdate);
+        delete publicPayload.telegramBotToken;
+        delete publicPayload.telegramChatId;
         try {
-            await db.collection("settings").doc("main").set(Object.assign({}, settings, updated));
-            settings = Object.assign({}, settings, updated);
+            var batch = db.batch();
+            batch.set(db.collection("settings").doc("public"), publicPayload, { merge: true });
+            batch.set(db.collection("settings").doc("private"), privateUpdate, { merge: true });
+            await batch.commit();
+            settings = Object.assign({}, settings, publicUpdate, privateUpdate);
             showToast("Settings saved", "success");
         } catch (e) {
             console.error(e);
@@ -1140,7 +1319,7 @@ try {
 
     async function persistRules(rules) {
         try {
-            await db.collection("settings").doc("main").set({ rules: rules }, { merge: true });
+            await db.collection("settings").doc("public").set({ rules: rules }, { merge: true });
             settings = Object.assign({}, settings, { rules: rules });
             showToast("Rules updated", "success");
         } catch (e) {

@@ -77,15 +77,10 @@ async function fetchSettings() {
         return cachedSettings;
     }
     try {
-        const snap = await withTimeout(db.collection('settings').doc('main').get(), 6000);
-        if (snap.exists) {
-            cachedSettings = Object.assign({}, DEFAULT_SETTINGS, snap.data());
-        } else {
-            cachedSettings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
-            try {
-                await withTimeout(db.collection('settings').doc('main').set(cachedSettings), 6000);
-            } catch (e) { }
-        }
+        const snap = await withTimeout(db.collection('settings').doc('public').get(), 6000);
+        cachedSettings = snap.exists
+            ? Object.assign({}, DEFAULT_SETTINGS, snap.data())
+            : JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
     } catch (e) {
         cachedSettings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
     }

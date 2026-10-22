@@ -4,22 +4,22 @@
 
 Clash Arena ek mobile-first tournament platform hai. Player mobile number + password se account banata hai, tournaments dekh kar join karta hai, results aur winnings dekhta hai, referral share karta hai aur apna wallet/profile manage karta hai.
 
-Admin panel se tournaments, winners, settings, rules aur purane player/payment records manage hote hain.
+Admin panel password-protected hai. Admin tournaments, winners, settings, rules, players aur payments manage karta hai.
 
 ## Pages
 
 | Page | URL | Kaam |
 |------|-----|------|
-| Login / Register | `/` | Mobile + password auth, referral code optional |
+| Login / Register | `/` | Mobile + password auth, optional referral code |
 | Home | `/home/` | Tournaments list, slots, entry fee, status |
-| Tournament Details | `/tournament/?id=...` | Full details, rules, room credentials (join ke baad), Join button |
+| Tournament Details | `/tournament/?id=...` | Details, rules, room credentials (join ke baad), Join button |
 | Results | `/results/` | Published winners aur prize details |
 | Referral | `/referral/` | Referral code, share link, referred users |
 | Wallet | `/wallet/` | Balance, totals, transaction history (read-only) |
 | Profile | `/profile/` | Account details, joined tournaments, password change, logout |
-| Joined Players (legacy) | `/join/` | Purane `players` collection ke approved players |
-| Rules (legacy) | `/rule/` | Admin-editable tournament rules |
-| Admin Panel | `/admin/` | Players, payments, tournaments, results, settings, rules |
+| Joined Players | `/join/` | Approved public player list |
+| Rules | `/rule/` | Admin-editable tournament rules |
+| Admin Panel | `/admin/` | Login-protected admin dashboard |
 
 ## User Flow
 
@@ -39,18 +39,28 @@ Firebase Auth me email/password provider use hota hai. Mobile number ko internal
 m<10-digit-mobile>@clasharena.app
 ```
 
-Player ko email dikhti nahi hai. Sirf mobile number se login hota hai.
+Player ko email dikhti nahi hai. Sirf mobile number se login hota hai. Registration par `users`, `referralCodes` aur (agar referral use hua ho) `referrals` docs ek batch me save hote hain.
 
-**Zaroori setup:** Firebase Console → Authentication → Sign-in method → **Email/Password** enable karna hoga. Ye provider disabled hone par app setup hint dikhata hai, lekin login/register kaam nahi karega.
+## Admin Setup
+
+1. Firebase Console → Authentication → Sign-in method → **Email/Password** enable karo.
+2. Authentication → Users → **Add user** se admin ka email/password account banao.
+3. Us user ka **UID** copy karo.
+4. Firestore me `admins/{UID}` document banao (empty doc chalega).
+5. `/admin/` kholo aur admin email/password se login karo.
+
+`admins/{UID}` doc na hone par login reject ho jayega. Admin writes sirf isi doc wale accounts ke liye allowed hain.
 
 ## Admin Panel
 
-- **Players** — purane `players` collection ke approved players manually add/edit/delete.
+- **Players** — player add/edit/delete; approve/reject.
 - **Payments** — pending/approved/rejected payment requests, screenshot, approve/reject.
-- **Tournaments** — tournament create/edit/delete, status, slots, room details, prize distribution.
-- **Results** — winner entries publish/delete; published results user app me dikhte hain.
+- **Tournaments** — create/edit/delete, status, slots, room details, prize distribution.
+- **Results** — winner entries publish/delete.
 - **Settings** — tournament name, entry fee, UPI/QR, prize pool, slots, announcement, Telegram, referral reward.
 - **Rules** — rules add/edit/delete; `/rule/` page par dikhte hain.
+
+Payment screenshots aur UTR admin-only `players_private` me rehte hain. Public `players_public` me sirf safe player fields jate hain.
 
 ## Tech Stack
 
@@ -58,34 +68,36 @@ Player ko email dikhti nahi hai. Sirf mobile number se login hota hai.
 - Firebase Firestore + Firebase Authentication (compat SDK 10.12.0).
 - OWN Library design system: `assets/ui.css`, `assets/app.js`.
 - Shared auth/page shell: `assets/auth.js`, `assets/app-nav.js`.
-- PWA admin panel: `admin/manifest.json`, `admin/sw.js`.
+- PWA admin panel: `admin/manifest.json`, `admin/sw.js` (cache v5).
 - Hosting: GitHub Pages, Netlify, Vercel ya Firebase Hosting.
 
 ## Project Structure
 
 ```text
 clash-arena/
-  index.html              # login / register
-  firebase-config.js      # Firebase config, defaults, settings loader
+  index.html               # login / register
+  firebase-config.js       # Firebase config, defaults, public settings loader
+  firestore.rules          # recommended Firestore security rules
+  firestore-rules.txt      # console me paste karne ke liye same rules
   assets/
-    ui.css                # design system
-    app.js                # theme, toast, overlay, helpers
-    auth.js               # Auth + user profile functions
-    app-nav.js            # bottom nav, page boot, formatters
-  home/index.html         # tournament listing
-  tournament/index.html   # details + join flow
-  results/index.html      # published results
-  referral/index.html     # referral dashboard
-  wallet/index.html       # wallet + transactions
-  profile/index.html      # account, history, password
-  join/index.html         # legacy approved players
-  rule/index.html         # tournament rules
+    ui.css                 # design system
+    app.js                 # theme, toast, overlay, helpers
+    auth.js                # Auth + profile + referral writes
+    app-nav.js             # bottom nav, page boot, formatters
+  home/index.html          # tournament listing
+  tournament/index.html    # details + join + private room details
+  results/index.html       # published results
+  referral/index.html      # referral dashboard
+  wallet/index.html        # wallet + transactions
+  profile/index.html       # account, history, password
+  join/index.html          # approved public players
+  rule/index.html          # tournament rules
   admin/
-    index.html            # admin panel
-    manifest.json         # PWA manifest
-    sw.js                 # service worker (cache v4)
-    icons/                # PWA icons
-  PROJECT LOGO/           # logo images
+    index.html             # admin login + panel
+    manifest.json          # PWA manifest
+    sw.js                  # service worker (cache v5)
+    icons/                 # PWA icons
+  PROJECT LOGO/            # logo images
 ```
 
 ## Firestore Data
@@ -97,41 +109,73 @@ clash-arena/
 | `userName` | string | Player ka display name |
 | `mobile` | string | 10-digit mobile number |
 | `referralCode` | string | Unique code (`CA` + UID prefix) |
-| `referredBy` | string | Referrer ka user doc ID, ya empty |
+| `referredBy` | string | Referrer ka UID, ya empty |
 | `createdAt` | timestamp | Account creation time |
 | `wallet` | map | `balance`, `totalEarnings`, `totalDeposits`, `totalWithdrawals` |
 
+Client sirf `userName` update kar sakta hai. Wallet fields client se immutable hain.
+
+### `referralCodes/{code}`
+
+Public `get`-only lookup doc: `code`, `uid`, `userName`, `createdAt`. Isme mobile/wallet nahi hota.
+
+### `referrals/{referrerUid_referredUid}`
+
+`referrerUid`, `referredUid`, `referredUserName`, `createdAt`. Referral page sirf apne referrals list kar sakta hai.
+
 ### `tournaments/{id}`
 
-`name`, `game`, `description`, `entryFee`, `prizePool`, `matchDate`, `totalSlots`, `joinedCount`, `status`, `matchFormat`, `rules`, `roomId`, `roomPassword`, `prizeDistribution`, `createdAt`, `updatedAt`.
+Public data: `name`, `game`, `description`, `entryFee`, `prizePool`, `matchDate`, `totalSlots`, `joinedCount`, `status`, `matchFormat`, `rules`, `prizeDistribution`, `createdAt`, `updatedAt`.
 
-Status values: `open`, `upcoming`, `full`, `ongoing`, `completed`, `cancelled`, `closed`.
+**Room ID/password public doc me nahi hote.** Wo `tournament_private/{id}` me hain.
+
+### `tournament_private/{id}`
+
+`tournamentId`, `roomId`, `roomPassword`, `updatedAt`. Sirf admin aur joined players read kar sakte hain.
 
 ### `joins/{tournamentId_uid}`
 
 `tournamentId`, `tournamentName`, `game`, `matchDate`, `entryFee`, `prizePool`, `userId`, `userName`, `mobile`, `status`, `joinedAt`.
 
-Doc ID `tournamentId_uid` hai, isliye same user dobara join nahi kar sakta. Join Firestore transaction me hota hai jo `joinedCount` bhi update karta hai.
+### `joinLocks/{tournamentId_uid}`
+
+`tournamentId`, `userId`, `counted`, `createdAt`. Ye lock ensure karta hai ki ek player ek tournament me sirf ek baar `joinedCount` badha sake.
 
 ### `results/{id}`
 
 `tournamentId`, `tournamentName`, `game`, `matchDate`, `winnerName`, `rank`, `prize`, `status`, `createdAt`.
 
-User app sirf `status: "published"` results dikhata hai.
-
 ### `transactions/{id}`
 
 `userId`, `type` (`deposit`, `withdraw`, `referral`, `prize`, `refund`), `amount`, `status` (`pending`, `successful`, `failed`), `note`, `createdAt`.
 
-Wallet page inhe read-only dikhata hai.
+Wallet page inhe read-only dikhata hai. Client transactions write nahi kar sakta.
 
-### `settings/main`
+### `players_private/{id}` aur `players_public/{id}`
 
-`tournamentName`, `entryFee`, `upiId`, `qrUrl`, `upiName`, `prizePool`, `matchTime`, `maxPlayers`, `announcement`, `telegramBotToken`, `telegramChatId`, `rules`, `referralReward`.
+`players_private` me poora payment record (UTR, screenshot, mobile, etc.) admin-only. `players_public` me sirf approved player ke safe fields public list ke liye.
 
-### Legacy `players/{id}`
+### `settings/public` aur `settings/private`
 
-Purana registration/payment flow `players` collection use karta hai: `userName`, `gameIdName`, `gameIdNumber`, `gameIdLevel`, `mobileNumber`, `paymentName`, `utrNumber`, `screenshot`, `status`, `createdAt`, `addedByAdmin`. `/join/` aur admin ke Players/Payments tabs abhi isi collection par chalte hain.
+Public: `tournamentName`, `entryFee`, `upiId`, `qrUrl`, `upiName`, `prizePool`, `matchTime`, `maxPlayers`, `announcement`, `referralReward`, `rules`.
+
+Private: `telegramBotToken`, `telegramChatId`. Ye client ko kabhi expose nahi hote.
+
+### `admins/{uid}`
+
+Admin access marker. Is doc ka hona hi admin panel writes allow karta hai. Client ise read/write nahi kar sakta; console/Admin SDK se banao.
+
+## Security Rules
+
+`firestore.rules` aur `firestore-rules.txt` me same rules hain. Firebase Console → Firestore Database → Rules → paste → **Publish**.
+
+Rules ka summary:
+
+- Users apna profile read kar sakte hain; wallet/transactions client se write nahi ho sakte.
+- Public tournaments/results/settings read hain; private room/token data admin-only.
+- Join transaction `joins` + `joinLocks` + `joinedCount` rules se validate hota hai.
+- Admin writes `admins/{uid}` doc se gate hain.
+- Unknown collections default deny hain.
 
 ## Deploy Kaise Kare
 
@@ -141,26 +185,24 @@ Project static hai, koi build command ki zaroorat nahi.
 - **Netlify:** Base directory blank, build command blank, publish directory `.`.
 - **Vercel:** Root directory `./`, framework `Other`, build command off, output directory `.`.
 
-Deploy ke baad site `/` par khulegi aur admin `/admin/` par. Root directory ko `index/` mat banana — entry file repo root me `index.html` hai.
+Deploy ke baad site `/` par khulegi aur admin `/admin/` par.
 
 ## Local Run
 
-Project root se koi static server chalao:
+Project root se static server chalao:
 
 ```bash
+cd /storage/emulated/0/workpleace/clash-arena
 python3 -m http.server 8080
 ```
 
 Phir `http://localhost:8080/` kholo. Direct file open karne par Firebase aur service worker theek se kaam nahi karenge.
 
-## Important Limitations / Security
+## Important Limitations
 
-- **Email/Password provider enable karna zaroori hai**, warna auth kaam nahi karega.
-- **Admin panel me abhi authentication nahi hai.** URL jaanne wala koi bhi data edit/delete kar sakta hai.
-- **Firestore security rules production-ready nahi hain.** Rules deploy karna zaroori hai; warna client se wallet/transactions/tournaments tamper ho sakte hain.
 - **Wallet read-only hai.** Deposit/withdraw buttons disabled hain; payment gateway/backend nahi hai.
 - **Referral reward automatically credit nahi hota.** Sirf configured reward aur referred users dikhte hain.
 - **Join hone par entry fee debit nahi hoti.** Join transaction sirf slot reserve karta hai.
-- **New joins admin me player-wise list nahi dikhte.** Admin tournament manager count dikhata hai; detailed `joins` management abhi add nahi hui.
-- **Legacy aur new data alag hain:** `/join/` aur admin Players `players` collection use karte hain, jabki naya app `users` + `joins` use karta hai.
-- Static frontend se koi bhi client-side validation bypass kar sakta hai; sensitive operations backend/Cloud Functions se hi secure honge.
+- **Admin player-wise joins list nahi dikhata.** Tournament manager count dikhata hai.
+- **Public results draft bhi read kar sakte hain** (rules public read allow karte hain). Sensitive results ho to status-based query add karo.
+- Static frontend se client-side validation bypass ho sakti hai; wallet/reward/prize credit backend/Cloud Functions se hi secure honge.

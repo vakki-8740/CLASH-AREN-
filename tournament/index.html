@@ -191,6 +191,7 @@ try {
         var status = String(state.tournament.status || "").toLowerCase();
         if (status === "cancelled") return "Tournament Cancelled";
         if (status === "completed") return "Tournament Completed";
+        if (status === "ongoing") return "Tournament Live";
         if (status === "closed") return "Joining Closed";
         return "Tournament Full";
     }
@@ -280,6 +281,10 @@ try {
 
     async function confirmJoin() {
         if (state.joining) return;
+        if (state.joined) {
+            joinError("Aap pehle se is tournament me join ho chuke ho.");
+            return;
+        }
         if (!state.user || !state.profile) {
             joinError("Profile load nahi hua. Page reload karke try karo.");
             return;
@@ -288,6 +293,7 @@ try {
         var t = state.tournament;
         var uid = state.user.uid;
         var joinRef = db.collection("joins").doc(t.id + "_" + uid);
+        var lockRef = db.collection("joinLocks").doc(t.id + "_" + uid);
         var tRef = db.collection("tournaments").doc(t.id);
         var btn = $("confirmJoinBtn");
         state.joining = true;
@@ -297,9 +303,6 @@ try {
 
         try {
             await db.runTransaction(async function (transaction) {
-                var existing = await transaction.get(joinRef);
-                if (existing.exists) throw new Error("already-joined");
-
                 var snap = await transaction.get(tRef);
                 if (!snap.exists) throw new Error("not-found");
 
@@ -308,7 +311,7 @@ try {
                 var total = Number(data.totalSlots) || 0;
                 var count = Number(data.joinedCount) || 0;
 
-                if (["closed", "full", "cancelled", "completed"].indexOf(status) !== -1) throw new Error("closed");
+                if (["closed", "full", "cancelled", "completed", "ongoing"].indexOf(status) !== -1) throw new Error("closed");
                 if (total > 0 && count >= total) throw new Error("full");
 
                 transaction.set(joinRef, {
@@ -323,6 +326,13 @@ try {
                     mobile: state.profile.mobile || "",
                     status: "joined",
                     joinedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                transaction.set(lockRef, {
+                    tournamentId: t.id,
+                    userId: uid,
+                    counted: true,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
                 transaction.update(tRef, {
@@ -342,6 +352,7 @@ try {
             else if (code === "full") joinError("Saari slots bhar chuki hain.");
             else if (code === "closed") joinError("Is tournament ke liye joining band hai.");
             else if (code === "not-found") joinError("Tournament ab available nahi hai.");
+            else if (err && err.code === "permission-denied") joinError("Aap pehle se join ho chuke ho ya joining ab available nahi hai.");
             else joinError("Join nahi ho paya. Internet check karke dobara try karo.");
         } finally {
             state.joining = false;
@@ -364,10 +375,27 @@ try {
 
             var t = tSnap.data();
             t.id = tSnap.id;
-            state.tournament = t;
 
-            var joinSnap = await db.collection("joins").doc(id + "_" + uid).get();
-            state.joined = joinSnap.exists;
+            var joinSnap = await db.collection("joins")
+                .where("tournamentId", "==", id)
+                .where("userId", "==", uid)
+                .limit(1)
+                .get();
+            state.joined = !joinSnap.empty;
+
+            if (state.joined) {
+                try {
+                    var privateSnap = await db.collection("tournament_private").doc(id).get();
+                    if (privateSnap.exists) Object.assign(t, privateSnap.data());
+                } catch (privateErr) {
+                    console.error(privateErr);
+                }
+            } else {
+                delete t.roomId;
+                delete t.roomPassword;
+            }
+
+            state.tournament = t;
 
             var resultsSnap = await db.collection("results").where("tournamentId", "==", id).get();
             var results = [];

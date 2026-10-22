@@ -1,4 +1,4 @@
-const CACHE = 'clash-admin-v4';
+const CACHE = 'clash-admin-v5';
 const CORE = [
     './',
     './manifest.json',

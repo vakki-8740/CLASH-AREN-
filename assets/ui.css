@@ -2031,3 +2031,42 @@ select.input {
     .detail-price { align-items: flex-start; }
     .t-meta .hm { padding: 7px 8px; }
 }
+
+/* ================= Admin auth gate ================= */
+.admin-gate {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: var(--bg);
+}
+body.admin-locked .admin-gate { display: flex; }
+body.admin-locked > .topbar,
+body.admin-locked > .shell,
+body.admin-locked > .site-foot { display: none; }
+
+.admin-login-card {
+    width: min(420px, 100%);
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px;
+    box-shadow: var(--shadow);
+}
+.admin-login-card .brand-mark {
+    width: 46px;
+    height: 46px;
+    margin-bottom: 16px;
+}
+.admin-login-card h1 {
+    font-size: 1.35rem;
+    margin-bottom: 4px;
+}
+.admin-login-card > p {
+    font-size: 0.82rem;
+    margin-bottom: 18px;
+}
+.admin-login-card form .field { margin-bottom: 12px; }

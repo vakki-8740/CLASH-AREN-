@@ -108,12 +108,11 @@
     }
 
     async function findReferrer(code) {
-        var snap = await withTimeout(
-            db.collection("users").where("referralCode", "==", code).limit(1).get(),
-            8000
-        );
-        if (snap.empty) return null;
-        return snap.docs[0];
+        var snap = await withTimeout(db.collection("referralCodes").doc(code).get(), 8000);
+        if (!snap.exists) return null;
+        var data = snap.data() || {};
+        if (!data.uid) return null;
+        return { uid: data.uid, userName: data.userName || "", code: code };
     }
 
     async function register(data) {
@@ -149,13 +148,18 @@
         var user = cred.user;
 
         try {
+            var code = codeFromUid(user.uid);
+            var stamp = firebase.firestore.FieldValue.serverTimestamp();
+            var batch = db.batch();
+
             await user.updateProfile({ displayName: userName });
-            await db.collection("users").doc(user.uid).set({
+
+            batch.set(db.collection("users").doc(user.uid), {
                 userName: userName,
                 mobile: mobile,
-                referralCode: codeFromUid(user.uid),
-                referredBy: referrer ? referrer.id : "",
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                referralCode: code,
+                referredBy: referrer ? referrer.uid : "",
+                createdAt: stamp,
                 wallet: {
                     balance: 0,
                     totalEarnings: 0,
@@ -163,6 +167,24 @@
                     totalWithdrawals: 0
                 }
             });
+
+            batch.set(db.collection("referralCodes").doc(code), {
+                code: code,
+                uid: user.uid,
+                userName: userName,
+                createdAt: stamp
+            });
+
+            if (referrer) {
+                batch.set(db.collection("referrals").doc(referrer.uid + "_" + user.uid), {
+                    referrerUid: referrer.uid,
+                    referredUid: user.uid,
+                    referredUserName: userName,
+                    createdAt: stamp
+                });
+            }
+
+            await batch.commit();
         } catch (e) {
             try { await user.delete(); } catch (ignore) { }
             try { await auth.signOut(); } catch (ignore2) { }

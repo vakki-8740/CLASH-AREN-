@@ -87,6 +87,7 @@
         var status = String(t.status || "").toLowerCase();
         if (status === "cancelled") return "Ye tournament cancel ho chuka hai.";
         if (status === "completed") return "Ye tournament complete ho chuka hai.";
+        if (status === "ongoing") return "Tournament live hai, joining band hai.";
         if (status === "closed") return "Joining closed hai.";
         if (status === "full") return "Tournament full hai.";
         if (remainingSlots(t) <= 0) return "Saari slots bhar chuki hain.";
