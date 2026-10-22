@@ -1,6 +1,6 @@
 rules_version = '2';
 
-// Clash Arena — target security rules.
+// QREN Esports — target security rules.
 // IMPORTANT: Ye rules tab apply karo jab code refactor ho jaye:
 // settings/public, settings/private, tournament_private, referralCodes,
 // referrals, joinLocks aur admin login. Current code in collections ko

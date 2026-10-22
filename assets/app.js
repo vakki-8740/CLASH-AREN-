@@ -1,5 +1,5 @@
 /* ==========================================================
-   Clash Arena UI — shared helpers (OWN Library design system)
+   QREN Esports UI — shared helpers (OWN Library design system)
    ========================================================== */
 (function () {
     "use strict";

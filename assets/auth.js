@@ -1,5 +1,5 @@
 /* ==========================================================
-   Clash Arena — Firebase Authentication helpers
+   QREN Esports — Firebase Authentication helpers
    Mobile number + password ko Firebase Auth (email/password)
    par map karta hai. Password Firebase ke paas secure rehta hai.
    ========================================================== */

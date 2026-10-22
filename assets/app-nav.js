@@ -1,5 +1,5 @@
 /* ==========================================================
-   Clash Arena — app shell helpers
+   QREN Esports — app shell helpers
    Bottom navigation, page boot and small shared formatters.
    ========================================================== */
 (function () {

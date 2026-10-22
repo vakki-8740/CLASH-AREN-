@@ -1,8 +1,8 @@
-# Clash Arena — Tournament Platform
+# QREN Esports — Tournament Platform
 
 ## Idea kya hai?
 
-Clash Arena ek mobile-first tournament platform hai. Player mobile number + password se account banata hai, tournaments dekh kar join karta hai, results aur winnings dekhta hai, referral share karta hai aur apna wallet/profile manage karta hai.
+QREN Esports ek mobile-first tournament platform hai. Player mobile number + password se account banata hai, tournaments dekh kar join karta hai, results aur winnings dekhta hai, referral share karta hai aur apna wallet/profile manage karta hai.
 
 Admin panel password-protected hai. Admin tournaments, winners, settings, rules, players aur payments manage karta hai.
 
@@ -74,7 +74,7 @@ Payment screenshots aur UTR admin-only `players_private` me rehte hain. Public `
 ## Project Structure
 
 ```text
-clash-arena/
+qren-esports/
   index.html               # login / register
   firebase-config.js       # Firebase config, defaults, public settings loader
   firestore.rules          # recommended Firestore security rules
@@ -192,7 +192,7 @@ Deploy ke baad site `/` par khulegi aur admin `/admin/` par.
 Project root se static server chalao:
 
 ```bash
-cd /storage/emulated/0/workpleace/clash-arena
+cd /storage/emulated/0/workpleace/qren-esports
 python3 -m http.server 8080
 ```
 

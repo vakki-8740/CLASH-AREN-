@@ -1,8 +1,8 @@
-const CACHE = 'clash-admin-v5';
+const CACHE = 'qren-admin-v1';
 const CORE = [
     './',
     './manifest.json',
-    './icons/LOGO-09.jpg',
+    './icons/qren-logo.png',
     '../assets/ui.css',
     '../assets/app.js',
     '../firebase-config.js'

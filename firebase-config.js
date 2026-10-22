@@ -1,5 +1,5 @@
 /* ==========================================================
-   FIREBASE SETUP - Clash Arena Tournament
+   FIREBASE SETUP - QREN Esports Tournament
    ----------------------------------------------------------
    STEP 1: Go to https://console.firebase.google.com
    STEP 2: Create a project, then go to Build -> Firestore
@@ -33,13 +33,13 @@ if (FIREBASE_CONFIGURED && typeof firebase !== 'undefined') {
 }
 
 const DEFAULT_SETTINGS = {
-    tournamentName: 'Clash Arena',
+    tournamentName: 'QREN Esports',
     entryFee: 199,
     upiId: '',
     qrUrl: '',
     telegramBotToken: '',
     telegramChatId: '',
-    upiName: 'Clash Arena',
+    upiName: 'QREN Esports',
     prizePool: '₹5,000',
     matchTime: '9:00 PM',
     maxPlayers: 100,
