@@ -65,7 +65,7 @@ service cloud.firestore {
           !request.resource.data.diff(resource.data).affectedKeys().hasAny(['photo'])
           || request.resource.data.photo == ''
           || (request.resource.data.photo is string
-              && request.resource.data.photo.matches('^data:image/(jpeg|png|webp);base64,')
+              && request.resource.data.photo.matches('^data:image/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$')
               && request.resource.data.photo.size() <= 250000)
         )
         && (
