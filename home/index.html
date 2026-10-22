@@ -105,12 +105,12 @@ try {
         var pct = total > 0 ? Math.min(Math.round((joined / total) * 100), 100) : 0;
 
         var imageUrl = CA.safeHttpUrl(t.imageUrl);
-        var thumb = imageUrl
-            ? '<span class="t-thumb"><img src="' + CA.esc(imageUrl) + '" alt="" loading="lazy" decoding="async" onerror="this.style.display=\'none\'" /></span>'
+        var cover = imageUrl
+            ? '<span class="t-cover"><img src="' + CA.esc(imageUrl) + '" alt="" loading="lazy" decoding="async" onerror="this.style.display=\'none\'" /></span>'
             : "";
 
-        return '<a class="t-card' + (thumb ? " has-thumb" : "") + '" href="../tournament/?id=' + encodeURIComponent(t.id) + '">' +
-            thumb +
+        return '<a class="t-card' + (cover ? " has-cover" : "") + '" href="../tournament/?id=' + encodeURIComponent(t.id) + '">' +
+            cover +
             '<div class="t-body">' +
                 '<div class="t-head">' +
                     '<div>' +

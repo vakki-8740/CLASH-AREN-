@@ -105,12 +105,12 @@ try {
             ? '<span class="badge success"><span class="dot"></span>Published</span>'
             : '<span class="badge neutral">' + CA.esc(status) + "</span>";
         var imageUrl = CA.safeHttpUrl(r.imageUrl);
-        var thumb = imageUrl
-            ? '<span class="t-thumb"><img src="' + CA.esc(imageUrl) + '" alt="" loading="lazy" decoding="async" onerror="this.style.display=\'none\'" /></span>'
+        var cover = imageUrl
+            ? '<span class="result-cover"><img src="' + CA.esc(imageUrl) + '" alt="" loading="lazy" decoding="async" onerror="this.style.display=\'none\'" /></span>'
             : "";
 
-        return '<button class="result-card' + (thumb ? " has-thumb" : "") + '" type="button" onclick="openResult(\'' + r.id + '\')">' +
-            thumb +
+        return '<button class="result-card' + (cover ? " has-cover" : "") + '" type="button" onclick="openResult(\'' + r.id + '\')">' +
+            cover +
             '<div class="result-body">' +
                 '<div class="result-top">' +
                     '<div>' +
