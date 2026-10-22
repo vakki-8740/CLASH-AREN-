@@ -107,6 +107,63 @@
         return ("CA" + String(uid || "").replace(/[^a-z0-9]/gi, "").slice(0, 6)).toUpperCase();
     }
 
+    function randomUserId() {
+        var value;
+        try {
+            if (typeof crypto !== "undefined" && crypto.getRandomValues) {
+                var buffer = new Uint32Array(1);
+                crypto.getRandomValues(buffer);
+                value = buffer[0] % 90000;
+            } else {
+                value = Math.floor(Math.random() * 90000);
+            }
+        } catch (e) {
+            value = Math.floor(Math.random() * 90000);
+        }
+        return String(10000 + value);
+    }
+
+    async function ensureUserId(profile, uid) {
+        if (!profile) return "";
+        if (/^\d{5}$/.test(String(profile.userId || ""))) return profile.userId;
+        if (!db || !auth || !auth.currentUser || auth.currentUser.uid !== uid) return "";
+
+        var stamp = firebase.firestore.FieldValue.serverTimestamp();
+        for (var attempt = 0; attempt < 10; attempt++) {
+            var candidate = randomUserId();
+            try {
+                var result = await db.runTransaction(async function (tx) {
+                    var userRef = db.collection("users").doc(uid);
+                    var idRef = db.collection("userIds").doc(candidate);
+                    var userSnap = await tx.get(userRef);
+                    if (!userSnap.exists) return { error: "missing-profile" };
+
+                    var current = userSnap.data() || {};
+                    if (/^\d{5}$/.test(String(current.userId || ""))) {
+                        return { userId: current.userId };
+                    }
+
+                    var idSnap = await tx.get(idRef);
+                    if (idSnap.exists) return { collision: true };
+
+                    tx.update(userRef, { userId: candidate });
+                    tx.set(idRef, { uid: uid, userId: candidate, createdAt: stamp });
+                    return { userId: candidate };
+                });
+
+                if (result && result.userId) {
+                    profile.userId = result.userId;
+                    return result.userId;
+                }
+                if (result && result.error) return "";
+            } catch (e) {
+                console.error("User ID setup failed:", e);
+                return "";
+            }
+        }
+        return "";
+    }
+
     async function findReferrer(code) {
         var snap = await withTimeout(db.collection("referralCodes").doc(code).get(), 8000);
         if (!snap.exists) return null;
@@ -150,41 +207,110 @@
         try {
             var code = codeFromUid(user.uid);
             var stamp = firebase.firestore.FieldValue.serverTimestamp();
-            var batch = db.batch();
-
             await user.updateProfile({ displayName: userName });
 
-            batch.set(db.collection("users").doc(user.uid), {
-                userName: userName,
-                mobile: mobile,
-                referralCode: code,
-                referredBy: referrer ? referrer.uid : "",
-                createdAt: stamp,
-                wallet: {
-                    balance: 0,
-                    totalEarnings: 0,
-                    totalDeposits: 0,
-                    totalWithdrawals: 0
-                }
-            });
+            var savedUserId = "";
+            var lastError = null;
 
-            batch.set(db.collection("referralCodes").doc(code), {
-                code: code,
-                uid: user.uid,
-                userName: userName,
-                createdAt: stamp
-            });
+            for (var attempt = 0; attempt < 10; attempt++) {
+                var candidate = randomUserId();
+                try {
+                    var idCheck = await db.collection("userIds").doc(candidate).get();
+                    if (idCheck.exists) continue;
+                } catch (ignore) { }
+                var batch = db.batch();
 
-            if (referrer) {
-                batch.set(db.collection("referrals").doc(referrer.uid + "_" + user.uid), {
-                    referrerUid: referrer.uid,
-                    referredUid: user.uid,
-                    referredUserName: userName,
+                batch.set(db.collection("users").doc(user.uid), {
+                    userName: userName,
+                    mobile: mobile,
+                    userId: candidate,
+                    referralCode: code,
+                    referredBy: referrer ? referrer.uid : "",
+                    createdAt: stamp,
+                    wallet: {
+                        balance: 0,
+                        totalEarnings: 0,
+                        totalDeposits: 0,
+                        totalWithdrawals: 0
+                    }
+                });
+
+                batch.set(db.collection("referralCodes").doc(code), {
+                    code: code,
+                    uid: user.uid,
+                    userName: userName,
                     createdAt: stamp
                 });
+
+                batch.set(db.collection("userIds").doc(candidate), {
+                    uid: user.uid,
+                    userId: candidate,
+                    createdAt: stamp
+                });
+
+                if (referrer) {
+                    batch.set(db.collection("referrals").doc(referrer.uid + "_" + user.uid), {
+                        referrerUid: referrer.uid,
+                        referredUid: user.uid,
+                        referredUserName: userName,
+                        createdAt: stamp
+                    });
+                }
+
+                try {
+                    await batch.commit();
+                    savedUserId = candidate;
+                    break;
+                } catch (e) {
+                    lastError = e;
+                    if (e && e.code === "already-exists") continue;
+
+                    if (e && e.code === "permission-denied") {
+                        var collision = false;
+                        try {
+                            var idSnap = await db.collection("userIds").doc(candidate).get();
+                            collision = idSnap.exists;
+                        } catch (ignore) { }
+                        if (collision) continue;
+
+                        var fallback = db.batch();
+                        fallback.set(db.collection("users").doc(user.uid), {
+                            userName: userName,
+                            mobile: mobile,
+                            userId: candidate,
+                            referralCode: code,
+                            referredBy: referrer ? referrer.uid : "",
+                            createdAt: stamp,
+                            wallet: {
+                                balance: 0,
+                                totalEarnings: 0,
+                                totalDeposits: 0,
+                                totalWithdrawals: 0
+                            }
+                        });
+                        fallback.set(db.collection("referralCodes").doc(code), {
+                            code: code,
+                            uid: user.uid,
+                            userName: userName,
+                            createdAt: stamp
+                        });
+                        if (referrer) {
+                            fallback.set(db.collection("referrals").doc(referrer.uid + "_" + user.uid), {
+                                referrerUid: referrer.uid,
+                                referredUid: user.uid,
+                                referredUserName: userName,
+                                createdAt: stamp
+                            });
+                        }
+                        await fallback.commit();
+                        savedUserId = candidate;
+                        break;
+                    }
+                    throw e;
+                }
             }
 
-            await batch.commit();
+            if (!savedUserId) throw lastError || new Error("User ID generate nahi hua.");
         } catch (e) {
             try { await user.delete(); } catch (ignore) { }
             try { await auth.signOut(); } catch (ignore2) { }
@@ -290,12 +416,15 @@
             if (snap.exists) {
                 var data = snap.data();
                 data.uid = uid;
+                await ensureUserId(data, uid);
                 return data;
             }
 
             var user = auth && auth.currentUser;
             if (!user || user.uid !== uid) return null;
-            return await createMissingProfile(user);
+            var created = await createMissingProfile(user);
+            if (created) await ensureUserId(created, uid);
+            return created;
         } catch (e) {
             console.error("Profile load/create failed:", e);
             return null;
@@ -345,6 +474,20 @@
         return name;
     }
 
+    async function updatePhoto(user, photo) {
+        ensureReady();
+        if (!user || !user.uid) throw makeError("profile/photo", "Profile load nahi hua. Reload karo.");
+        var value = String(photo || "");
+        if (value && !/^data:image\/(jpeg|png|webp);base64,[a-z0-9+/=]+$/i.test(value)) {
+            throw makeError("form/photo", "Sirf gallery se image select karo.");
+        }
+        if (value.length > 240000) {
+            throw makeError("form/photo", "Photo bahut badi hai. Chhoti image select karo.");
+        }
+        await withTimeout(db.collection("users").doc(user.uid).update({ photo: value }), 10000);
+        return value;
+    }
+
     async function changePassword(user, currentPassword, newPassword) {
         if (!currentPassword) throw makeError("form/current", "Current password daalo.");
         var problem = passwordProblem(newPassword);
@@ -376,6 +519,8 @@
         login: login,
         loadProfile: loadProfile,
         createMissingProfile: createMissingProfile,
+        ensureUserId: ensureUserId,
+        updatePhoto: updatePhoto,
         requireUser: requireUser,
         redirectIfLoggedIn: redirectIfLoggedIn,
         logout: logout,

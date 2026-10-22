@@ -59,8 +59,30 @@ service cloud.firestore {
         && request.resource.data.wallet.totalEarnings == 0
         && request.resource.data.wallet.totalDeposits == 0
         && request.resource.data.wallet.totalWithdrawals == 0;
-      allow update: if isOwner(userId) && changedOnly(['userName']);
+      allow update: if isOwner(userId) && changedOnly(['userName', 'photo', 'userId'])
+        && (
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['photo'])
+          || request.resource.data.photo == ''
+          || (request.resource.data.photo is string
+              && request.resource.data.photo.matches('^data:image/(jpeg|png|webp);base64,')
+              && request.resource.data.photo.size() <= 250000)
+        )
+        && (
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['userId'])
+          || (request.resource.data.userId.matches('^[0-9]{5}$') && !('userId' in resource.data))
+        );
       allow delete: if false;
+    }
+
+    // 5-digit public user ID reservation. Har ID sirf ek hi account le sakta hai.
+    match /userIds/{userIdCode} {
+      allow get: if signedIn();
+      allow list: if isAdmin();
+      allow create: if signedIn()
+        && request.resource.data.uid == uid()
+        && request.resource.data.userId == userIdCode
+        && userIdCode.matches('^[0-9]{5}$');
+      allow update, delete: if isAdmin();
     }
 
     // Public referral code lookup. Is doc me sirf code, uid, userName rakho.

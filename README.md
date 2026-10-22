@@ -16,7 +16,7 @@ Admin panel password-protected hai. Admin tournaments, winners, settings, rules,
 | Results | `/results/` | Published winners aur prize details |
 | Referral | `/referral/` | Referral code, share link, referred users |
 | Wallet | `/wallet/` | Balance, totals, transaction history (read-only) |
-| Profile | `/profile/` | Account details, joined tournaments, password change, logout |
+| Profile | `/profile/` | 5-digit user ID, profile photo, account details, joined tournaments, password change, logout |
 | Joined Players | `/join/` | Approved public player list |
 | Rules | `/rule/` | Admin-editable tournament rules |
 | Admin Panel | `/admin/` | Login-protected admin dashboard |
@@ -29,7 +29,7 @@ Admin panel password-protected hai. Admin tournaments, winners, settings, rules,
 4. **Join Tournament** — Firestore transaction duplicate join aur slot overbooking rokta hai.
 5. **Room details** — join ke baad hi room ID/password dikhte hain.
 6. **Results** — admin ke publish kiye winners aur prizes.
-7. **Profile** — naam update, password change, joined matches aur logout.
+7. **Profile** — 5-digit user ID, gallery se profile photo, naam update, password change, joined matches aur logout.
 
 ### Auth kaise kaam karta hai?
 
@@ -70,7 +70,7 @@ Payment screenshots aur UTR admin-only `players_private` me rehte hain. Public `
 - Firebase Firestore + Firebase Authentication (compat SDK 10.12.0).
 - OWN Library design system: `assets/ui.css`, `assets/app.js`.
 - Shared auth/page shell: `assets/auth.js`, `assets/app-nav.js`.
-- PWA admin panel: `admin/manifest.json`, `admin/sw.js` (cache `qren-admin-v3`).
+- PWA admin panel: `admin/manifest.json`, `admin/sw.js` (cache `qren-admin-v4`).
 - Hosting: GitHub Pages, Netlify, Vercel ya Firebase Hosting.
 
 ## Project Structure
@@ -97,7 +97,7 @@ qren-esports/
   admin/
     index.html             # admin login + panel
     manifest.json          # PWA manifest
-    sw.js                  # service worker (cache v5)
+    sw.js                  # service worker (cache v4)
     icons/                 # PWA icons
   PROJECT LOGO/            # logo images
 ```
@@ -110,6 +110,8 @@ qren-esports/
 |-------|------|-------------|
 | `userName` | string | Player ka display name |
 | `mobile` | string | 10-digit mobile number |
+| `userId` | string | Unique 5-digit public user ID, jaise `12345` |
+| `photo` | string | Compressed profile photo data URL (optional, max 250KB) |
 | `referralCode` | string | Unique code (`CA` + UID prefix) |
 | `referredBy` | string | Referrer ka UID, ya empty |
 | `createdAt` | timestamp | Account creation time |
@@ -153,6 +155,10 @@ Public data: `name`, `game`, `description`, `entryFee`, `prizePool`, `matchDate`
 
 Wallet page inhe read-only dikhata hai. Client transactions write nahi kar sakta.
 
+### `userIds/{userIdCode}`
+
+Har 5-digit user ID ka reservation doc. Isse do players ko same ID nahi milta. Doc ID hi 5-digit code hota hai; andar `uid`, `userId` aur `createdAt` rehte hain.
+
 ### `players_private/{id}` aur `players_public/{id}`
 
 `players_private` me poora payment record (UTR, screenshot, mobile, etc.) admin-only. `players_public` me sirf approved player ke safe fields public list ke liye.
@@ -174,6 +180,8 @@ Admin access marker. Is doc ka hona hi admin panel writes allow karta hai. Clien
 Rules ka summary:
 
 - Users apna profile read kar sakte hain; wallet/transactions client se write nahi ho sakte.
+- 5-digit user ID `userIds` collection me reserve hota hai; ek ID sirf ek account le sakta hai.
+- Profile photo owner-only compressed data URL hai (JPEG/PNG/WebP, max 250KB).
 - Public tournaments/results/settings read hain; private room/token data admin-only.
 - Join transaction `joins` + `joinLocks` + `joinedCount` rules se validate hota hai.
 - Admin writes `admins/{uid}` doc se gate hain.
