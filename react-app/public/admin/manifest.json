@@ -1,0 +1,19 @@
+{
+  "name": "QREN Esports Admin Panel",
+  "short_name": "QREN Admin",
+  "description": "QREN Esports Tournament Admin Panel",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f4f5f7",
+  "theme_color": "#4f6bed",
+  "icons": [
+    {
+      "src": "icons/qren-logo.png",
+      "sizes": "1254x1254",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

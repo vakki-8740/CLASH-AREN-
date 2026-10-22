@@ -2,7 +2,7 @@
 
 ## Idea kya hai?
 
-QREN Esports ek mobile-first tournament platform hai. Player mobile number + password se account banata hai, tournaments dekh kar join karta hai, results aur winnings dekhta hai, referral share karta hai aur apna wallet/profile manage karta hai.
+QREN Esports ek mobile-first React tournament platform hai. Player mobile number + password se account banata hai, tournaments dekh kar join karta hai, results aur winnings dekhta hai, referral share karta hai aur apna wallet/profile manage karta hai.
 
 Admin panel password-protected hai. Admin tournaments, winners, settings, rules, players aur payments manage karta hai.
 
@@ -11,15 +11,15 @@ Admin panel password-protected hai. Admin tournaments, winners, settings, rules,
 | Page | URL | Kaam |
 |------|-----|------|
 | Login / Register | `/` | Mobile + password auth, optional referral code |
-| Home | `/home/` | Tournaments list, slots, entry fee, status |
-| Tournament Details | `/tournament/?id=...` | Image thumbnail, details, rules, room credentials (join ke baad), Join button |
-| Results | `/results/` | Published winners aur prize details |
-| Referral | `/referral/` | Referral code, share link, referred users |
-| Wallet | `/wallet/` | Balance, totals, transaction history (read-only) |
-| Profile | `/profile/` | Single **Edit profile** mode for photo/name/email, 5-digit user ID, verification status, joined tournaments, password change, logout |
-| Joined Players | `/join/` | Approved public player list |
-| Rules | `/rule/` | Admin-editable tournament rules |
-| Admin Panel | `/admin/` | Login-protected admin dashboard |
+| Home | `/home` | Tournaments list, slots, entry fee, status |
+| Tournament Details | `/tournament?id=...` | Full-width cover image, details, rules, room credentials (join ke baad), Join button |
+| Results | `/results` | Published winners aur prize details |
+| Referral | `/referral` | Referral code, share link, referred users |
+| Wallet | `/wallet` | Balance, totals, transaction history (read-only) |
+| Profile | `/profile` | Single **Edit profile** mode for photo/name/email, 5-digit user ID, verification status, joined tournaments, password change, logout |
+| Joined Players | `/join` | Approved public player list |
+| Rules | `/rule` | Admin-editable tournament rules |
+| Admin Panel | `/admin` | Login-protected admin dashboard |
 
 ## User Flow
 
@@ -49,9 +49,9 @@ Agar kisi Firebase Auth account ka `users/{uid}` profile missing ho (jaise manua
 2. Authentication → Users → **Add user** se admin ka email/password account banao.
 3. Us user ka **UID** copy karo.
 4. `firestore.rules` ko Firestore → Rules me paste karke **Publish** karo.
-5. `/admin/` kholo aur admin email/password se login karo.
+5. `/admin` kholo aur admin email/password se login karo.
 
-Current single-admin setup me UID `E8mVnZXrGhQVvVFr5Sj3tdLZrSg1` `firestore.rules` ke `isAdmin()` aur `firebase-config.js` ke `BOOTSTRAP_ADMIN_UIDS` me allowlisted hai. Isliye `admins/{UID}` doc optional hai; future admins ke liye doc ya allowlist use kar sakte ho. Password client-side JS me kabhi mat rakho.
+Current single-admin setup me UID `E8mVnZXrGhQVvVFr5Sj3tdLZrSg1` `firestore.rules` ke `isAdmin()` aur `react-app/src/lib/firebase.js` ke `BOOTSTRAP_ADMIN_UIDS` me allowlisted hai. Isliye `admins/{UID}` doc optional hai; future admins ke liye doc ya allowlist use kar sakte ho. Password client-side JS me kabhi mat rakho.
 
 ## Admin Panel
 
@@ -67,40 +67,36 @@ Payment screenshots aur UTR admin-only `players_private` me rehte hain. Public `
 
 ## Tech Stack
 
-- Plain HTML, CSS, JavaScript — koi build tool nahi.
-- Firebase Firestore + Firebase Authentication (compat SDK 10.12.0).
-- OWN Library design system: `assets/ui.css`, `assets/app.js`.
-- Shared auth/page shell: `assets/auth.js`, `assets/app-nav.js`.
-- PWA admin panel: `admin/manifest.json`, `admin/sw.js` (cache `qren-admin-v11`).
-- Hosting: GitHub Pages, Netlify, Vercel ya Firebase Hosting.
+- React 19 + React Router 7, Vite 8 build.
+- Firebase Firestore + Firebase Authentication (compat SDK 13).
+- Design system: `react-app/src/ui.css` (legacy UI jaisa hi).
+- Shared auth/settings contexts aur reusable components `react-app/src/`.
+- PWA admin panel: `admin/manifest.json`, `admin/sw.js` (cache `qren-admin-v12`).
+- Hosting: GitHub Pages legacy branch deployment (`main`, root), Netlify, Vercel ya Firebase Hosting.
 
 ## Project Structure
 
 ```text
-qren-esports/
-  index.html               # login / register
-  firebase-config.js       # Firebase config, defaults, public settings loader
+CLASH-AREN-/
+  index.html               # React app shell (built output)
+  assets/                  # hashed JS/CSS build output
+  404.html                 # GitHub Pages SPA deep-link redirect
+  admin/                   # PWA manifest, service worker, icons
+  PROJECT LOGO/            # logo used by app
   firestore.rules          # recommended Firestore security rules
   firestore-rules.txt      # console me paste karne ke liye same rules
-  assets/
-    ui.css                 # design system
-    app.js                 # toast, overlay, helpers
-    auth.js                # Auth + profile + referral writes
-    app-nav.js             # bottom nav, page boot, formatters
-  home/index.html          # tournament listing
-  tournament/index.html    # details + join + private room details
-  results/index.html       # published results
-  referral/index.html      # referral dashboard
-  wallet/index.html        # wallet + transactions
-  profile/index.html       # account, history, password
-  join/index.html          # approved public players
-  rule/index.html          # tournament rules
-  admin/
-    index.html             # admin login + panel
-    manifest.json          # PWA manifest
-    sw.js                  # service worker (cache v11)
-    icons/                 # PWA icons
-  PROJECT LOGO/            # logo images
+  firebase-config.js       # legacy config reference (app ab bundled config use karta hai)
+  react-app/               # React source
+    src/
+      App.jsx              # routes + providers
+      main.jsx             # app entry
+      ui.css               # design system
+      components/          # Topbar, BottomNav, Overlay, Toast...
+      context/             # AuthContext, SettingsContext
+      lib/                 # Firebase, auth, settings, formatters
+      pages/               # Login, Home, Tournament, Results, Admin...
+    public/                # logo, 404.html, admin PWA files
+    vite.config.js         # base `/CLASH-AREN-/`
 ```
 
 ## Firestore Data
@@ -194,24 +190,46 @@ Rules ka summary:
 
 ## Deploy Kaise Kare
 
-Project static hai, koi build command ki zaroorat nahi.
+Production GitHub Pages par root folder serve hota hai, isliye React build root me commit kiya jata hai.
+
+1. Source update karo `react-app/src/` me.
+2. Build karo:
+   ```bash
+   cd react-app
+   npm install
+   npm run build
+   ```
+3. Built files root par copy karo (old hashed assets hata kar):
+   ```bash
+   cd ..
+   rm -rf assets admin index.html 404.html "PROJECT LOGO"
+   cp -a react-app/dist/. .
+   touch .nojekyll
+   ```
+4. `main` branch push karo. GitHub Pages build automatically chalega.
 
 - **GitHub Pages:** Settings → Pages → Branch `main`, folder `/ (root)`.
-- **Netlify:** Base directory blank, build command blank, publish directory `.`.
-- **Vercel:** Root directory `./`, framework `Other`, build command off, output directory `.`.
+- **Netlify:** Publish directory `react-app/dist`, build command `npm run build`, base `react-app`.
+- **Vercel:** Root directory `react-app`, framework Vite, output `dist`.
 
-Deploy ke baad site `/` par khulegi aur admin `/admin/` par.
+Deploy ke baad site `/` par khulegi aur admin `/admin` par.
 
 ## Local Run
 
-Project root se static server chalao:
-
 ```bash
-cd /storage/emulated/0/workpleace/qren-esports
-python3 -m http.server 8080
+cd react-app
+npm install
+npm run dev
 ```
 
-Phir `http://localhost:8080/` kholo. Direct file open karne par Firebase aur service worker theek se kaam nahi karenge.
+Build preview:
+
+```bash
+npm run build
+npm run preview
+```
+
+`vite.config.js` dev me `/` aur production build me `/CLASH-AREN-/` base use karta hai.
 
 ## Important Limitations
 

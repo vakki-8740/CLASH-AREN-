@@ -1,19 +1,28 @@
-const CACHE = 'qren-admin-v11';
+const CACHE = 'qren-admin-v12';
+const BASE = '/CLASH-AREN-/';
 const CORE = [
-    './',
-    './manifest.json',
-    './icons/qren-logo.png',
-    '../assets/ui.css',
-    '../assets/app.js',
-    '../firebase-config.js'
+    BASE,
+    BASE + 'admin/manifest.json',
+    BASE + 'admin/icons/qren-logo.png'
 ];
 
+async function precache() {
+    const cache = await caches.open(CACHE);
+    await cache.addAll(CORE).catch(() => { });
+    try {
+        const res = await fetch(BASE, { cache: 'reload' });
+        const html = await res.text();
+        const urls = new Set();
+        for (const match of html.matchAll(/(?:src|href)="([^"]+)"/g)) {
+            const value = match[1];
+            if (value.startsWith(BASE) && /\.(?:js|css|png|svg|woff2?)(?:\?|$)/.test(value)) urls.add(value);
+        }
+        await Promise.all([...urls].map(url => cache.add(url).catch(() => { })));
+    } catch (e) { }
+}
+
 self.addEventListener('install', e => {
-    e.waitUntil(
-        caches.open(CACHE)
-            .then(c => c.addAll(CORE))
-            .catch(() => { })
-    );
+    e.waitUntil(precache());
     self.skipWaiting();
 });
 
@@ -30,17 +39,19 @@ self.addEventListener('fetch', e => {
     if (req.method !== 'GET') return;
 
     const url = new URL(req.url);
-    if (url.origin !== self.location.origin) return;
+    if (url.origin !== self.location.origin || !url.pathname.startsWith(BASE)) return;
 
     if (req.mode === 'navigate') {
         e.respondWith(
             fetch(req)
                 .then(res => {
-                    const copy = res.clone();
-                    caches.open(CACHE).then(c => c.put(req, copy));
+                    if (res.ok && (res.headers.get('content-type') || '').includes('text/html')) {
+                        const copy = res.clone();
+                        caches.open(CACHE).then(c => c.put(BASE, copy));
+                    }
                     return res;
                 })
-                .catch(() => caches.match(req).then(cached => cached || caches.match('./')))
+                .catch(() => caches.match(BASE))
         );
         return;
     }
@@ -49,8 +60,10 @@ self.addEventListener('fetch', e => {
         caches.match(req).then(cached => {
             if (cached) return cached;
             return fetch(req).then(res => {
-                const copy = res.clone();
-                caches.open(CACHE).then(c => c.put(req, copy));
+                if (res.ok) {
+                    const copy = res.clone();
+                    caches.open(CACHE).then(c => c.put(req, copy));
+                }
                 return res;
             });
         })
