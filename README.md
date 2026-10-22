@@ -71,7 +71,7 @@ Payment screenshots aur UTR admin-only `players_private` me rehte hain. Public `
 - Firebase Firestore + Firebase Authentication (compat SDK 10.12.0).
 - OWN Library design system: `assets/ui.css`, `assets/app.js`.
 - Shared auth/page shell: `assets/auth.js`, `assets/app-nav.js`.
-- PWA admin panel: `admin/manifest.json`, `admin/sw.js` (cache `qren-admin-v10`).
+- PWA admin panel: `admin/manifest.json`, `admin/sw.js` (cache `qren-admin-v11`).
 - Hosting: GitHub Pages, Netlify, Vercel ya Firebase Hosting.
 
 ## Project Structure
@@ -98,7 +98,7 @@ qren-esports/
   admin/
     index.html             # admin login + panel
     manifest.json          # PWA manifest
-    sw.js                  # service worker (cache v10)
+    sw.js                  # service worker (cache v11)
     icons/                 # PWA icons
   PROJECT LOGO/            # logo images
 ```

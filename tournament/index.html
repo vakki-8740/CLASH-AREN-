@@ -120,10 +120,6 @@ try {
 
     function $(id) { return document.getElementById(id); }
 
-    function gameIcon() {
-        return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 11h4M8 9v4"/><path d="M15 12h.01M18 10h.01"/><path d="M17.3 5H6.7a4 4 0 0 0-3.9 3.1l-1.2 6A3 3 0 0 0 7.4 17l1.2-2h6.8l1.2 2a3 3 0 0 0 5.8-2.9l-1.2-6A4 4 0 0 0 17.3 5z"/></svg>';
-    }
-
     function effectiveStatus(t) {
         if (CA_PAGE.remainingSlots(t) <= 0 && ["completed", "cancelled", "closed"].indexOf(String(t.status || "").toLowerCase()) === -1) {
             return "full";
@@ -212,7 +208,7 @@ try {
                 (imageUrl ? '<span class="detail-cover"><img src="' + CA.esc(imageUrl) + '" alt="" loading="lazy" decoding="async" onerror="this.style.display=\'none\'" /></span>' : "") +
                 '<span class="badge ' + status.cls + '"><span class="dot"></span>' + CA.esc(status.label) + "</span>" +
                 "<h1>" + CA.esc(t.name || "Tournament") + "</h1>" +
-                '<div class="game-line">' + gameIcon() + "<span>" + CA.esc(t.game || "Game") + "</span><span>·</span><span>" + CA.esc(CA.fmtTime(t.matchDate) || "Time TBA") + "</span></div>" +
+                '<div class="game-line"><span>' + CA.esc(t.game || "Game") + "</span><span>·</span><span>" + CA.esc(CA.fmtTime(t.matchDate) || "Time TBA") + "</span></div>" +
                 '<div class="detail-price">' +
                     '<div class="fee"><small>Entry fee</small>' + CA.esc(CA_PAGE.money(t.entryFee)) + "</div>" +
                     '<div class="prize prize-pool"><small>Prize pool</small>' + CA.esc(CA_PAGE.money(t.prizePool)) + "</div>" +
