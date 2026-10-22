@@ -71,7 +71,7 @@ Payment screenshots aur UTR admin-only `players_private` me rehte hain. Public `
 - Firebase Firestore + Firebase Authentication (compat SDK 13).
 - Design system: `react-app/src/ui.css` (legacy UI jaisa hi).
 - Shared auth/settings contexts aur reusable components `react-app/src/`.
-- PWA admin panel: `admin/manifest.json`, `admin/sw.js` (cache `qren-admin-v13`).
+- PWA admin panel: `admin/manifest.json`, `admin/sw.js` (cache `qren-admin-v14`).
 - Hosting: GitHub Pages legacy branch deployment (`main`, root), Netlify, Vercel ya Firebase Hosting.
 
 ## Project Structure
@@ -229,7 +229,7 @@ npm run build
 npm run preview
 ```
 
-`vite.config.js` dev me `/` aur production build me `/CLASH-AREN-/` base use karta hai.
+`vite.config.js` dev me `/`, GitHub Pages build me `/CLASH-AREN-/`, aur Netlify/Vercel par `/` base use karta hai. Firebase ya kisi aur root host ke liye `VITE_BASE=/ npm run build` chalao.
 
 ## Important Limitations
 

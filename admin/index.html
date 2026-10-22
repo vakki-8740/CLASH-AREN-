@@ -6,7 +6,9 @@
 <title>QREN Admin</title>
 <script>
 (async function () {
-    var base = "/CLASH-AREN-/";
+    var path = location.pathname;
+    var base = path.replace(/admin(?:\/index\.html)?\/?$/, "");
+    if (base.charAt(base.length - 1) !== "/") base += "/";
     try {
         var keys = await caches.keys();
         if (keys.indexOf("qren-admin-v11") !== -1) {

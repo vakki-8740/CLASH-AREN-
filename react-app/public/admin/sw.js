@@ -1,5 +1,5 @@
-const CACHE = 'qren-admin-v13';
-const BASE = '/CLASH-AREN-/';
+const CACHE = 'qren-admin-v14';
+const BASE = new URL('../', self.location.href).pathname;
 const CORE = [
     BASE,
     BASE + 'admin/manifest.json',
