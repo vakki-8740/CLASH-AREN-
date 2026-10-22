@@ -1529,16 +1529,14 @@ select.input {
 
 .t-cover {
     display: block;
-    height: 96px;
     margin: 0 -16px 13px;
     background: var(--accent-soft);
 }
 
 .t-cover img {
     width: 100%;
-    height: 100%;
+    height: auto;
     display: block;
-    object-fit: cover;
 }
 
 .t-image-preview {
@@ -1551,11 +1549,12 @@ select.input {
 }
 
 .t-image-preview img {
-    width: 48px;
-    height: 48px;
+    width: 72px;
+    height: auto;
+    max-height: 96px;
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    object-fit: cover;
+    object-fit: contain;
     background: var(--bg);
 }
 
@@ -1844,16 +1843,14 @@ select.input {
 
 .result-cover {
     display: block;
-    height: 96px;
     margin: 0 -16px 13px;
     background: var(--accent-soft);
 }
 
 .result-cover img {
     width: 100%;
-    height: 100%;
+    height: auto;
     display: block;
-    object-fit: cover;
 }
 
 .result-body { min-width: 0; }

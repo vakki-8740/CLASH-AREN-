@@ -58,7 +58,7 @@ Current single-admin setup me UID `E8mVnZXrGhQVvVFr5Sj3tdLZrSg1` `firestore.rule
 - **Players** — player add/edit/delete; approve/reject.
 - **Email verify** — player ke email verification requests dekhna aur verify karna.
 - **Payments** — pending/approved/rejected payment requests, screenshot, approve/reject.
-- **Tournaments** — create/edit/delete, image URL (card ke upar 96px thumbnail), status, slots, room details, prize distribution.
+- **Tournaments** — create/edit/delete, image URL (card ke upar full-width image), status, slots, room details, prize distribution.
 - **Results** — winner entries publish/delete.
 - **Settings** — tournament name, entry fee, UPI/QR, prize pool, slots, announcement, Telegram, referral reward.
 - **Rules** — rules add/edit/delete; `/rule/` page par dikhte hain.
@@ -71,7 +71,7 @@ Payment screenshots aur UTR admin-only `players_private` me rehte hain. Public `
 - Firebase Firestore + Firebase Authentication (compat SDK 10.12.0).
 - OWN Library design system: `assets/ui.css`, `assets/app.js`.
 - Shared auth/page shell: `assets/auth.js`, `assets/app-nav.js`.
-- PWA admin panel: `admin/manifest.json`, `admin/sw.js` (cache `qren-admin-v7`).
+- PWA admin panel: `admin/manifest.json`, `admin/sw.js` (cache `qren-admin-v8`).
 - Hosting: GitHub Pages, Netlify, Vercel ya Firebase Hosting.
 
 ## Project Structure
@@ -98,7 +98,7 @@ qren-esports/
   admin/
     index.html             # admin login + panel
     manifest.json          # PWA manifest
-    sw.js                  # service worker (cache v7)
+    sw.js                  # service worker (cache v8)
     icons/                 # PWA icons
   PROJECT LOGO/            # logo images
 ```
