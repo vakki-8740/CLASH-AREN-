@@ -1655,21 +1655,21 @@ select.input {
     margin-bottom: 14px;
 }
 
-.detail-hero-top {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 12px;
+.detail-hero.has-cover {
+    padding-top: 0;
+    overflow: hidden;
 }
 
-.detail-thumb {
-    flex: 0 0 auto;
-    width: 68px;
-    height: 68px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    object-fit: cover;
-    background: var(--bg);
+.detail-cover {
+    display: block;
+    margin: 0 -20px 16px;
+    background: var(--accent-soft);
+}
+
+.detail-cover img {
+    width: 100%;
+    height: auto;
+    display: block;
 }
 
 .detail-hero h1 {

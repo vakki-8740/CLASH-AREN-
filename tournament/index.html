@@ -208,11 +208,9 @@ try {
         document.title = "QREN Esports — " + (t.name || "Tournament");
 
         $("detailContent").innerHTML =
-            '<section class="detail-hero">' +
-                '<div class="detail-hero-top">' +
-                    '<span class="badge ' + status.cls + '"><span class="dot"></span>' + CA.esc(status.label) + "</span>" +
-                    (imageUrl ? '<img class="detail-thumb" src="' + CA.esc(imageUrl) + '" alt="" loading="lazy" decoding="async" onerror="this.style.display=\'none\'" />' : "") +
-                "</div>" +
+            '<section class="detail-hero' + (imageUrl ? " has-cover" : "") + '">' +
+                (imageUrl ? '<span class="detail-cover"><img src="' + CA.esc(imageUrl) + '" alt="" loading="lazy" decoding="async" onerror="this.style.display=\'none\'" /></span>' : "") +
+                '<span class="badge ' + status.cls + '"><span class="dot"></span>' + CA.esc(status.label) + "</span>" +
                 "<h1>" + CA.esc(t.name || "Tournament") + "</h1>" +
                 '<div class="game-line">' + gameIcon() + "<span>" + CA.esc(t.game || "Game") + "</span><span>·</span><span>" + CA.esc(CA.fmtTime(t.matchDate) || "Time TBA") + "</span></div>" +
                 '<div class="detail-price">' +
