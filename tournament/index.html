@@ -215,7 +215,7 @@ try {
                 '<div class="game-line">' + gameIcon() + "<span>" + CA.esc(t.game || "Game") + "</span><span>·</span><span>" + CA.esc(CA.fmtTime(t.matchDate) || "Time TBA") + "</span></div>" +
                 '<div class="detail-price">' +
                     '<div class="fee"><small>Entry fee</small>' + CA.esc(CA_PAGE.money(t.entryFee)) + "</div>" +
-                    '<div class="prize"><small>Prize pool</small>' + CA.esc(CA_PAGE.money(t.prizePool)) + "</div>" +
+                    '<div class="prize prize-pool"><small>Prize pool</small>' + CA.esc(CA_PAGE.money(t.prizePool)) + "</div>" +
                 "</div>" +
                 '<div class="slot-bar" style="margin-top:16px"><span class="' + (remaining <= 0 ? "full" : "") + '" style="width:' + pct + '%"></span></div>' +
                 '<div class="t-foot" style="border-top:0;margin-top:6px;padding-top:0">' +

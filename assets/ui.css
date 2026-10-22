@@ -286,6 +286,8 @@ svg { flex: 0 0 auto; }
     text-overflow: ellipsis;
 }
 
+.prize-pool { color: var(--yes); }
+
 /* ================= Page head ================= */
 .page-head {
     display: flex;
