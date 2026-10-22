@@ -1,4 +1,4 @@
-const CACHE = 'qren-admin-v12';
+const CACHE = 'qren-admin-v13';
 const BASE = '/CLASH-AREN-/';
 const CORE = [
     BASE,
@@ -42,17 +42,7 @@ self.addEventListener('fetch', e => {
     if (url.origin !== self.location.origin || !url.pathname.startsWith(BASE)) return;
 
     if (req.mode === 'navigate') {
-        e.respondWith(
-            fetch(req)
-                .then(res => {
-                    if (res.ok && (res.headers.get('content-type') || '').includes('text/html')) {
-                        const copy = res.clone();
-                        caches.open(CACHE).then(c => c.put(BASE, copy));
-                    }
-                    return res;
-                })
-                .catch(() => caches.match(BASE))
-        );
+        e.respondWith(fetch(req).catch(() => caches.match(BASE)));
         return;
     }
 

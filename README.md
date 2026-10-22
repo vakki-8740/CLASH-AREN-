@@ -71,7 +71,7 @@ Payment screenshots aur UTR admin-only `players_private` me rehte hain. Public `
 - Firebase Firestore + Firebase Authentication (compat SDK 13).
 - Design system: `react-app/src/ui.css` (legacy UI jaisa hi).
 - Shared auth/settings contexts aur reusable components `react-app/src/`.
-- PWA admin panel: `admin/manifest.json`, `admin/sw.js` (cache `qren-admin-v12`).
+- PWA admin panel: `admin/manifest.json`, `admin/sw.js` (cache `qren-admin-v13`).
 - Hosting: GitHub Pages legacy branch deployment (`main`, root), Netlify, Vercel ya Firebase Hosting.
 
 ## Project Structure
