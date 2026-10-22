@@ -47,10 +47,10 @@ Player ko email dikhti nahi hai. Sirf mobile number se login hota hai. Registrat
 1. Firebase Console → Authentication → Sign-in method → **Email/Password** enable karo.
 2. Authentication → Users → **Add user** se admin ka email/password account banao.
 3. Us user ka **UID** copy karo.
-4. Firestore me `admins/{UID}` document banao (empty doc chalega).
+4. `firestore.rules` ko Firestore → Rules me paste karke **Publish** karo.
 5. `/admin/` kholo aur admin email/password se login karo.
 
-`admins/{UID}` doc na hone par login reject ho jayega. Admin writes sirf isi doc wale accounts ke liye allowed hain.
+Current single-admin setup me UID `E8mVnZXrGhQVvVFr5Sj3tdLZrSg1` `firestore.rules` ke `isAdmin()` aur `firebase-config.js` ke `BOOTSTRAP_ADMIN_UIDS` me allowlisted hai. Isliye `admins/{UID}` doc optional hai; future admins ke liye doc ya allowlist use kar sakte ho. Password client-side JS me kabhi mat rakho.
 
 ## Admin Panel
 

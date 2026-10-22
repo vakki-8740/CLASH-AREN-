@@ -22,8 +22,10 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return signedIn()
-        && exists(/databases/$(database)/documents/admins/$(uid()));
+      return signedIn() && (
+        uid() == 'E8mVnZXrGhQVvVFr5Sj3tdLZrSg1'
+        || exists(/databases/$(database)/documents/admins/$(uid()))
+      );
     }
 
     function changedOnly(keys) {

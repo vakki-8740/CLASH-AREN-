@@ -508,6 +508,11 @@ try {
         adminAuth = null;
     }
 
+    function isBootstrapAdmin(uidValue) {
+        return typeof BOOTSTRAP_ADMIN_UIDS !== "undefined"
+            && BOOTSTRAP_ADMIN_UIDS.indexOf(uidValue) !== -1;
+    }
+
     function showAdminLogin(message) {
         document.body.classList.add("admin-locked");
         adminStarted = false;
@@ -556,11 +561,27 @@ try {
         }
         try {
             var adminSnap = await db.collection("admins").doc(user.uid).get();
-            if (!adminSnap.exists) {
+            var allowlisted = isBootstrapAdmin(user.uid);
+
+            if (!adminSnap.exists && !allowlisted) {
                 showAdminLogin("Ye account admin nahi hai. Firestore me admins/" + user.uid + " doc banao.");
                 await adminAuth.signOut();
                 return;
             }
+
+            if (!adminSnap.exists && allowlisted) {
+                try {
+                    await db.collection("settings").doc("private").get();
+                } catch (checkErr) {
+                    if (checkErr && checkErr.code === "permission-denied") {
+                        showAdminLogin("Admin UID code me allowlisted hai, lekin Firestore rules purane hain. Updated firestore.rules paste karke Publish karo.");
+                        await adminAuth.signOut();
+                        return;
+                    }
+                    throw checkErr;
+                }
+            }
+
             adminGateMessage = "";
             document.body.classList.remove("admin-locked");
             $("adminBadge").style.display = "inline-flex";

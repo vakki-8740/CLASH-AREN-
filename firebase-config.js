@@ -24,6 +24,11 @@ const FIREBASE_CONFIG = {
 
 const FIREBASE_CONFIGURED = FIREBASE_CONFIG.apiKey !== "YOUR_API_KEY";
 
+// Single-admin allowlist. UID public identifier hai, password nahi.
+const BOOTSTRAP_ADMIN_UIDS = [
+    "E8mVnZXrGhQVvVFr5Sj3tdLZrSg1"
+];
+
 let firebaseApp = null;
 let db = null;
 
