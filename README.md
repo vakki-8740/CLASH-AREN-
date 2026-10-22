@@ -17,7 +17,6 @@ Admin panel password-protected hai. Admin tournaments, winners, settings, rules,
 | Referral | `/referral/` | Referral code, share link, referred users |
 | Wallet | `/wallet/` | Balance, totals, transaction history (read-only) |
 | Profile | `/profile/` | Account details, joined tournaments, password change, logout |
-| Settings | `/settings/` | Appearance, light/dark mode aur theme color |
 | Joined Players | `/join/` | Approved public player list |
 | Rules | `/rule/` | Admin-editable tournament rules |
 | Admin Panel | `/admin/` | Login-protected admin dashboard |
@@ -71,16 +70,8 @@ Payment screenshots aur UTR admin-only `players_private` me rehte hain. Public `
 - Firebase Firestore + Firebase Authentication (compat SDK 10.12.0).
 - OWN Library design system: `assets/ui.css`, `assets/app.js`.
 - Shared auth/page shell: `assets/auth.js`, `assets/app-nav.js`.
-- PWA admin panel: `admin/manifest.json`, `admin/sw.js` (cache `qren-admin-v2`).
+- PWA admin panel: `admin/manifest.json`, `admin/sw.js` (cache `qren-admin-v3`).
 - Hosting: GitHub Pages, Netlify, Vercel ya Firebase Hosting.
-
-## Themes
-
-Profile page ke top-right **Settings** button se `/settings/` kholo. Wahan se mode aur theme color change hota hai. Choice `localStorage` me save rehti hai aur saare pages + admin panel par apply hoti hai.
-
-- Default Blue — `#4F6BED`
-- Neon Green — `#00FF80`
-- Aqua Cyan — `#57FEFF`
 
 ## Project Structure
 
@@ -92,7 +83,7 @@ qren-esports/
   firestore-rules.txt      # console me paste karne ke liye same rules
   assets/
     ui.css                 # design system
-    app.js                 # theme, toast, overlay, helpers
+    app.js                 # toast, overlay, helpers
     auth.js                # Auth + profile + referral writes
     app-nav.js             # bottom nav, page boot, formatters
   home/index.html          # tournament listing
@@ -101,7 +92,6 @@ qren-esports/
   referral/index.html      # referral dashboard
   wallet/index.html        # wallet + transactions
   profile/index.html       # account, history, password
-  settings/index.html      # appearance + theme colors
   join/index.html          # approved public players
   rule/index.html          # tournament rules
   admin/

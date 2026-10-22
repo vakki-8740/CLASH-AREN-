@@ -217,10 +217,6 @@ svg { flex: 0 0 auto; }
 
 .icon-btn .dot.show { display: block; }
 
-.theme-toggle .icon-sun { display: none; }
-[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
-[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
-
 /* ================= Layout ================= */
 .shell {
     width: 100%;
@@ -1981,97 +1977,6 @@ select.input {
     font-size: 0.72rem;
     color: var(--muted);
     margin-top: 5px;
-}
-
-/* ================= Theme settings ================= */
-.theme-options {
-    display: grid;
-    gap: 10px;
-    margin-top: 12px;
-}
-
-.theme-option {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    width: 100%;
-    padding: 12px 14px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--card);
-    color: var(--text);
-    text-align: left;
-    font-family: inherit;
-    cursor: pointer;
-    transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
-}
-
-.theme-option:hover {
-    border-color: var(--accent);
-    transform: translateY(-1px);
-}
-
-.theme-option.is-on {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-soft);
-}
-
-.theme-swatch {
-    width: 38px;
-    height: 38px;
-    flex: 0 0 auto;
-    border-radius: 50%;
-    border: 1px solid rgba(0, 0, 0, 0.12);
-    background: var(--swatch, var(--accent));
-    box-shadow: inset 0 0 0 4px var(--card);
-}
-
-.theme-copy {
-    flex: 1;
-    min-width: 0;
-}
-
-.theme-copy strong {
-    display: block;
-    font-size: 0.88rem;
-    line-height: 1.25;
-}
-
-.theme-copy small {
-    display: block;
-    margin-top: 2px;
-    color: var(--muted);
-    font-size: 0.68rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-}
-
-.theme-check {
-    width: 22px;
-    height: 22px;
-    flex: 0 0 auto;
-    color: var(--accent);
-    opacity: 0;
-    transform: scale(0.8);
-    transition: opacity 0.2s, transform 0.2s;
-}
-
-.theme-check svg { width: 100%; height: 100%; }
-.theme-option.is-on .theme-check { opacity: 1; transform: scale(1); }
-
-.theme-preview {
-    margin-top: 16px;
-    padding: 14px;
-    border: 1px dashed var(--border);
-    border-radius: var(--radius);
-    background: var(--bg);
-}
-
-.theme-preview .btn-row { margin-top: 9px; }
-
-@media (max-width: 420px) {
-    .theme-option { padding: 11px 12px; }
-    .theme-swatch { width: 34px; height: 34px; }
 }
 
 /* ================= Skeleton ================= */
