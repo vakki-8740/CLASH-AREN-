@@ -83,8 +83,7 @@ CLASH-AREN-/
   404.html                 # GitHub Pages SPA deep-link redirect
   admin/                   # PWA manifest, service worker, icons
   PROJECT LOGO/            # logo used by app
-  firestore.rules          # recommended Firestore security rules
-  firestore-rules.txt      # console me paste karne ke liye same rules
+  firestore.rules          # Firestore security rules (console me paste karo)
   firebase-config.js       # legacy config reference (app ab bundled config use karta hai)
   react-app/               # React source
     src/
@@ -175,7 +174,9 @@ Admin access marker. Is doc ka hona hi admin panel writes allow karta hai. Clien
 
 ## Security Rules
 
-`firestore.rules` aur `firestore-rules.txt` me same rules hain. Firebase Console → Firestore Database → Rules → paste → **Publish**.
+`firestore.rules` hi single source of truth hai. Firebase Console → Firestore Database → Rules → paste → **Publish**.
+
+Agar Console copy-paste ke baad bole **"no changes"**, matlab rules already same hain — koi update required nahi. App me "Firestore rules update karo" message kisi write ke permission-denied par generic aata hai; exact operation/error share karo.
 
 Rules ka summary:
 

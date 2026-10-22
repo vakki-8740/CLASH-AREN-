@@ -1,10 +1,11 @@
 rules_version = '2';
 
-// QREN Esports — target security rules.
-// IMPORTANT: Ye rules tab apply karo jab code refactor ho jaye:
-// settings/public, settings/private, tournament_private, referralCodes,
-// referrals, joinLocks aur admin login. Current code in collections ko
-// abhi use nahi karta. /admins/{uid} doc console se banega.
+// QREN Esports — Firestore security rules.
+// Covers: users, userIds, referralCodes, referrals, tournaments,
+// tournament_private, joins, joinLocks, results, transactions,
+// players_public, players_private, settings/public, settings/private,
+// admins aur default-deny unknown collections.
+// /admins/{uid} doc optional hai; bootstrap admin UID neeche allowlisted hai.
 
 service cloud.firestore {
   match /databases/{database}/documents {
