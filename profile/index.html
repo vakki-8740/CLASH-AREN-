@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Clash Arena — Profile</title>
+<script>
+try {
+    var savedTheme = localStorage.getItem("theme");
+    if (savedTheme) document.documentElement.setAttribute("data-theme", savedTheme);
+    else if (window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches) document.documentElement.setAttribute("data-theme", "dark");
+} catch (e) {}
+</script>
+<link rel="stylesheet" href="../assets/ui.css" />
+</head>
+<body>
+
+<header class="topbar">
+    <div class="topbar-inner">
+        <a class="brand" href="../home/">
+            <span class="brand-mark">
+                <img src="../PROJECT%20LOGO/photo_2026-08-05_11-49-04.jpg" alt="Clash Arena logo" />
+            </span>
+            <span>
+                <strong class="brand-name" data-tournament-name>Clash Arena</strong>
+                <span class="brand-sub">Profile</span>
+            </span>
+        </a>
+        <div class="topbar-actions">
+            <button class="icon-btn theme-toggle" type="button" data-theme-toggle aria-label="Toggle theme">
+                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+            </button>
+        </div>
+    </div>
+</header>
+
+<main class="shell">
+    <div class="profile-card">
+        <span class="avatar lg" id="profileAvatar">P</span>
+        <div style="min-width:0">
+            <div class="profile-name" id="profileName">Loading...</div>
+            <div class="profile-meta" id="profileMeta">Profile load ho raha hai</div>
+            <div class="profile-uid" id="profileUid"></div>
+        </div>
+    </div>
+
+    <div class="detail-block">
+        <h2>Account details</h2>
+        <div class="detail-rows" id="accountDetails"></div>
+    </div>
+
+    <div class="detail-block">
+        <h2>Account settings</h2>
+        <form id="nameForm" novalidate>
+            <div class="field">
+                <label class="field-label" for="nameInput">User name</label>
+                <input class="input" type="text" id="nameInput" maxlength="40" autocomplete="nickname" />
+                <span class="field-error"></span>
+            </div>
+            <div class="alert success" id="nameMsg" style="display:none;margin-bottom:10px"></div>
+            <button class="btn primary" type="submit" id="nameBtn">Save name</button>
+        </form>
+
+        <div class="field" style="margin-top:16px">
+            <label class="field-label" for="mobileInput">Registered mobile number</label>
+            <input class="input" type="tel" id="mobileInput" disabled />
+            <p class="settings-note">Mobile number change karne ke liye verification zaroori hai — support se contact karo.</p>
+        </div>
+    </div>
+
+    <div class="detail-block">
+        <h2>Change password</h2>
+        <form id="passwordForm" novalidate>
+            <div class="field">
+                <label class="field-label" for="currentPw">Current password</label>
+                <input class="input" type="password" id="currentPw" autocomplete="current-password" />
+            </div>
+            <div class="field">
+                <label class="field-label" for="newPw">New password</label>
+                <input class="input" type="password" id="newPw" autocomplete="new-password" placeholder="8+ characters, letter aur number" />
+            </div>
+            <div class="alert success" id="pwMsg" style="display:none;margin-bottom:10px"></div>
+            <button class="btn primary" type="submit" id="pwBtn">Update password</button>
+        </form>
+    </div>
+
+    <p class="section-label">Joined tournaments</p>
+    <div id="joinedList" class="list">
+        <div class="skel-card">
+            <div class="skeleton skel-line w60"></div>
+            <div class="skeleton skel-line w40"></div>
+        </div>
+    </div>
+    <div class="empty" id="joinedEmpty" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0Z"/><path d="M7 5H4v2a4 4 0 0 0 4 4"/><path d="M17 5h3v2a4 4 0 0 1-4 4"/></svg>
+        <h3>Abhi koi tournament join nahi kiya</h3>
+        <p>Home page par available tournaments dekho aur Join Tournament dabao.</p>
+    </div>
+
+    <p class="section-label" style="margin-top:18px">Match history</p>
+    <div id="historyList" class="list">
+        <div class="skel-card">
+            <div class="skeleton skel-line w60"></div>
+            <div class="skeleton skel-line w40"></div>
+        </div>
+    </div>
+    <div class="empty" id="historyEmpty" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0Z"/><path d="M7 5H4v2a4 4 0 0 0 4 4"/><path d="M17 5h3v2a4 4 0 0 1-4 4"/></svg>
+        <h3>Abhi koi match result nahi</h3>
+        <p>Result publish hone ke baad aapki match history yahan dikhegi.</p>
+    </div>
+
+    <div class="alert danger" id="profileError" style="display:none">
+        <span id="profileErrorText"></span>
+    </div>
+
+    <div class="detail-block" style="margin-top:18px">
+        <h2>Session</h2>
+        <p class="settings-note" style="margin-bottom:10px">Logout karne par session clear ho jayega.</p>
+        <button class="btn danger full" type="button" onclick="logout()">Logout</button>
+    </div>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="../firebase-config.js"></script>
+<script src="../assets/app.js"></script>
+<script src="../assets/auth.js"></script>
+<script src="../assets/app-nav.js"></script>
+<script>
+    "use strict";
+
+    var state = { user: null, profile: null, joins: [], results: [] };
+
+    function $(id) { return document.getElementById(id); }
+
+    function detailRow(k, v) {
+        return '<div class="detail-row"><span class="k">' + k + '</span><span class="v">' + CA.esc(v || "—") + "</span></div>";
+    }
+
+    function showMsg(id, text, type) {
+        var el = $(id);
+        el.textContent = text;
+        el.className = "alert " + (type || "success");
+        el.style.display = "flex";
+    }
+
+    function hideMsg(id) {
+        $(id).style.display = "none";
+    }
+
+    function toMillis(ts) {
+        if (!ts) return 0;
+        if (typeof ts.toMillis === "function") return ts.toMillis();
+        var d = new Date(ts);
+        return isNaN(d.getTime()) ? 0 : d.getTime();
+    }
+
+    function renderProfile() {
+        var p = state.profile;
+        $("profileAvatar").textContent = CA.initials(p.userName);
+        $("profileName").textContent = p.userName || "Player";
+        $("profileMeta").textContent = p.mobile ? "+91 " + p.mobile : "Mobile not available";
+        $("profileUid").textContent = "User ID: " + state.user.uid;
+
+        $("accountDetails").innerHTML =
+            detailRow("User name", p.userName) +
+            detailRow("Registered mobile", p.mobile ? "+91 " + p.mobile : "") +
+            detailRow("User ID", state.user.uid) +
+            detailRow("Referral code", p.referralCode || "—");
+
+        $("nameInput").value = p.userName || "";
+        $("mobileInput").value = p.mobile ? "+91 " + p.mobile : "";
+    }
+
+    function renderJoins() {
+        if (!state.joins.length) {
+            $("joinedList").innerHTML = "";
+            $("joinedEmpty").style.display = "block";
+            return;
+        }
+        $("joinedEmpty").style.display = "none";
+        $("joinedList").innerHTML = state.joins.map(function (j) {
+            return '<a class="row-card" href="../tournament/?id=' + encodeURIComponent(j.tournamentId) + '">' +
+                '<span class="avatar">' + CA.esc(CA.initials(j.tournamentName)) + "</span>" +
+                '<div class="row-main">' +
+                    '<p class="row-title">' + CA.esc(j.tournamentName || "Tournament") + "</p>" +
+                    '<p class="row-sub">' + CA.esc(j.game || "Game") + " · " + CA.esc(CA.fmtTime(j.matchDate) || "TBA") + "</p>" +
+                "</div>" +
+                '<span class="badge success"><span class="dot"></span>Joined</span>' +
+            "</a>";
+        }).join("");
+    }
+
+    function renderHistory() {
+        var joinedIds = {};
+        state.joins.forEach(function (j) { joinedIds[j.tournamentId] = j; });
+
+        var history = state.results.filter(function (r) { return joinedIds[r.tournamentId]; });
+        history.sort(function (a, b) {
+            var diff = toMillis(b.matchDate) - toMillis(a.matchDate);
+            return diff !== 0 ? diff : CA_PAGE.number(a.rank) - CA_PAGE.number(b.rank);
+        });
+
+        if (!history.length) {
+            $("historyList").innerHTML = "";
+            $("historyEmpty").style.display = "block";
+            return;
+        }
+
+        $("historyEmpty").style.display = "none";
+        $("historyList").innerHTML = history.map(function (r) {
+            return '<div class="row-card">' +
+                '<span class="avatar">#' + CA.esc(r.rank || "—") + "</span>" +
+                '<div class="row-main">' +
+                    '<p class="row-title">' + CA.esc(r.tournamentName || "Tournament") + "</p>" +
+                    '<p class="row-sub">Winner: ' + CA.esc(r.winnerName || "—") + " · " + CA.esc(CA.fmtDate(r.matchDate) || "—") + "</p>" +
+                "</div>" +
+                '<span class="tx-amount plus">' + CA.esc(CA_PAGE.money(r.prize)) + "</span>" +
+            "</div>";
+        }).join("");
+    }
+
+    async function loadJoins() {
+        var snap = await db.collection("joins").where("userId", "==", state.user.uid).get();
+        var list = [];
+        snap.forEach(function (doc) {
+            var j = doc.data();
+            j.id = doc.id;
+            list.push(j);
+        });
+        list.sort(function (a, b) { return toMillis(b.joinedAt) - toMillis(a.joinedAt); });
+        state.joins = list;
+        renderJoins();
+
+        try {
+            var rSnap = await db.collection("results").get();
+            var results = [];
+            rSnap.forEach(function (doc) {
+                var r = doc.data();
+                r.id = doc.id;
+                if (String(r.status || "published").toLowerCase() === "published") results.push(r);
+            });
+            state.results = results;
+        } catch (e) {
+            state.results = [];
+        }
+        renderHistory();
+    }
+
+    $("nameForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
+        var btn = $("nameBtn");
+        var input = $("nameInput");
+        var field = input.closest(".field");
+        hideMsg("nameMsg");
+        field.classList.remove("invalid");
+
+        btn.disabled = true;
+        btn.classList.add("loading");
+        btn.dataset.label = btn.textContent;
+        btn.innerHTML = '<span class="spin" aria-hidden="true"></span>Saving...';
+
+        try {
+            var name = await CA_AUTH.updateUserName(state.user, input.value);
+            state.profile.userName = name;
+            renderProfile();
+            showMsg("nameMsg", "User name update ho gaya.", "success");
+        } catch (err) {
+            field.classList.add("invalid");
+            var errEl = field.querySelector(".field-error");
+            if (errEl) errEl.textContent = err.message || "Name update nahi hua.";
+            showMsg("nameMsg", err.message || "Name update nahi hua.", "danger");
+        } finally {
+            btn.disabled = false;
+            btn.classList.remove("loading");
+            btn.textContent = btn.dataset.label || "Save name";
+        }
+    });
+
+    $("passwordForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
+        var btn = $("pwBtn");
+        hideMsg("pwMsg");
+        btn.disabled = true;
+        btn.classList.add("loading");
+        btn.dataset.label = btn.textContent;
+        btn.innerHTML = '<span class="spin" aria-hidden="true"></span>Updating...';
+
+        try {
+            await CA_AUTH.changePassword(state.user, $("currentPw").value, $("newPw").value);
+            $("currentPw").value = "";
+            $("newPw").value = "";
+            showMsg("pwMsg", "Password update ho gaya.", "success");
+        } catch (err) {
+            showMsg("pwMsg", err.message || "Password update nahi hua.", "danger");
+        } finally {
+            btn.disabled = false;
+            btn.classList.remove("loading");
+            btn.textContent = btn.dataset.label || "Update password";
+        }
+    });
+
+    function logout() {
+        CA_AUTH.logout("../");
+    }
+
+    (async function init() {
+        try {
+            var boot = await CA_PAGE.boot("profile");
+            state.user = boot.user;
+            state.profile = boot.profile;
+
+            if (!state.profile) {
+                $("profileErrorText").textContent = "Profile load nahi hua. Logout karke dobara login karo.";
+                $("profileError").style.display = "flex";
+                return;
+            }
+
+            renderProfile();
+            await loadJoins();
+        } catch (err) {
+            console.error(err);
+            $("profileErrorText").textContent = "Profile load nahi hua. Reload karke try karo.";
+            $("profileError").style.display = "flex";
+        }
+    })();
+</script>
+</body>
+</html>

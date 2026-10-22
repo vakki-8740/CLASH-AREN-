@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Clash Arena — Wallet</title>
+<script>
+try {
+    var savedTheme = localStorage.getItem("theme");
+    if (savedTheme) document.documentElement.setAttribute("data-theme", savedTheme);
+    else if (window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches) document.documentElement.setAttribute("data-theme", "dark");
+} catch (e) {}
+</script>
+<link rel="stylesheet" href="../assets/ui.css" />
+</head>
+<body>
+
+<header class="topbar">
+    <div class="topbar-inner">
+        <a class="brand" href="../home/">
+            <span class="brand-mark">
+                <img src="../PROJECT%20LOGO/photo_2026-08-05_11-49-04.jpg" alt="Clash Arena logo" />
+            </span>
+            <span>
+                <strong class="brand-name" data-tournament-name>Clash Arena</strong>
+                <span class="brand-sub">Wallet</span>
+            </span>
+        </a>
+        <div class="topbar-actions">
+            <button class="icon-btn theme-toggle" type="button" data-theme-toggle aria-label="Toggle theme">
+                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+            </button>
+        </div>
+    </div>
+</header>
+
+<main class="shell">
+    <div class="app-head">
+        <div>
+            <h1>Wallet</h1>
+            <p>Balance aur transaction history.</p>
+        </div>
+    </div>
+
+    <section class="wallet-hero">
+        <p class="lb">Available balance</p>
+        <p class="balance" id="walletBalance">₹0</p>
+        <div class="wallet-actions">
+            <button class="btn" type="button" disabled title="Payment gateway configured nahi hai">Deposit</button>
+            <button class="btn" type="button" disabled title="Withdrawal workflow configured nahi hai">Withdraw</button>
+        </div>
+    </section>
+
+    <p class="help" style="font-size:.72rem;color:var(--muted);margin:-4px 0 14px">Deposit aur withdrawal abhi unavailable hain — secure payment gateway configure hone ke baad hi enable honge.</p>
+
+    <div class="wallet-summary">
+        <div class="ws"><span>Total earnings</span><strong id="totalEarnings">₹0</strong></div>
+        <div class="ws"><span>Total deposits</span><strong id="totalDeposits">₹0</strong></div>
+        <div class="ws"><span>Total withdrawals</span><strong id="totalWithdrawals">₹0</strong></div>
+    </div>
+
+    <p class="section-label">Transaction history</p>
+
+    <div id="txList" class="list">
+        <div class="skel-card">
+            <div class="skeleton skel-line w60"></div>
+            <div class="skeleton skel-line w40"></div>
+        </div>
+    </div>
+
+    <div class="empty" id="txEmpty" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><path d="M16 12h3"/><path d="M3 9h18"/></svg>
+        <h3>Abhi koi transaction nahi</h3>
+        <p>Deposit, withdrawal aur reward transactions yahan dikhenge.</p>
+    </div>
+
+    <div class="alert danger" id="txError" style="display:none">
+        <span>Transaction history load nahi ho payi.</span>
+    </div>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="../firebase-config.js"></script>
+<script src="../assets/app.js"></script>
+<script src="../assets/auth.js"></script>
+<script src="../assets/app-nav.js"></script>
+<script>
+    "use strict";
+
+    var state = { user: null, profile: null, transactions: [] };
+
+    function $(id) { return document.getElementById(id); }
+
+    function typeLabel(type) {
+        var map = {
+            deposit: "Deposit",
+            withdrawal: "Withdrawal",
+            referral: "Referral reward",
+            prize: "Prize money",
+            entry_fee: "Entry fee",
+            refund: "Refund"
+        };
+        return map[String(type || "").toLowerCase()] || (type ? String(type) : "Transaction");
+    }
+
+    function statusInfo(status) {
+        var value = String(status || "pending").toLowerCase();
+        if (value === "successful" || value === "success" || value === "completed") return { label: "Successful", cls: "success" };
+        if (value === "failed" || value === "cancelled" || value === "rejected") return { label: "Failed", cls: "danger" };
+        return { label: "Pending", cls: "warning" };
+    }
+
+    function isCredit(type) {
+        var t = String(type || "").toLowerCase();
+        return t === "deposit" || t === "referral" || t === "prize" || t === "refund";
+    }
+
+    function toMillis(ts) {
+        if (!ts) return 0;
+        if (typeof ts.toMillis === "function") return ts.toMillis();
+        var d = new Date(ts);
+        return isNaN(d.getTime()) ? 0 : d.getTime();
+    }
+
+    function txRow(tx) {
+        var status = statusInfo(tx.status);
+        var credit = isCredit(tx.type);
+        var amount = Math.abs(Number(tx.amount) || 0);
+
+        return '<div class="row-card">' +
+            '<div class="row-main">' +
+                '<p class="row-title">' + CA.esc(typeLabel(tx.type)) + "</p>" +
+                '<p class="row-sub">' + CA.esc(tx.note || "") + (tx.note ? " · " : "") + CA.esc(CA.fmtTime(tx.createdAt) || "—") + "</p>" +
+            "</div>" +
+            '<div class="row-actions" style="flex-direction:column;align-items:flex-end;gap:4px">' +
+                '<span class="tx-amount ' + (credit ? "plus" : "minus") + '">' + (credit ? "+" : "-") + CA.esc(CA_PAGE.money(amount)) + "</span>" +
+                '<span class="badge ' + status.cls + '"><span class="dot"></span>' + status.label + "</span>" +
+            "</div>" +
+        "</div>";
+    }
+
+    function renderWallet() {
+        var wallet = (state.profile && state.profile.wallet) || {};
+        $("walletBalance").textContent = CA_PAGE.money(wallet.balance || 0);
+        $("totalEarnings").textContent = CA_PAGE.money(wallet.totalEarnings || 0);
+        $("totalDeposits").textContent = CA_PAGE.money(wallet.totalDeposits || 0);
+        $("totalWithdrawals").textContent = CA_PAGE.money(wallet.totalWithdrawals || 0);
+    }
+
+    function renderTransactions() {
+        var list = state.transactions;
+        if (!list.length) {
+            $("txList").innerHTML = "";
+            $("txEmpty").style.display = "block";
+            return;
+        }
+        $("txEmpty").style.display = "none";
+        $("txList").innerHTML = list.map(txRow).join("");
+    }
+
+    async function loadTransactions() {
+        try {
+            var snap = await db.collection("transactions").where("userId", "==", state.user.uid).get();
+            var list = [];
+            snap.forEach(function (doc) {
+                var tx = doc.data();
+                tx.id = doc.id;
+                list.push(tx);
+            });
+            list.sort(function (a, b) { return toMillis(b.createdAt) - toMillis(a.createdAt); });
+            state.transactions = list;
+            renderTransactions();
+        } catch (err) {
+            console.error(err);
+            $("txList").innerHTML = "";
+            $("txEmpty").style.display = "none";
+            $("txError").style.display = "flex";
+        }
+    }
+
+    (async function init() {
+        try {
+            var boot = await CA_PAGE.boot("wallet");
+            state.user = boot.user;
+            state.profile = boot.profile;
+
+            if (!state.profile) {
+                $("txError").style.display = "flex";
+                return;
+            }
+
+            renderWallet();
+            await loadTransactions();
+        } catch (err) {
+            console.error(err);
+            $("txError").style.display = "flex";
+        }
+    })();
+</script>
+</body>
+</html>

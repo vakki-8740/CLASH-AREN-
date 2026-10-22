@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Clash Arena — Tournament</title>
+<script>
+try {
+    var savedTheme = localStorage.getItem("theme");
+    if (savedTheme) document.documentElement.setAttribute("data-theme", savedTheme);
+    else if (window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches) document.documentElement.setAttribute("data-theme", "dark");
+} catch (e) {}
+</script>
+<link rel="stylesheet" href="../assets/ui.css" />
+</head>
+<body>
+
+<header class="topbar">
+    <div class="topbar-inner">
+        <a class="brand" href="../home/">
+            <span class="brand-mark">
+                <img src="../PROJECT%20LOGO/photo_2026-08-05_11-49-04.jpg" alt="Clash Arena logo" />
+            </span>
+            <span>
+                <strong class="brand-name" data-tournament-name>Clash Arena</strong>
+                <span class="brand-sub">Tournament details</span>
+            </span>
+        </a>
+        <div class="topbar-actions">
+            <button class="icon-btn theme-toggle" type="button" data-theme-toggle aria-label="Toggle theme">
+                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+            </button>
+        </div>
+    </div>
+</header>
+
+<main class="shell">
+    <div class="app-head">
+        <div>
+            <h1 id="tName">Tournament</h1>
+            <p id="tGame">Details load ho rahe hain...</p>
+        </div>
+        <a class="head-action" href="../home/">&larr; Tournaments</a>
+    </div>
+
+    <div id="detailContent">
+        <div class="skel-card">
+            <div class="skeleton skel-line w60"></div>
+            <div class="skeleton skel-line w40"></div>
+            <div class="skeleton skel-line w85" style="margin-top:16px"></div>
+            <div class="skeleton skel-line w85"></div>
+        </div>
+        <div class="skel-card">
+            <div class="skeleton skel-line w40"></div>
+            <div class="skeleton skel-line w85"></div>
+            <div class="skeleton skel-line w60"></div>
+        </div>
+    </div>
+
+    <div class="alert danger" id="errorBox" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+        <div>
+            <strong id="errorTitle">Tournament load nahi hua</strong>
+            <p class="muted" style="font-size:.78rem" id="errorText">Ye tournament exist nahi karta ya link galat hai.</p>
+            <a class="btn outline sm" style="margin-top:8px" href="../home/">Back to tournaments</a>
+        </div>
+    </div>
+
+    <div class="sticky-action" id="joinBar" style="display:none">
+        <button class="btn primary lg full" type="button" id="joinBtn" onclick="openJoinModal()">Join Tournament</button>
+    </div>
+</main>
+
+<div class="overlay" id="joinModal" role="dialog" aria-modal="true" aria-labelledby="joinModalTitle">
+    <div class="modal">
+        <div class="modal-head">
+            <div class="modal-title">
+                <h3 id="joinModalTitle">Confirm joining</h3>
+                <p>Entry ek baar confirm karne ke baad slot book ho jayega.</p>
+            </div>
+            <button class="modal-close" type="button" data-close-overlay="joinModal" aria-label="Close">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        <div class="detail-rows" id="joinSummary"></div>
+
+        <p class="section-label">Your entry details</p>
+        <div class="detail-rows" id="joinUserDetails"></div>
+
+        <div class="alert danger" id="joinError" style="display:none;margin-top:12px">
+            <span id="joinErrorText"></span>
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn outline sm" type="button" data-close-overlay="joinModal">Cancel</button>
+            <button class="btn primary sm" type="button" id="confirmJoinBtn" onclick="confirmJoin()">Confirm Join</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="../firebase-config.js"></script>
+<script src="../assets/app.js"></script>
+<script src="../assets/auth.js"></script>
+<script src="../assets/app-nav.js"></script>
+<script>
+    "use strict";
+
+    var state = {
+        id: "",
+        user: null,
+        profile: null,
+        tournament: null,
+        joined: false,
+        results: [],
+        joining: false
+    };
+
+    function $(id) { return document.getElementById(id); }
+
+    function gameIcon() {
+        return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 11h4M8 9v4"/><path d="M15 12h.01M18 10h.01"/><path d="M17.3 5H6.7a4 4 0 0 0-3.9 3.1l-1.2 6A3 3 0 0 0 7.4 17l1.2-2h6.8l1.2 2a3 3 0 0 0 5.8-2.9l-1.2-6A4 4 0 0 0 17.3 5z"/></svg>';
+    }
+
+    function effectiveStatus(t) {
+        if (CA_PAGE.remainingSlots(t) <= 0 && ["completed", "cancelled", "closed"].indexOf(String(t.status || "").toLowerCase()) === -1) {
+            return "full";
+        }
+        return t.status || "open";
+    }
+
+    function detailRow(k, v) {
+        return '<div class="detail-row"><span class="k">' + k + '</span><span class="v">' + CA.esc(v || "—") + "</span></div>";
+    }
+
+    function rulesHtml(rules) {
+        if (!rules) return '<p class="prose">Rules abhi add nahi hue.</p>';
+        if (Array.isArray(rules)) {
+            return rules.map(function (r) {
+                if (r && typeof r === "object") {
+                    return '<div class="rule-card"><p class="rule-title">' + CA.esc(r.title || "Rule") + '</p><p class="rule-desc">' + CA.esc(r.description || "") + "</p></div>";
+                }
+                return '<p class="prose">' + CA.esc(r) + "</p>";
+            }).join("");
+        }
+        return String(rules).split(/\n+/).filter(function (line) { return line.trim(); }).map(function (line, i) {
+            return '<p class="prose">' + (i + 1) + ". " + CA.esc(line.trim()) + "</p>";
+        }).join("") || '<p class="prose">Rules abhi add nahi hue.</p>';
+    }
+
+    function resultRows() {
+        if (!state.results.length) {
+            return '<p class="prose">Result abhi publish nahi hua.</p>';
+        }
+        return state.results.map(function (r) {
+            return '<div class="result-win">' +
+                '<span><span class="rank-pill">#' + CA.esc(r.rank || "—") + '</span> <strong>' + CA.esc(r.winnerName || "Winner") + '</strong></span>' +
+                '<span class="prize">' + CA.esc(CA_PAGE.money(r.prize)) + "</span>" +
+            "</div>";
+        }).join("");
+    }
+
+    function roomHtml() {
+        var t = state.tournament;
+        var hasRoom = t.roomId || t.roomPassword;
+        if (!state.joined) {
+            return '<div class="room-locked">' +
+                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>' +
+                '<span>Room ID aur password sirf joined players ko dikhte hain.</span>' +
+            "</div>";
+        }
+        if (!hasRoom) {
+            return '<p class="prose">Organizer ne abhi room details release nahi ki.</p>';
+        }
+        return '<div class="room-box">' +
+            '<div><span class="hm-lb">Room ID</span><p class="room-val">' + CA.esc(t.roomId || "—") + "</p></div>" +
+            '<div><span class="hm-lb">Password</span><p class="room-val">' + CA.esc(t.roomPassword || "—") + "</p></div>" +
+        "</div>";
+    }
+
+    function joinLabel() {
+        if (state.joined) return "Joined";
+        var reason = CA_PAGE.joinBlockReason(state.tournament);
+        if (!reason) return "Join Tournament";
+        var status = String(state.tournament.status || "").toLowerCase();
+        if (status === "cancelled") return "Tournament Cancelled";
+        if (status === "completed") return "Tournament Completed";
+        if (status === "closed") return "Joining Closed";
+        return "Tournament Full";
+    }
+
+    function render() {
+        var t = state.tournament;
+        if (!t) return;
+
+        var status = CA_PAGE.statusInfo(effectiveStatus(t));
+        var total = CA_PAGE.number(t.totalSlots);
+        var joined = CA_PAGE.number(t.joinedCount);
+        var remaining = CA_PAGE.remainingSlots(t);
+        var pct = total > 0 ? Math.min(Math.round((joined / total) * 100), 100) : 0;
+
+        $("tName").textContent = t.name || "Tournament";
+        $("tGame").textContent = (t.game || "Game") + " · " + CA.fmtTime(t.matchDate);
+        document.title = "Clash Arena — " + (t.name || "Tournament");
+
+        $("detailContent").innerHTML =
+            '<section class="detail-hero">' +
+                '<span class="badge ' + status.cls + '"><span class="dot"></span>' + CA.esc(status.label) + "</span>" +
+                "<h1>" + CA.esc(t.name || "Tournament") + "</h1>" +
+                '<div class="game-line">' + gameIcon() + "<span>" + CA.esc(t.game || "Game") + "</span><span>·</span><span>" + CA.esc(CA.fmtTime(t.matchDate) || "Time TBA") + "</span></div>" +
+                '<div class="detail-price">' +
+                    '<div class="fee"><small>Entry fee</small>' + CA.esc(CA_PAGE.money(t.entryFee)) + "</div>" +
+                    '<div class="prize"><small>Prize pool</small>' + CA.esc(CA_PAGE.money(t.prizePool)) + "</div>" +
+                "</div>" +
+                '<div class="slot-bar" style="margin-top:16px"><span class="' + (remaining <= 0 ? "full" : "") + '" style="width:' + pct + '%"></span></div>' +
+                '<div class="t-foot" style="border-top:0;margin-top:6px;padding-top:0">' +
+                    '<span class="t-slots">' + remaining + " / " + total + " slots left</span>" +
+                    '<span class="muted">' + joined + " joined</span>" +
+                "</div>" +
+            "</section>" +
+
+            '<div class="detail-grid">' +
+                '<div class="dg"><span>Match date</span><strong>' + CA.esc(CA.fmtDate(t.matchDate) || "TBA") + "</strong></div>" +
+                '<div class="dg"><span>Match time</span><strong>' + CA.esc(CA.fmtTime(t.matchDate) || "TBA") + "</strong></div>" +
+                '<div class="dg"><span>Total slots</span><strong>' + total + "</strong></div>" +
+                '<div class="dg"><span>Slots left</span><strong>' + remaining + "</strong></div>" +
+                '<div class="dg"><span>Match format</span><strong>' + CA.esc(t.matchFormat || "—") + "</strong></div>" +
+                '<div class="dg"><span>Status</span><strong>' + CA.esc(status.label) + "</strong></div>" +
+            "</div>" +
+
+            '<div class="detail-block"><h2>About this tournament</h2><p class="prose">' + CA.esc(t.description || "Description abhi add nahi hui.") + "</p></div>" +
+
+            (t.prizeDistribution ? '<div class="detail-block"><h2>Prize distribution</h2><p class="prose">' + CA.esc(t.prizeDistribution) + "</p></div>" : "") +
+
+            '<div class="detail-block"><h2>Tournament rules</h2>' + rulesHtml(t.rules) + "</div>" +
+
+            '<div class="detail-block"><h2>Room details</h2>' + roomHtml() + "</div>" +
+
+            '<div class="detail-block"><h2>Results &amp; winners</h2>' + resultRows() + "</div>";
+
+        var btn = $("joinBtn");
+        $("joinBar").style.display = "block";
+        btn.textContent = joinLabel();
+        btn.disabled = state.joined || !!CA_PAGE.joinBlockReason(t);
+        btn.classList.toggle("success", state.joined);
+        $("errorBox").style.display = "none";
+    }
+
+    function fillJoinModal() {
+        var t = state.tournament;
+        $("joinSummary").innerHTML =
+            detailRow("Tournament", t.name) +
+            detailRow("Game", t.game) +
+            detailRow("Entry fee", CA_PAGE.money(t.entryFee)) +
+            detailRow("Match", CA.fmtTime(t.matchDate)) +
+            detailRow("Slots left", CA_PAGE.remainingSlots(t) + " / " + CA_PAGE.number(t.totalSlots));
+        $("joinUserDetails").innerHTML =
+            detailRow("Player name", state.profile ? state.profile.userName : (state.user.displayName || "Player")) +
+            detailRow("Mobile number", state.profile ? state.profile.mobile : "—");
+        $("joinError").style.display = "none";
+    }
+
+    function openJoinModal() {
+        if (!state.tournament || state.joined) return;
+        if (CA_PAGE.joinBlockReason(state.tournament)) return;
+        fillJoinModal();
+        CA.openOverlay("joinModal");
+    }
+
+    function joinError(message) {
+        $("joinErrorText").textContent = message;
+        $("joinError").style.display = "flex";
+    }
+
+    async function confirmJoin() {
+        if (state.joining) return;
+        if (!state.user || !state.profile) {
+            joinError("Profile load nahi hua. Page reload karke try karo.");
+            return;
+        }
+
+        var t = state.tournament;
+        var uid = state.user.uid;
+        var joinRef = db.collection("joins").doc(t.id + "_" + uid);
+        var tRef = db.collection("tournaments").doc(t.id);
+        var btn = $("confirmJoinBtn");
+        state.joining = true;
+        btn.disabled = true;
+        btn.classList.add("loading");
+        btn.innerHTML = '<span class="spin" aria-hidden="true"></span>Joining...';
+
+        try {
+            await db.runTransaction(async function (transaction) {
+                var existing = await transaction.get(joinRef);
+                if (existing.exists) throw new Error("already-joined");
+
+                var snap = await transaction.get(tRef);
+                if (!snap.exists) throw new Error("not-found");
+
+                var data = snap.data();
+                var status = String(data.status || "open").toLowerCase();
+                var total = Number(data.totalSlots) || 0;
+                var count = Number(data.joinedCount) || 0;
+
+                if (["closed", "full", "cancelled", "completed"].indexOf(status) !== -1) throw new Error("closed");
+                if (total > 0 && count >= total) throw new Error("full");
+
+                transaction.set(joinRef, {
+                    tournamentId: t.id,
+                    tournamentName: data.name || t.name || "",
+                    game: data.game || "",
+                    matchDate: data.matchDate || null,
+                    entryFee: data.entryFee || 0,
+                    prizePool: data.prizePool || "",
+                    userId: uid,
+                    userName: state.profile.userName || state.user.displayName || "Player",
+                    mobile: state.profile.mobile || "",
+                    status: "joined",
+                    joinedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                transaction.update(tRef, {
+                    joinedCount: count + 1,
+                    status: total > 0 && count + 1 >= total ? "full" : (data.status || "open")
+                });
+            });
+
+            CA.closeOverlay("joinModal");
+            CA.toast("Tournament joined successfully", "success");
+            state.joined = true;
+            await loadDetails();
+        } catch (err) {
+            console.error(err);
+            var code = err && err.message;
+            if (code === "already-joined") joinError("Aap pehle se is tournament me join ho chuke ho.");
+            else if (code === "full") joinError("Saari slots bhar chuki hain.");
+            else if (code === "closed") joinError("Is tournament ke liye joining band hai.");
+            else if (code === "not-found") joinError("Tournament ab available nahi hai.");
+            else joinError("Join nahi ho paya. Internet check karke dobara try karo.");
+        } finally {
+            state.joining = false;
+            btn.disabled = false;
+            btn.classList.remove("loading");
+            btn.textContent = "Confirm Join";
+        }
+    }
+
+    async function loadDetails() {
+        var id = state.id;
+        var uid = state.user.uid;
+
+        try {
+            var tSnap = await db.collection("tournaments").doc(id).get();
+            if (!tSnap.exists) {
+                showError("Tournament nahi mila", "Ye tournament delete ho gaya hai ya link galat hai.");
+                return;
+            }
+
+            var t = tSnap.data();
+            t.id = tSnap.id;
+            state.tournament = t;
+
+            var joinSnap = await db.collection("joins").doc(id + "_" + uid).get();
+            state.joined = joinSnap.exists;
+
+            var resultsSnap = await db.collection("results").where("tournamentId", "==", id).get();
+            var results = [];
+            resultsSnap.forEach(function (doc) {
+                var r = doc.data();
+                r.id = doc.id;
+                if (String(r.status || "published").toLowerCase() === "published") results.push(r);
+            });
+            results.sort(function (a, b) { return CA_PAGE.number(a.rank) - CA_PAGE.number(b.rank); });
+            state.results = results;
+
+            render();
+        } catch (err) {
+            console.error(err);
+            showError("Tournament load nahi hua", "Internet ya Firestore permissions check karo.");
+        }
+    }
+
+    function showError(title, text) {
+        $("detailContent").innerHTML = "";
+        $("joinBar").style.display = "none";
+        $("errorTitle").textContent = title;
+        $("errorText").textContent = text;
+        $("errorBox").style.display = "flex";
+    }
+
+    (async function init() {
+        try {
+            var params = new URLSearchParams(window.location.search);
+            state.id = params.get("id") || "";
+            if (!state.id) {
+                showError("Tournament ID missing", "Home page se koi tournament kholo.");
+                return;
+            }
+
+            var boot = await CA_PAGE.boot("home");
+            state.user = boot.user;
+            state.profile = boot.profile;
+
+            if (!state.profile) {
+                showError("Profile load nahi hua", "Aapka account data nahi mila. Logout karke dobara login karo.");
+                return;
+            }
+
+            await loadDetails();
+        } catch (err) {
+            console.error(err);
+            showError("Page load nahi hua", "Reload karke dobara try karo.");
+        }
+    })();
+</script>
+</body>
+</html>

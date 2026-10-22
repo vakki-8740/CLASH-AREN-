@@ -3,23 +3,23 @@
    ----------------------------------------------------------
    STEP 1: Go to https://console.firebase.google.com
    STEP 2: Create a project, then go to Build -> Firestore
-           Database and click "Create database" (Test mode)
+           Database and click "Create database" (Production mode)
    STEP 3: Go to Project Settings -> Your apps -> Add app
            (Web), register a web app and copy the config
            values below
-   STEP 4: Paste your values below in place of YOUR_...
-   STEP 5: Upload all folders to any static host
+   STEP 4: Enable Authentication -> Sign-in method -> Email/Password
+   STEP 5: Paste Firestore rules from firestore.rules
+   STEP 6: Upload all folders to any static host
            (Netlify / Vercel / Firebase Hosting)
    ========================================================== */
 
 const FIREBASE_CONFIG = {
-    apiKey: "AIzaSyCXSv7eNl7KcttNvKF46BCAkhYv6t6S0bI",
-    authDomain: "user-manage-bot.firebaseapp.com",
-    databaseURL: "https://user-manage-bot-default-rtdb.firebaseio.com",
-    projectId: "user-manage-bot",
-    storageBucket: "user-manage-bot.firebasestorage.app",
-    messagingSenderId: "17364199534",
-    appId: "1:17364199534:web:dce4f0df3efe163930de7f"
+    apiKey: "AIzaSyCHYRqHF__EqHOxEXap-QvkHLmamfdaotU",
+    authDomain: "clash-arena-cb69a.firebaseapp.com",
+    projectId: "clash-arena-cb69a",
+    storageBucket: "clash-arena-cb69a.firebasestorage.app",
+    messagingSenderId: "300063887305",
+    appId: "1:300063887305:web:6db4678be2ef60a91ba218"
 };
 
 const FIREBASE_CONFIGURED = FIREBASE_CONFIG.apiKey !== "YOUR_API_KEY";
@@ -44,7 +44,7 @@ const DEFAULT_SETTINGS = {
     matchTime: '9:00 PM',
     maxPlayers: 100,
     announcement: '',
-    adminPass: 'admin123',
+    referralReward: 0,
     rules: [
         { title: 'Fair Play Only', description: 'Any use of hacks, mods, or third-party tools will result in immediate disqualification.' },
         { title: 'Entry Fee Non-Refundable', description: 'Once paid, the entry fee is non-refundable under any circumstances.' },

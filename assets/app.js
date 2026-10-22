@@ -40,6 +40,22 @@
         });
     }
 
+    function fmtDate(ts) {
+        if (!ts) return "";
+        var d = (ts && typeof ts.toDate === "function") ? ts.toDate() : new Date(ts);
+        if (isNaN(d.getTime())) return "";
+        return d.toLocaleDateString("en-IN", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric"
+        });
+    }
+
+    function initials(name) {
+        return String(name || "P").split(" ").filter(function (w) { return w; })
+            .map(function (w) { return w[0]; }).slice(0, 2).join("").toUpperCase() || "P";
+    }
+
     function toast(message, type) {
         var el = document.getElementById("toast");
         if (!el) {
@@ -104,6 +120,8 @@
         currentTheme: currentTheme,
         esc: esc,
         fmtTime: fmtTime,
+        fmtDate: fmtDate,
+        initials: initials,
         toast: toast,
         openOverlay: openOverlay,
         closeOverlay: closeOverlay

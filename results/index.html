@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Clash Arena — Results</title>
+<script>
+try {
+    var savedTheme = localStorage.getItem("theme");
+    if (savedTheme) document.documentElement.setAttribute("data-theme", savedTheme);
+    else if (window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches) document.documentElement.setAttribute("data-theme", "dark");
+} catch (e) {}
+</script>
+<link rel="stylesheet" href="../assets/ui.css" />
+</head>
+<body>
+
+<header class="topbar">
+    <div class="topbar-inner">
+        <a class="brand" href="../home/">
+            <span class="brand-mark">
+                <img src="../PROJECT%20LOGO/photo_2026-08-05_11-49-04.jpg" alt="Clash Arena logo" />
+            </span>
+            <span>
+                <strong class="brand-name" data-tournament-name>Clash Arena</strong>
+                <span class="brand-sub">Results</span>
+            </span>
+        </a>
+        <div class="topbar-actions">
+            <button class="icon-btn theme-toggle" type="button" data-theme-toggle aria-label="Toggle theme">
+                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+            </button>
+        </div>
+    </div>
+</header>
+
+<main class="shell">
+    <div class="app-head">
+        <div>
+            <h1>Results</h1>
+            <p>Published winners aur prize details.</p>
+        </div>
+        <button class="head-action" type="button" onclick="loadResults()">Refresh</button>
+    </div>
+
+    <div id="resultList" class="t-list">
+        <div class="skel-card">
+            <div class="skeleton skel-line w60"></div>
+            <div class="skeleton skel-line w40"></div>
+            <div class="skeleton skel-line w85" style="margin-top:16px"></div>
+        </div>
+    </div>
+
+    <div class="empty" id="emptyState" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0Z"/><path d="M7 5H4v2a4 4 0 0 0 4 4"/><path d="M17 5h3v2a4 4 0 0 1-4 4"/></svg>
+        <h3>Abhi koi result nahi hai</h3>
+        <p>Tournament complete hone ke baad admin yahan winners publish karega.</p>
+    </div>
+
+    <div class="alert danger" id="errorBox" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+        <div>
+            <strong>Results load nahi ho paye</strong>
+            <p class="muted" style="font-size:.78rem">Internet check karke dobara try karo.</p>
+            <button class="btn outline sm" type="button" style="margin-top:8px" onclick="loadResults()">Retry</button>
+        </div>
+    </div>
+</main>
+
+<div class="overlay" id="resultModal" role="dialog" aria-modal="true" aria-labelledby="resultModalTitle">
+    <div class="modal">
+        <div class="modal-head">
+            <div class="modal-title">
+                <h3 id="resultModalTitle">Result</h3>
+                <p id="resultModalSub">Match details</p>
+            </div>
+            <button class="modal-close" type="button" data-close-overlay="resultModal" aria-label="Close">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div class="detail-rows" id="resultDetails"></div>
+    </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="../firebase-config.js"></script>
+<script src="../assets/app.js"></script>
+<script src="../assets/auth.js"></script>
+<script src="../assets/app-nav.js"></script>
+<script>
+    "use strict";
+
+    var resultMap = {};
+    var loading = false;
+
+    function $(id) { return document.getElementById(id); }
+
+    function detailRow(k, v) {
+        return '<div class="detail-row"><span class="k">' + k + '</span><span class="v">' + CA.esc(v || "—") + "</span></div>";
+    }
+
+    function resultCard(r) {
+        var status = String(r.status || "published").toLowerCase();
+        var badge = status === "published"
+            ? '<span class="badge success"><span class="dot"></span>Published</span>'
+            : '<span class="badge neutral">' + CA.esc(status) + "</span>";
+
+        return '<button class="result-card" type="button" onclick="openResult(\'' + r.id + '\')">' +
+            '<div class="result-top">' +
+                '<div>' +
+                    '<div class="result-title">' + CA.esc(r.tournamentName || "Tournament") + '</div>' +
+                    '<div class="result-sub">' + CA.esc(CA.fmtDate(r.matchDate) || "Date TBA") + (r.game ? " · " + CA.esc(r.game) : "") + '</div>' +
+                '</div>' +
+                badge +
+            '</div>' +
+            '<div class="result-win">' +
+                '<span>Winner: <strong>' + CA.esc(r.winnerName || "—") + '</strong></span>' +
+                '<span class="rank-pill">#' + CA.esc(r.rank || "—") + '</span>' +
+            '</div>' +
+            '<div class="result-win" style="border-top:0;padding-top:4px;margin-top:0">' +
+                '<span class="muted" style="font-size:.72rem">Prize won</span>' +
+                '<span class="prize">' + CA.esc(CA_PAGE.money(r.prize)) + '</span>' +
+            '</div>' +
+        '</button>';
+    }
+
+    function openResult(id) {
+        var r = resultMap[id];
+        if (!r) return;
+        $("resultModalTitle").textContent = r.tournamentName || "Result";
+        $("resultModalSub").textContent = CA.fmtDate(r.matchDate) || "Match result";
+        $("resultDetails").innerHTML =
+            detailRow("Tournament", r.tournamentName) +
+            detailRow("Game", r.game) +
+            detailRow("Match date", CA.fmtDate(r.matchDate)) +
+            detailRow("Winner / team", r.winnerName) +
+            detailRow("Rank / position", r.rank) +
+            detailRow("Prize won", CA_PAGE.money(r.prize)) +
+            detailRow("Result status", r.status ? String(r.status).charAt(0).toUpperCase() + String(r.status).slice(1) : "Published");
+        CA.openOverlay("resultModal");
+    }
+
+    function toMillis(ts) {
+        if (!ts) return 0;
+        if (typeof ts.toMillis === "function") return ts.toMillis();
+        var d = new Date(ts);
+        return isNaN(d.getTime()) ? 0 : d.getTime();
+    }
+
+    async function loadResults() {
+        if (loading) return;
+        loading = true;
+        $("errorBox").style.display = "none";
+
+        try {
+            var snap = await db.collection("results").get();
+            var list = [];
+            snap.forEach(function (doc) {
+                var r = doc.data();
+                r.id = doc.id;
+                if (String(r.status || "published").toLowerCase() === "published") list.push(r);
+            });
+
+            list.sort(function (a, b) {
+                var diff = toMillis(b.matchDate) - toMillis(a.matchDate);
+                if (diff !== 0) return diff;
+                return CA_PAGE.number(a.rank) - CA_PAGE.number(b.rank);
+            });
+
+            resultMap = {};
+            list.forEach(function (r) { resultMap[r.id] = r; });
+
+            $("resultList").innerHTML = list.map(resultCard).join("");
+            $("emptyState").style.display = list.length ? "none" : "block";
+        } catch (err) {
+            console.error(err);
+            $("resultList").innerHTML = "";
+            $("emptyState").style.display = "none";
+            $("errorBox").style.display = "flex";
+        } finally {
+            loading = false;
+        }
+    }
+
+    (async function init() {
+        try {
+            await CA_PAGE.boot("results");
+            await loadResults();
+        } catch (err) {
+            console.error(err);
+            $("errorBox").style.display = "flex";
+        }
+    })();
+</script>
+</body>
+</html>

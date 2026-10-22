@@ -64,6 +64,8 @@ try {
     <div class="tabs" role="tablist" aria-label="Admin sections">
         <button class="tab is-on" type="button" role="tab" data-tab="players" aria-selected="true">Players</button>
         <button class="tab" type="button" role="tab" data-tab="payments" aria-selected="false">Payments</button>
+        <button class="tab" type="button" role="tab" data-tab="tournaments" aria-selected="false">Tournaments</button>
+        <button class="tab" type="button" role="tab" data-tab="results" aria-selected="false">Results</button>
         <button class="tab" type="button" role="tab" data-tab="settings" aria-selected="false">Settings</button>
         <button class="tab" type="button" role="tab" data-tab="rules" aria-selected="false">Rules</button>
     </div>
@@ -127,6 +129,155 @@ try {
         </div>
     </section>
 
+    <!-- ================= TOURNAMENTS ================= -->
+    <section class="tab-panel" data-panel="tournaments">
+        <div class="panel">
+            <div class="panel-head">
+                <div>
+                    <h2 class="panel-title">Tournament manager</h2>
+                    <p class="panel-sub">Create matches, slots, room details and schedules. Ye data user app me turant dikhta hai.</p>
+                </div>
+            </div>
+
+            <input type="hidden" id="tEditId" />
+
+            <div class="form-grid">
+                <div class="field">
+                    <label class="field-label" for="tName">Tournament name <span class="req">*</span></label>
+                    <input class="input" type="text" id="tName" placeholder="Friday Night Clash" />
+                </div>
+                <div class="field">
+                    <label class="field-label" for="tGame">Game <span class="req">*</span></label>
+                    <input class="input" type="text" id="tGame" placeholder="Free Fire" />
+                </div>
+                <div class="field">
+                    <label class="field-label" for="tEntryFee">Entry fee (₹)</label>
+                    <input class="input" type="number" id="tEntryFee" min="0" value="0" />
+                </div>
+                <div class="field">
+                    <label class="field-label" for="tPrizePool">Prize pool</label>
+                    <input class="input" type="text" id="tPrizePool" placeholder="₹5,000" />
+                </div>
+                <div class="field">
+                    <label class="field-label" for="tTotalSlots">Total slots <span class="req">*</span></label>
+                    <input class="input" type="number" id="tTotalSlots" min="1" value="48" />
+                </div>
+                <div class="field">
+                    <label class="field-label" for="tMatchDate">Match date &amp; time <span class="req">*</span></label>
+                    <input class="input" type="datetime-local" id="tMatchDate" />
+                </div>
+                <div class="field">
+                    <label class="field-label" for="tStatus">Status</label>
+                    <select class="input" id="tStatus">
+                        <option value="open">Open</option>
+                        <option value="upcoming">Upcoming</option>
+                        <option value="closed">Closed</option>
+                        <option value="full">Full</option>
+                        <option value="ongoing">Live</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label class="field-label" for="tMatchFormat">Match format</label>
+                    <input class="input" type="text" id="tMatchFormat" placeholder="Squad / Duo / Solo" />
+                </div>
+                <div class="field">
+                    <label class="field-label" for="tRoomId">Room ID</label>
+                    <input class="input" type="text" id="tRoomId" placeholder="Release hone ke baad" />
+                </div>
+                <div class="field">
+                    <label class="field-label" for="tRoomPassword">Room password</label>
+                    <input class="input" type="text" id="tRoomPassword" placeholder="Release hone ke baad" />
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="field-label" for="tDescription">Description</label>
+                <textarea class="textarea" id="tDescription" placeholder="Tournament ka short description..."></textarea>
+            </div>
+
+            <div class="form-grid">
+                <div class="field">
+                    <label class="field-label" for="tPrizeDistribution">Prize distribution</label>
+                    <textarea class="textarea" id="tPrizeDistribution" placeholder="1st: ₹3,000&#10;2nd: ₹1,500"></textarea>
+                </div>
+                <div class="field">
+                    <label class="field-label" for="tRules">Rules (one per line)</label>
+                    <textarea class="textarea" id="tRules" placeholder="Fair play only&#10;Room join 10 minutes before match"></textarea>
+                </div>
+            </div>
+
+            <div class="btn-row">
+                <button class="btn primary" type="button" id="tSaveBtn" onclick="saveTournament()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                    Add tournament
+                </button>
+                <button class="btn outline" type="button" id="tCancelBtn" style="display:none" onclick="cancelTournamentEdit()">Cancel edit</button>
+            </div>
+        </div>
+
+        <p class="section-label">All tournaments</p>
+        <div class="list" id="adminTournamentList"></div>
+        <div class="empty" id="adminTournamentEmpty" style="display:none">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0Z"/><path d="M7 5H4v2a4 4 0 0 0 4 4"/><path d="M17 5h3v2a4 4 0 0 1-4 4"/></svg>
+            <h3>Abhi koi tournament nahi</h3>
+            <p>Upar form se pehla tournament add karo.</p>
+        </div>
+    </section>
+
+    <!-- ================= RESULTS ================= -->
+    <section class="tab-panel" data-panel="results">
+        <div class="panel">
+            <div class="panel-head">
+                <div>
+                    <h2 class="panel-title">Publish result</h2>
+                    <p class="panel-sub">Winner entries user app ke Results page aur tournament page par dikhengi.</p>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="field-label" for="rTournament">Tournament <span class="req">*</span></label>
+                <select class="input" id="rTournament"></select>
+            </div>
+
+            <div class="form-grid">
+                <div class="field">
+                    <label class="field-label" for="rWinner">Winner / team name <span class="req">*</span></label>
+                    <input class="input" type="text" id="rWinner" placeholder="Winning player or team" />
+                </div>
+                <div class="field">
+                    <label class="field-label" for="rRank">Rank / position</label>
+                    <input class="input" type="number" id="rRank" min="1" value="1" />
+                </div>
+                <div class="field">
+                    <label class="field-label" for="rPrize">Prize won</label>
+                    <input class="input" type="text" id="rPrize" placeholder="₹3,000" />
+                </div>
+                <div class="field">
+                    <label class="field-label" for="rStatus">Status</label>
+                    <select class="input" id="rStatus">
+                        <option value="published">Published</option>
+                        <option value="draft">Draft</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="btn primary" type="button" onclick="publishResult()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+                Publish result
+            </button>
+        </div>
+
+        <p class="section-label">Result entries</p>
+        <div class="list" id="adminResultList"></div>
+        <div class="empty" id="adminResultEmpty" style="display:none">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0Z"/><path d="M7 5H4v2a4 4 0 0 0 4 4"/><path d="M17 5h3v2a4 4 0 0 1-4 4"/></svg>
+            <h3>Abhi koi result nahi</h3>
+            <p>Upar form se winner publish karo.</p>
+        </div>
+    </section>
+
     <!-- ================= SETTINGS ================= -->
     <section class="tab-panel" data-panel="settings">
         <div class="panel">
@@ -141,6 +292,10 @@ try {
                 <div class="field">
                     <label class="field-label" for="setEntryFee">Entry fee (₹)</label>
                     <input class="input" type="number" id="setEntryFee" min="0" />
+                </div>
+                <div class="field">
+                    <label class="field-label" for="setReferralReward">Referral reward (₹)</label>
+                    <input class="input" type="number" id="setReferralReward" min="0" value="0" />
                 </div>
                 <div class="field">
                     <label class="field-label" for="setUpiId">UPI ID</label>
@@ -206,7 +361,7 @@ try {
 </main>
 
 <footer class="site-foot">
-    <a href="../">Registration</a> &nbsp;·&nbsp;
+    <a href="../">App home</a> &nbsp;·&nbsp;
     <a href="../join/index.html">Players</a> &nbsp;·&nbsp;
     <a href="../rule/index.html">Rules</a>
 </footer>
@@ -291,6 +446,9 @@ try {
     var currentFilter = "all";
     var currentPlayerId = null;
     var currentModalPlayer = null;
+    var allTournaments = [];
+    var allResults = [];
+    var editingTournamentId = null;
 
     function $(id) { return document.getElementById(id); }
     function escapeHtml(str) { return CA.esc(str); }
@@ -322,6 +480,8 @@ try {
         fillSettingsForm();
         renderRules();
         startListening();
+        startTournamentListening();
+        startResultListening();
 
         if ("serviceWorker" in navigator) {
             navigator.serviceWorker.register("sw.js").catch(function () { });
@@ -573,6 +733,334 @@ try {
         }
     }
 
+    /* ================= TOURNAMENTS ================= */
+    function toMillis(ts) {
+        if (!ts) return 0;
+        if (typeof ts.toMillis === "function") return ts.toMillis();
+        var d = new Date(ts);
+        return isNaN(d.getTime()) ? 0 : d.getTime();
+    }
+
+    function money(value) {
+        if (value === 0 || value === "0") return "₹0";
+        if (value == null || value === "") return "—";
+        var str = String(value).trim();
+        if (str.charAt(0) === "₹") return str;
+        var num = Number(str);
+        return isNaN(num) ? str : "₹" + num.toLocaleString("en-IN");
+    }
+
+    function tStatus(status) {
+        var value = String(status || "").toLowerCase();
+        var map = {
+            open: { label: "Open", cls: "success" },
+            upcoming: { label: "Upcoming", cls: "info" },
+            full: { label: "Full", cls: "warning" },
+            ongoing: { label: "Live", cls: "info" },
+            completed: { label: "Completed", cls: "neutral" },
+            cancelled: { label: "Cancelled", cls: "danger" },
+            closed: { label: "Closed", cls: "neutral" }
+        };
+        return map[value] || { label: value || "Unknown", cls: "neutral" };
+    }
+
+    function localDateInput(ts) {
+        if (!ts) return "";
+        var d = (ts && typeof ts.toDate === "function") ? ts.toDate() : new Date(ts);
+        if (isNaN(d.getTime())) return "";
+        var pad = function (n) { return String(n).padStart(2, "0"); };
+        return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + "T" + pad(d.getHours()) + ":" + pad(d.getMinutes());
+    }
+
+    function startTournamentListening() {
+        if (!db) return;
+        db.collection("tournaments").onSnapshot(function (snap) {
+            allTournaments = [];
+            snap.forEach(function (doc) {
+                var t = doc.data();
+                t.id = doc.id;
+                allTournaments.push(t);
+            });
+            allTournaments.sort(function (a, b) { return toMillis(b.matchDate) - toMillis(a.matchDate); });
+            renderAdminTournaments();
+            fillResultTournamentSelect();
+        }, function (err) {
+            console.error(err);
+            showToast("Error loading tournaments", "danger");
+        });
+    }
+
+    function startResultListening() {
+        if (!db) return;
+        db.collection("results").onSnapshot(function (snap) {
+            allResults = [];
+            snap.forEach(function (doc) {
+                var r = doc.data();
+                r.id = doc.id;
+                allResults.push(r);
+            });
+            allResults.sort(function (a, b) {
+                var diff = toMillis(b.createdAt) - toMillis(a.createdAt);
+                return diff !== 0 ? diff : toMillis(b.matchDate) - toMillis(a.matchDate);
+            });
+            renderAdminResults();
+        }, function (err) {
+            console.error(err);
+            showToast("Error loading results", "danger");
+        });
+    }
+
+    function renderAdminTournaments() {
+        var list = $("adminTournamentList");
+        var empty = $("adminTournamentEmpty");
+        list.innerHTML = "";
+
+        if (!allTournaments.length) {
+            empty.style.display = "block";
+            return;
+        }
+        empty.style.display = "none";
+
+        allTournaments.forEach(function (t) {
+            var status = tStatus(t.status);
+            var item = document.createElement("article");
+            item.className = "row-card";
+            item.innerHTML =
+                '<div class="row-main">' +
+                    '<p class="row-title">' + escapeHtml(t.name || "Tournament") + "</p>" +
+                    '<p class="row-sub">' + escapeHtml(t.game || "Game") + " · " + escapeHtml(CA.fmtTime(t.matchDate) || "TBA") + " · " +
+                        (Number(t.joinedCount) || 0) + "/" + (Number(t.totalSlots) || 0) + " joined</p>" +
+                "</div>" +
+                '<div class="row-actions">' +
+                    '<span class="badge ' + status.cls + '"><span class="dot"></span>' + escapeHtml(status.label) + "</span>" +
+                    '<button class="btn outline sm" type="button" onclick="editTournament(\'' + escapeHtml(t.id) + '\')">Edit</button>' +
+                    '<button class="btn danger sm" type="button" onclick="deleteTournament(\'' + escapeHtml(t.id) + '\')">Delete</button>' +
+                "</div>";
+            list.appendChild(item);
+        });
+    }
+
+    function fillResultTournamentSelect() {
+        var select = $("rTournament");
+        var current = select.value;
+        select.innerHTML = "";
+
+        if (!allTournaments.length) {
+            select.innerHTML = '<option value="">No tournaments available</option>';
+            return;
+        }
+
+        var placeholder = document.createElement("option");
+        placeholder.value = "";
+        placeholder.textContent = "Select tournament";
+        select.appendChild(placeholder);
+
+        allTournaments.forEach(function (t) {
+            var opt = document.createElement("option");
+            opt.value = t.id;
+            opt.textContent = (t.name || "Tournament") + " — " + tStatus(t.status).label;
+            select.appendChild(opt);
+        });
+
+        if (current) select.value = current;
+    }
+
+    function findTournament(id) {
+        return allTournaments.find(function (t) { return t.id === id; });
+    }
+
+    function clearTournamentForm() {
+        editingTournamentId = null;
+        $("tEditId").value = "";
+        $("tName").value = "";
+        $("tGame").value = "";
+        $("tEntryFee").value = "0";
+        $("tPrizePool").value = "";
+        $("tTotalSlots").value = "48";
+        $("tMatchDate").value = "";
+        $("tStatus").value = "open";
+        $("tMatchFormat").value = "";
+        $("tRoomId").value = "";
+        $("tRoomPassword").value = "";
+        $("tDescription").value = "";
+        $("tPrizeDistribution").value = "";
+        $("tRules").value = "";
+        $("tSaveBtn").innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg> Add tournament';
+        $("tCancelBtn").style.display = "none";
+    }
+
+    function cancelTournamentEdit() {
+        clearTournamentForm();
+    }
+
+    function editTournament(id) {
+        var t = findTournament(id);
+        if (!t) return;
+        editingTournamentId = id;
+        $("tEditId").value = id;
+        $("tName").value = t.name || "";
+        $("tGame").value = t.game || "";
+        $("tEntryFee").value = Number(t.entryFee) || 0;
+        $("tPrizePool").value = t.prizePool || "";
+        $("tTotalSlots").value = Number(t.totalSlots) || 1;
+        $("tMatchDate").value = localDateInput(t.matchDate);
+        $("tStatus").value = t.status || "open";
+        $("tMatchFormat").value = t.matchFormat || "";
+        $("tRoomId").value = t.roomId || "";
+        $("tRoomPassword").value = t.roomPassword || "";
+        $("tDescription").value = t.description || "";
+        $("tPrizeDistribution").value = t.prizeDistribution || "";
+        $("tRules").value = Array.isArray(t.rules) ? t.rules.map(function (r) { return r.title ? r.title + ": " + (r.description || "") : r; }).join("\n") : (t.rules || "");
+        $("tSaveBtn").innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg> Update tournament';
+        $("tCancelBtn").style.display = "inline-flex";
+        var panel = document.querySelector('[data-panel="tournaments"] .panel');
+        if (panel && typeof panel.scrollIntoView === "function") panel.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    async function saveTournament() {
+        var name = $("tName").value.trim();
+        var game = $("tGame").value.trim();
+        var slots = Number($("tTotalSlots").value);
+        var dateVal = $("tMatchDate").value;
+
+        if (!name) { showToast("Tournament name daalo", "danger"); return; }
+        if (!game) { showToast("Game name daalo", "danger"); return; }
+        if (!slots || slots < 1) { showToast("Total slots 1 ya zyada rakho", "danger"); return; }
+        if (!dateVal) { showToast("Match date aur time select karo", "danger"); return; }
+
+        var date = new Date(dateVal);
+        if (isNaN(date.getTime())) { showToast("Match date valid nahi hai", "danger"); return; }
+
+        var existing = editingTournamentId ? findTournament(editingTournamentId) : null;
+        var payload = {
+            name: name,
+            game: game,
+            entryFee: Number($("tEntryFee").value) || 0,
+            prizePool: $("tPrizePool").value.trim(),
+            totalSlots: slots,
+            joinedCount: existing ? (Number(existing.joinedCount) || 0) : 0,
+            matchDate: firebase.firestore.Timestamp.fromDate(date),
+            status: $("tStatus").value || "open",
+            matchFormat: $("tMatchFormat").value.trim(),
+            roomId: $("tRoomId").value.trim(),
+            roomPassword: $("tRoomPassword").value.trim(),
+            description: $("tDescription").value.trim(),
+            prizeDistribution: $("tPrizeDistribution").value.trim(),
+            rules: $("tRules").value.trim(),
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        var btn = $("tSaveBtn");
+        btn.disabled = true;
+
+        try {
+            if (editingTournamentId) {
+                await db.collection("tournaments").doc(editingTournamentId).set(payload, { merge: true });
+                showToast("Tournament updated", "success");
+            } else {
+                payload.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+                await db.collection("tournaments").add(payload);
+                showToast("Tournament added", "success");
+            }
+            clearTournamentForm();
+        } catch (e) {
+            console.error(e);
+            showToast("Error saving tournament", "danger");
+        } finally {
+            btn.disabled = false;
+        }
+    }
+
+    async function deleteTournament(id) {
+        if (!confirm("Delete this tournament? Iske joins aur results bhi delete ho jayenge.")) return;
+        try {
+            var joins = await db.collection("joins").where("tournamentId", "==", id).get();
+            var results = await db.collection("results").where("tournamentId", "==", id).get();
+            var batch = db.batch();
+            joins.forEach(function (doc) { batch.delete(doc.ref); });
+            results.forEach(function (doc) { batch.delete(doc.ref); });
+            batch.delete(db.collection("tournaments").doc(id));
+            await batch.commit();
+            if (editingTournamentId === id) clearTournamentForm();
+            showToast("Tournament deleted", "success");
+        } catch (e) {
+            console.error(e);
+            showToast("Error deleting tournament", "danger");
+        }
+    }
+
+    /* ================= RESULTS ================= */
+    function renderAdminResults() {
+        var list = $("adminResultList");
+        var empty = $("adminResultEmpty");
+        list.innerHTML = "";
+
+        if (!allResults.length) {
+            empty.style.display = "block";
+            return;
+        }
+        empty.style.display = "none";
+
+        allResults.forEach(function (r) {
+            var published = String(r.status || "published").toLowerCase() === "published";
+            var item = document.createElement("article");
+            item.className = "row-card";
+            item.innerHTML =
+                '<div class="row-main">' +
+                    '<p class="row-title">' + escapeHtml(r.tournamentName || "Tournament") + "</p>" +
+                    '<p class="row-sub">' + escapeHtml(r.winnerName || "—") + " · Rank #" + escapeHtml(r.rank || "—") + " · " + escapeHtml(money(r.prize)) + "</p>" +
+                "</div>" +
+                '<div class="row-actions">' +
+                    '<span class="badge ' + (published ? "success" : "neutral") + '"><span class="dot"></span>' + (published ? "Published" : "Draft") + "</span>" +
+                    '<button class="btn danger sm" type="button" onclick="deleteResult(\'' + escapeHtml(r.id) + '\')">Delete</button>' +
+                "</div>";
+            list.appendChild(item);
+        });
+    }
+
+    async function publishResult() {
+        var id = $("rTournament").value;
+        var winner = $("rWinner").value.trim();
+        var t = findTournament(id);
+
+        if (!id || !t) { showToast("Tournament select karo", "danger"); return; }
+        if (!winner) { showToast("Winner name daalo", "danger"); return; }
+
+        var payload = {
+            tournamentId: id,
+            tournamentName: t.name || "Tournament",
+            game: t.game || "",
+            matchDate: t.matchDate || null,
+            winnerName: winner,
+            rank: Number($("rRank").value) || 1,
+            prize: $("rPrize").value.trim(),
+            status: $("rStatus").value || "published",
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        try {
+            await db.collection("results").add(payload);
+            $("rWinner").value = "";
+            $("rRank").value = "1";
+            $("rPrize").value = "";
+            showToast("Result published", "success");
+        } catch (e) {
+            console.error(e);
+            showToast("Error publishing result", "danger");
+        }
+    }
+
+    async function deleteResult(id) {
+        if (!confirm("Delete this result entry?")) return;
+        try {
+            await db.collection("results").doc(id).delete();
+            showToast("Result deleted", "success");
+        } catch (e) {
+            console.error(e);
+            showToast("Error deleting result", "danger");
+        }
+    }
+
     /* ================= SETTINGS ================= */
     function renderQrPreview() {
         var url = $("setQrUrl").value.trim();
@@ -589,6 +1077,7 @@ try {
     function fillSettingsForm() {
         if (!settings) return;
         $("setEntryFee").value = settings.entryFee || 0;
+        $("setReferralReward").value = settings.referralReward || 0;
         $("setUpiId").value = settings.upiId || "";
         $("setQrUrl").value = settings.qrUrl || "";
         $("setTgToken").value = settings.telegramBotToken || "";
@@ -599,6 +1088,7 @@ try {
     async function saveSettings() {
         var updated = {
             entryFee: Number($("setEntryFee").value) || 0,
+            referralReward: Number($("setReferralReward").value) || 0,
             upiId: $("setUpiId").value.trim(),
             qrUrl: $("setQrUrl").value.trim(),
             telegramBotToken: $("setTgToken").value.trim(),
